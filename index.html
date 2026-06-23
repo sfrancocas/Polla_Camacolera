@@ -130,4 +130,403 @@
         .pts-badge { background: var(--accent); color: white; padding: 4px 10px; border-radius: 12px; font-weight: bold; }
         .trend { font-size: 0.85rem; margin-right: 5px; display: inline-block; width: 16px; text-align: center; }
 
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%;
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 200; align-items: center; justify-content: center; padding: 20px;}
+        .modal.active { display: flex; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+        
+        .modal-content { background: var(--card-bg); padding: 25px; border-radius: 16px; width: 100%; max-width: 320px; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border-top: 6px solid var(--primary); text-align: center;}
+        .close-btn { position: absolute; top: 10px; right: 15px; font-size: 1.8rem; font-weight: bold; cursor: pointer; color: var(--text-muted); transition: color 0.2s;}
+        .close-btn:hover { color: #e53935; }
+        
+        .modal-name { font-size: 1.3rem; font-weight: 900; color: var(--primary); margin: 5px 0 20px 0;}
+        .modal-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: left;}
+        .stat-box { background: rgba(0,0,0,0.03); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); text-align: center;}
+        .stat-box span { display: block; font-size: 1.5rem; font-weight: 900; color: var(--text-main); margin-bottom: 4px;}
+        .stat-box small { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;}
+        
+        .stat-total { grid-column: span 2; background: #e8f5e9; border-color: var(--accent); color: var(--accent); margin-top: 5px;}
+        body.dark-mode .stat-total { background: #1b3a1b; }
+        .stat-total span { color: var(--accent); font-size: 2rem;}
+
+        .loader { text-align: center; padding: 40px; color: var(--text-muted); font-weight: 600;}
+    </style>
+</head>
+<body>
+
+    <div class="app-header">
+        <div class="header-top">
+            <div style="width:35px"></div>
+            <h1>⚽ Polla Camacolera</h1>
+            <span class="theme-toggle" onclick="toggleTheme()">🌓</span>
+        </div>
+        <p id="status">Calculando estrategias... 🔄</p>
+        
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('matches')">Partidos del Día</button>
+            <button class="tab-btn" onclick="switchTab('leaderboard')">Posiciones</button>
+        </div>
+    </div>
+
+    <div class="container active" id="matches-container">
+        <div class="loader">Buscando los partidos del día...</div>
+    </div>
+
+    <div class="container" id="leaderboard-container">
+        <div class="loader">Calculando posiciones...</div>
+    </div>
+
+    <div id="player-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2 class="modal-name" id="m-name">Nombre</h2>
+            
+            <div class="modal-stats-grid">
+                <div class="stat-box">
+                    <span id="m-at">0</span>
+                    <small>Aciertos Exactos (AT)</small>
+                </div>
+                <div class="stat-box">
+                    <span id="m-mu">0</span>
+                    <small>Marcador Único (MU)</small>
+                </div>
+                <div class="stat-box" style="grid-column: span 2;">
+                    <span id="m-ag">0</span>
+                    <small>Consolación por Goles (AG)</small>
+                </div>
+                <div class="stat-box stat-total">
+                    <span id="m-pts">0</span>
+                    <small>Puntos Totales</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const urlPartidos = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5-A3wQAPUD3raKLrhfkiKWU62m6V7xFLsXY-vO_UdxCSADMwQSmkEecyGTqfpCJr2yYL6IghQ_B3i/pub?gid=658946236&single=true&output=csv";
+        const urlTabla = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5-A3wQAPUD3raKLrhfkiKWU62m6V7xFLsXY-vO_UdxCSADMwQSmkEecyGTqfpCJr2yYL6IghQ_B3i/pub?gid=187955950&single=true&output=csv";
+
+        const frasesGalpon = [
+            "El que no arriesga, no gana puntos.",
+            "Prohibido llorar si hay empate a ceros.",
+            "El VAR los está observando de cerca...",
+            "Con la fe intacta y la calculadora en mano.",
+            "¿Quién se llevará hoy el Raspa-Ollas?",
+            "La esperanza es lo último que se pierde...",
+            "Tensión pura en la parte alta de la tabla.",
+            "¡Apostar con el corazón a veces sale caro!"
+        ];
+
+        let globalPlayersList = []; // Para el buscador global
+
+        setInterval(() => {
+            let statusP = document.getElementById("status");
+            if (statusP) {
+                statusP.style.opacity = 0;
+                setTimeout(() => {
+                    let fraseElegida = frasesGalpon[Math.floor(Math.random() * frasesGalpon.length)];
+                    statusP.innerHTML = `${fraseElegida} 🟢`;
+                    statusP.style.opacity = 1;
+                }, 500); 
+            }
+        }, 6000);
+
+        function toggleTheme() { document.body.classList.toggle('dark-mode'); }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            // Soporte para eventos de clicks directos de pestañas
+            if(window.event && window.event.target) window.event.target.classList.add('active');
+            document.querySelectorAll('.container').forEach(cont => cont.classList.remove('active'));
+            document.getElementById(tab + '-container').classList.add('active');
+        }
+
+        function openModal(name, pts, mu, at, ag) {
+            document.getElementById('m-name').innerText = name;
+            document.getElementById('m-pts').innerText = pts;
+            document.getElementById('m-mu').innerText = mu;
+            document.getElementById('m-at').innerText = at;
+            document.getElementById('m-ag').innerText = ag;
+            document.getElementById('player-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('player-modal').classList.remove('active');
+        }
+
+        window.onclick = function(event) {
+            let modal = document.getElementById('player-modal');
+            if (event.target == modal) { closeModal(); }
+        }
+
+        // Filtro del buscador en tiempo real
+        function filterStrategists() {
+            let query = document.getElementById("strat-search").value.toLowerCase().trim();
+            let rows = document.querySelectorAll(".strat-row");
+            rows.forEach(row => {
+                let name = row.getAttribute("data-name").toLowerCase();
+                if(name.includes(query)) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        }
+
+        function parseCSV(text) {
+            let result = [], row = [], cur = '', inQuote = false;
+            for (let i = 0; i < text.length; i++) {
+                let c = text[i];
+                if (inQuote) {
+                    if (c === '"' && text[i+1] === '"') { cur += '"'; i++; }
+                    else if (c === '"') { inQuote = false; }
+                    else { cur += c; }
+                } else {
+                    if (c === '"') { inQuote = true; }
+                    else if (c === ',') { row.push(cur.trim()); cur = ''; }
+                    else if (c === '\n' || c === '\r') {
+                        row.push(cur.trim()); result.push(row); row = []; cur = '';
+                        if (c === '\r' && text[i+1] === '\n') i++;
+                    }
+                    else { cur += c; }
+                }
+            }
+            if (cur || row.length) { row.push(cur.trim()); result.push(row); }
+            return result;
+        }
+
+        async function loadData() {
+            try {
+                // 1. CARGAR PARTIDOS
+                const resMatches = await fetch(urlPartidos);
+                const csvMatches = await resMatches.text();
+                const rowsM = parseCSV(csvMatches);
+                const header = rowsM[0];
+                
+                const players = [
+                    {name: "Sergio", idxL: 5, idxV: 6},
+                    {name: "Paula", idxL: 8, idxV: 9},
+                    {name: "J.Sebastián", idxL: 11, idxV: 12},
+                    {name: "Viviana", idxL: 14, idxV: 15},
+                    {name: "Mónica", idxL: 17, idxV: 18},
+                    {name: "J.Pablo", idxL: 20, idxV: 21},
+                    {name: "Manuel", idxL: 23, idxV: 24},
+                    {name: "Valeria", idxL: 26, idxV: 27},
+                    {name: "Angélica", idxL: 29, idxV: 30},
+                    {name: "Luisa", idxL: 32, idxV: 33},
+                    {name: "Diana", idxL: 35, idxV: 36},
+                    {name: "Manuela", idxL: 38, idxV: 39}
+                ];
+
+                let upcomingMatches = [];
+                for(let i=1; i<rowsM.length; i++){
+                    const cols = rowsM[i];
+                    if(cols.length < 5) continue;
+                    
+                    let colA = cols[0] ? cols[0].toString().trim().toUpperCase() : "";
+                    let fechaPartido = cols[1] || "";
+                    let horaPartido = cols[2] || "";
+                    let teamL = cols[3] || "";
+                    let teamV = cols[4] || "";
+                    let golesLReales = cols[5] !== undefined ? cols[5].toString().trim() : "";
+                    let golesVReales = cols[6] !== undefined ? cols[6].toString().trim() : "";
+                    
+                    if(!teamL || !teamV || teamL.toLowerCase().includes("local")) continue;
+                    
+                    let isLive = (colA.includes("EN VIVO") || colA.includes("VIVO") || colA.includes("EN JUEGO"));
+                    
+                    if(isLive) {
+                        upcomingMatches.push({teamL, teamV, cols, status: "LIVE", fecha: fechaPartido, hora: horaPartido, gl: golesLReales, gv: golesVReales});
+                    } else if(cols[5] === "" && cols[6] === "") {
+                        upcomingMatches.push({teamL, teamV, cols, status: "PRÓXIMO", fecha: fechaPartido, hora: horaPartido, gl: "", gv: ""});
+                    }
+                }
+
+                const matchesToShow = upcomingMatches.slice(0, 4);
+                const containerM = document.getElementById("matches-container");
+                containerM.innerHTML = "";
+                
+                if(matchesToShow.length === 0) {
+                    containerM.innerHTML = "<div class='loader'>⚽ No hay pronósticos pendientes. ¡Todo está jugado!</div>";
+                } else {
+                    matchesToShow.forEach((match, index) => {
+                        let predsHtml = "";
+                        let localBets = 0, tieBets = 0, visitBets = 0, totalBets = 0;
+
+                        players.forEach(p => {
+                            let idxL = p.idxL + 2;
+                            let idxV = p.idxV + 2;
+                            
+                            let pL = match.cols[idxL], pV = match.cols[idxV];
+                            let score = "-";
+                            
+                            if(pL !== undefined && pV !== undefined && pL !== "" && pV !== "") {
+                                score = `${pL} - ${pV}`.replace(/\.0/g, '').replace(/o/gi, '0');
+                                let numL = parseInt(pL.replace(/o/gi, '0'));
+                                let numV = parseInt(pV.replace(/o/gi, '0'));
+                                if(!isNaN(numL) && !isNaN(numV)) {
+                                    totalBets++;
+                                    if(numL > numV) localBets++;
+                                    else if(numL < numV) visitBets++;
+                                    else tieBets++;
+                                }
+                            }
+                            
+                            let headerName = header[idxL] ? header[idxL].replace(" (L)", "").replace("(L)", "").trim() : p.name;
+                            let cleanName = headerName.replace(/'/g, "");
+                            
+                            predsHtml += `<li class="pred-row"><span class="player-name">${cleanName}</span> <span class="pred-score">${score}</span></li>`;
+                        });
+
+                        let pL = totalBets ? Math.round((localBets/totalBets)*100) : 0;
+                        let pE = totalBets ? Math.round((tieBets/totalBets)*100) : 0;
+                        let pV = totalBets ? Math.round((visitBets/totalBets)*100) : 0;
+
+                        let statusCenterHtml = "";
+                        let liveBadgeHtml = "";
+                        let cardClass = "match-card";
+
+                        // MEJORA #1: PINTAR MARCADOR REAL EN VIVO EN EL CENTRO
+                        if(match.status === "LIVE") {
+                            cardClass = "match-card live-card";
+                            liveBadgeHtml = `<span class="time live">🔴 EN VIVO</span>`;
+                            let displayGL = match.gl !== "" ? match.gl : "0";
+                            let displayGV = match.gv !== "" ? match.gv : "0";
+                            statusCenterHtml = `<div class="live-score-badge">${displayGL}<span class="live-dot">🔴</span>${displayGV}</div>`;
+                        } else {
+                            statusCenterHtml = `
+                                <div class="match-sched">
+                                    <span class="date-val">${match.fecha}</span>
+                                    <span class="time-val">${match.hora}</span>
+                                </div>`;
+                        }
+
+                        containerM.innerHTML += `
+                            <div class="${cardClass}">
+                                <div class="match-info">
+                                    <div class="team"><span class="team-icon">⚽</span><span class="team-name">${match.teamL}</span></div>
+                                    <div class="match-status"><span class="vs">VS</span>${statusCenterHtml}${liveBadgeHtml}</div>
+                                    <div class="team"><span class="team-icon">⚽</span><span class="team-name">${match.teamV}</span></div>
+                                </div>
+                                <div class="dist-container">
+                                    <div class="dist-bar-wrapper">
+                                        <div class="dist-bar local" style="width:${pL}%"></div>
+                                        <div class="dist-bar empate" style="width:${pE}%"></div>
+                                        <div class="dist-bar visit" style="width:${pV}%"></div>
+                                    </div>
+                                    <div class="dist-labels">
+                                        <span>${localBets} L</span><span>${tieBets} E</span><span>${visitBets} V</span>
+                                    </div>
+                                </div>
+                                <button class="toggle-btn" id="btn_${index}" onclick="togglePred('pred_${index}', 'btn_${index}')">VER PRONÓSTICOS ▼</button>
+                                <ul class="predictions" id="pred_${index}">${predsHtml}</ul>
+                            </div>`;
+                    });
+                }
+
+                // 2. CARGAR TABLA DE POSICIONES
+                const resBoard = await fetch(urlTabla);
+                const csvBoard = await resBoard.text();
+                const rowsB = parseCSV(csvBoard);
+                
+                const hB = rowsB[0].map(h => h.toString().trim().toUpperCase());
+                let idxName = hB.indexOf("JUGADOR"); if(idxName === -1) idxName = 1;
+                let idxPts = hB.indexOf("PUNTOS TOTALES"); if(idxPts === -1) idxPts = 2;
+                let idxMU = hB.indexOf("MU");
+                let idxAT = hB.indexOf("AT");
+                let idxAG = hB.indexOf("AG");
+
+                globalPlayersList = [];
+                for(let i=1; i<rowsB.length; i++) {
+                    let cols = rowsB[i];
+                    if(!cols[idxName]) continue;
+                    
+                    globalPlayersList.push({
+                        nombre: cols[idxName],
+                        puntos: parseInt(cols[idxPts]) || 0,
+                        mu: idxMU !== -1 ? (parseInt(cols[idxMU])||0) : 0,
+                        at: idxAT !== -1 ? (parseInt(cols[idxAT])||0) : 0,
+                        ag: idxAG !== -1 ? (parseInt(cols[idxAG])||0) : 0
+                    });
+                }
+
+                globalPlayersList.sort((a, b) => b.puntos - a.puntos);
+
+                let maxMU = -1, maxAT = -1, maxAG = -1;
+                let nMU = "-", nAT = "-", nAG = "-";
+                
+                // MEJORA #2: AGREGAR BARRA DE BÚSQUEDA SUPERIOR CON LUPA
+                let searchHtml = `
+                    <div class="search-wrapper">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="strat-search" class="search-input" placeholder="Buscar estratega..." onkeyup="filterStrategists()">
+                    </div>`;
+
+                let boardHtml = `<div class="leaderboard-card"><table class="pos-table" id="table-board">
+                                 <tr><th>#</th><th>Estratega (Toca para ver stats)</th><th>Puntos</th></tr>`;
+                
+                let currentRank = 1;
+                let previousPts = -1;
+
+                globalPlayersList.forEach((p, index) => {
+                    if (p.puntos !== previousPts) { currentRank = index + 1; previousPts = p.puntos; }
+                    if(p.mu > maxMU){ maxMU = p.mu; nMU = p.nombre.split(" ")[0]; }
+                    if(p.at > maxAT){ maxAT = p.at; nAT = p.nombre.split(" ")[0]; }
+                    if(p.ag > maxAG){ maxAG = p.ag; nAG = p.nombre.split(" ")[0]; }
+
+                    // MEJORA #3: RESALTAR VISUALMENTE EL PODIO CON ICONOS DE MEDALLAS Y FILAS DE COLOR
+                    let trendHtml = `<span class="trend" style="color:var(--text-muted)">●</span>`;
+                    let podiumClass = "";
+                    
+                    if (currentRank === 1) {
+                        trendHtml = `<span class="trend">👑</span>`;
+                        podiumClass = "podium-1";
+                    } else if (currentRank === 2) {
+                        trendHtml = `<span class="trend">🥈</span>`;
+                        podiumClass = "podium-2";
+                    } else if (currentRank === 3) {
+                        trendHtml = `<span class="trend">🥉</span>`;
+                        podiumClass = "podium-3";
+                    } else if (currentRank > 3 && currentRank <= 5) {
+                        trendHtml = `<span class="trend" style="color:var(--accent)">▲</span>`;
+                    } else if (currentRank >= 10) {
+                        trendHtml = `<span class="trend" style="color:#e53935">▼</span>`;
+                    }
+
+                    boardHtml += `<tr class="strat-row ${podiumClass}" data-name="${p.nombre}" onclick="openModal('${p.nombre}', ${p.puntos}, ${p.mu}, ${p.at}, ${p.ag})">
+                                    <td>${currentRank}</td>
+                                    <td>${trendHtml} ${p.nombre}</td>
+                                    <td><span class="pts-badge">${p.puntos}</span></td>
+                                  </tr>`;
+                });
+                boardHtml += `</table></div>`;
+                
+                let fameHtml = `
+                    <div class="wall-of-fame">
+                        <div class="fame-item">🎯 <span>${nAT}</span><br><small>Líder de Precisión (AT)</small></div>
+                        <div class="fame-item">🔥 <span>${nMU}</span><br><small>Líder de Chepazos (Mu)</small></div>
+                        <div class="fame-item">🩹 <span>${nAG}</span><br><small>Líder de Consolación (AG)</small></div>
+                    </div>`;
+
+                // Renderizar Todo en el contenedor de Posiciones
+                document.getElementById('leaderboard-container').innerHTML = searchHtml + fameHtml + boardHtml;
+                
+                let fraseElegida = frasesGalpon[Math.floor(Math.random() * frasesGalpon.length)];
+                document.getElementById("status").innerHTML = `${fraseElegida} 🟢`;
+
+            } catch (error) {
+                document.getElementById("status").innerText = "Sin conexión al VAR 🔴";
+                console.error(error);
+            }
+        }
+
+        function togglePred(listId, btnId) {
+            document.getElementById(listId).classList.toggle('active');
+            let btn = document.getElementById(btnId);
+            btn.classList.toggle('active');
+            btn.innerText = btn.classList.contains('active') ? "OCULTAR PRONÓSTICOS ▲" : "VER PRONÓSTICOS ▼";
+        }
+
+        window.onload = loadData;
+    </script>
+</body>
+</html>
