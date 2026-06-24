@@ -49,7 +49,6 @@
         .tabs { display: flex; margin-top: 10px; background: rgba(0,0,0,0.15); border-radius: 12px 12px 0 0; padding: 5px 5px 0 5px;}
         body.dark-mode .tabs { background: rgba(0,0,0,0.4); }
         
-        /* Ajuste de fuente para que quepan los textos completos */
         .tab-btn { flex: 1; background: transparent; color: rgba(255, 255, 255, 0.6); border: none; padding: 8px 2px; font-size: 0.65rem; font-weight: 700; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s; display: flex; flex-direction: column; align-items: center; gap: 4px; text-transform: uppercase; letter-spacing: 0.2px; text-align: center; line-height: 1.1;}
         .tab-btn span.icon { font-size: 1.2rem; margin-bottom: 2px;}
         .tab-btn.active { color: white; border-bottom: 3px solid var(--accent); background: rgba(255, 255, 255, 0.1); border-radius: 8px 8px 0 0;}
@@ -178,7 +177,6 @@
     <div class="container" id="bracket-container"><div class="loader">Analizando clasificados...</div></div>
     <div class="container" id="leaderboard-container"><div class="loader">Calculando posiciones...</div></div>
 
-    <!-- Modal de Estadísticas -->
     <div id="player-modal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal()">&times;</span>
@@ -198,24 +196,20 @@
         const urlTabla = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5-A3wQAPUD3raKLrhfkiKWU62m6V7xFLsXY-vO_UdxCSADMwQSmkEecyGTqfpCJr2yYL6IghQ_B3i/pub?gid=187955950&single=true&output=csv";
 
         const frasesGalpon = [
-const frasesGalpon = [
             "El que no arriesga, no gana puntos.",
-            "Prohibido llorar si hay empate a ceros.",
-            "El VAR los está observando de cerca...",
-            "Con la fe intacta y la calculadora en mano.",
-            "¿Quién se llevará hoy el Raspa-Ollas?",
-            "La esperanza es lo último que se pierde...",
-            "Tensión pura en la parte alta de la tabla.",
-            "¡Apostar con el corazón a veces sale caro!",
-            "Se sufre más aquí que con el informe de fin de mes.",
-            "Menos análisis técnico y más chepazos, por favor.",
-            "Tranquilos, matemáticamente todavía hay posibilidades.",
-            "Ni Nostradamus le atinaba a ese resultado.",
-            "Más perdidos que el árbitro en el VAR.",
-            "Los puntos de consolación también son cariño.",
-            "A rezarle a los santos para ese gol en el 90+5'."
-            "Apostando como proyecto VIS, pero esperando resultados estrato 6."
-        ];
+            "Pónganse el casco, que empezaron a llover batacazos. 👷‍♂️",
+            "Ese pronóstico tiene menos cimientos que obra de practicante. 🧱",
+            "El VAR nos negó la licencia de construcción para ese gol. 🚫",
+            "Apostando como VIS, esperando resultados estrato 6. 🏠",
+            "La estrategia de varios se quedó en obra gris. 🏢",
+            "La precisión de Diana asusta... ¿Tiene los planos del Mundial? 🎯",
+            "Manuela demostrando que un buen chepazo salva cualquier proyecto. 🔥",
+            "Manuel sacando puntos de consolación de debajo de los escombros. 🩹",
+            "Dicen que Sergio hace sus pronósticos tirando línea en AutoCAD. 💻",
+            "Viviana y Paula van calladitas, pero facturando como en cierre de mes. 🤑",
+            "J.Pablo y J.Sebastián defienden sus puntos como residentes de obra. 🏗️",
+            "Mónica y Angélica le tienen más fe al 0-0 que al contratista. 😅",
+            "Valeria y Luisa ya están calculando el presupuesto del premio mayor. 💰"
         ];
 
         let globalPlayersList = []; 
@@ -295,7 +289,7 @@ const frasesGalpon = [
                 const resMatches = await fetch(urlPartidos);
                 const csvMatches = await resMatches.text();
                 const rowsM = parseCSV(csvMatches);
-                const header = rowsM[0];
+                const header = rowsM[0] || [];
                 
                 const players = [
                     {name: "Sergio", idxL: 5, idxV: 6}, {name: "Paula", idxL: 8, idxV: 9},
@@ -310,34 +304,33 @@ const frasesGalpon = [
                 let finishedMatches = [];
 
                 for(let i=1; i<rowsM.length; i++){
-                    const cols = rowsM[i];
+                    const cols = rowsM[i] || [];
                     if(cols.length < 5) continue;
                     
-                    let colA = cols[0] ? cols[0].toString().trim().toUpperCase() : "";
-                    let fechaPartido = cols[1] || "";
-                    let horaPartido = cols[2] || "";
-                    let teamL = cols[3] || "";
-                    let teamV = cols[4] || "";
-                    let golesLReales = cols[5] !== undefined ? cols[5].toString().trim() : "";
-                    let golesVReales = cols[6] !== undefined ? cols[6].toString().trim() : "";
+                    // Escudo Anti-Errores: Convierte TODO en texto seguro antes de leerlo
+                    let colA = cols[0] ? String(cols[0]).trim().toUpperCase() : "";
+                    let fechaPartido = cols[1] ? String(cols[1]).trim() : "";
+                    let horaPartido = cols[2] ? String(cols[2]).trim() : "";
+                    let teamL = cols[3] ? String(cols[3]).trim() : "";
+                    let teamV = cols[4] ? String(cols[4]).trim() : "";
+                    let golesLReales = cols[5] !== undefined ? String(cols[5]).trim() : "";
+                    let golesVReales = cols[6] !== undefined ? String(cols[6]).trim() : "";
                     
                     if(!teamL || !teamV || teamL.toLowerCase().includes("local")) continue;
                     
                     let isLive = (colA.includes("EN VIVO") || colA.includes("VIVO") || colA.includes("EN JUEGO"));
                     
-                    // Lógica para separar Partidos de Hoy vs Historial (Ya terminados)
                     if(isLive) {
                         upcomingMatches.push({teamL, teamV, cols, status: "LIVE", fecha: fechaPartido, hora: horaPartido, gl: golesLReales, gv: golesVReales});
                     } else if(golesLReales === "" && golesVReales === "") {
                         upcomingMatches.push({teamL, teamV, cols, status: "PRÓXIMO", fecha: fechaPartido, hora: horaPartido, gl: "", gv: ""});
                     } else {
-                        // Si ya no dice EN VIVO y tiene goles anotados, se va al Historial
                         finishedMatches.push({teamL, teamV, cols, status: "FINALIZADO", fecha: fechaPartido, hora: horaPartido, gl: golesLReales, gv: golesVReales});
                     }
                 }
 
-                // ---- RENDERIZAR PARTIDOS DEL DÍA (PENDIENTES O EN VIVO) ----
-                const matchesToShow = upcomingMatches.slice(0, 6); // Muestra los próximos 4
+                // ---- RENDERIZAR PARTIDOS DEL DÍA ----
+                const matchesToShow = upcomingMatches.slice(0, 6);
                 const containerM = document.getElementById("matches-container");
                 containerM.innerHTML = "";
                 
@@ -350,19 +343,24 @@ const frasesGalpon = [
 
                         players.forEach(p => {
                             let idxL = p.idxL + 2; let idxV = p.idxV + 2;
-                            let pL = match.cols[idxL], pV = match.cols[idxV];
+                            // Escudo Anti-Errores para Goles
+                            let pL = match.cols[idxL] !== undefined ? String(match.cols[idxL]) : "";
+                            let pV = match.cols[idxV] !== undefined ? String(match.cols[idxV]) : "";
                             let score = "-";
                             
-                            if(pL !== undefined && pV !== undefined && pL !== "" && pV !== "") {
+                            if(pL !== "" && pV !== "") {
                                 score = `${pL} - ${pV}`.replace(/\.0/g, '').replace(/o/gi, '0');
-                                let numL = parseInt(pL.replace(/o/gi, '0')); let numV = parseInt(pV.replace(/o/gi, '0'));
+                                let numL = parseInt(pL.replace(/o/gi, '0')); 
+                                let numV = parseInt(pV.replace(/o/gi, '0'));
                                 if(!isNaN(numL) && !isNaN(numV)) {
                                     totalBets++;
                                     if(numL > numV) localBets++; else if(numL < numV) visitBets++; else tieBets++;
                                 }
                             }
-                            let headerName = header[idxL] ? header[idxL].replace(" (L)", "").replace("(L)", "").trim() : p.name;
-                            let cleanName = headerName.replace(/'/g, "");
+                            // Escudo Anti-Errores para Nombres
+                            let headerStr = header[idxL] !== undefined ? String(header[idxL]) : "";
+                            let headerName = headerStr ? headerStr.replace(" (L)", "").replace("(L)", "").trim() : p.name;
+                            let cleanName = String(headerName).replace(/'/g, "");
                             predsHtml += `<li class="pred-row"><span class="player-name">${cleanName}</span> <span class="pred-score">${score}</span></li>`;
                         });
 
@@ -403,157 +401,27 @@ const frasesGalpon = [
                     });
                 }
 
-                // ---- RENDERIZAR HISTORIAL DE PARTIDOS (Pestaña 2) ----
+                // ---- RENDERIZAR HISTORIAL DE PARTIDOS ----
                 const containerH = document.getElementById("history-container");
                 if(finishedMatches.length === 0) {
                     containerH.innerHTML = "<div class='loader'>Aún no hay partidos finalizados.</div>";
                 } else {
                     let histHtml = "";
-                    // Se invierte el array para que los últimos jugados salgan primero arriba
                     finishedMatches.slice().reverse().forEach((match, index) => {
                         let predsHtml = "";
                         let localBets = 0, tieBets = 0, visitBets = 0, totalBets = 0;
 
                         players.forEach(p => {
                             let idxL = p.idxL + 2; let idxV = p.idxV + 2;
-                            let pL = match.cols[idxL], pV = match.cols[idxV];
+                            // Escudo Anti-Errores
+                            let pL = match.cols[idxL] !== undefined ? String(match.cols[idxL]) : "";
+                            let pV = match.cols[idxV] !== undefined ? String(match.cols[idxV]) : "";
                             let score = "-";
-                            if(pL !== undefined && pV !== undefined && pL !== "" && pV !== "") {
+                            
+                            if(pL !== "" && pV !== "") {
                                 score = `${pL} - ${pV}`.replace(/\.0/g, '').replace(/o/gi, '0');
-                                let numL = parseInt(pL.replace(/o/gi, '0')); let numV = parseInt(pV.replace(/o/gi, '0'));
+                                let numL = parseInt(pL.replace(/o/gi, '0')); 
+                                let numV = parseInt(pV.replace(/o/gi, '0'));
                                 if(!isNaN(numL) && !isNaN(numV)) {
                                     totalBets++;
-                                    if(numL > numV) localBets++; else if(numL < numV) visitBets++; else tieBets++;
-                                }
-                            }
-                            let headerName = header[idxL] ? header[idxL].replace(" (L)", "").replace("(L)", "").trim() : p.name;
-                            let cleanName = headerName.replace(/'/g, "");
-                            predsHtml += `<li class="pred-row"><span class="player-name">${cleanName}</span> <span class="pred-score">${score}</span></li>`;
-                        });
-
-                        let pL = totalBets ? Math.round((localBets/totalBets)*100) : 0;
-                        let pE = totalBets ? Math.round((tieBets/totalBets)*100) : 0;
-                        let pV = totalBets ? Math.round((visitBets/totalBets)*100) : 0;
-
-                        histHtml += `
-                            <div class="match-card history-card">
-                                <div class="match-info">
-                                    <div class="team"><span class="team-icon">⚽</span><span class="team-name">${match.teamL}</span></div>
-                                    <div class="match-status">
-                                        <span class="vs">FINAL</span>
-                                        <div class="live-score-badge" style="color:var(--primary); font-size:1.8rem;">${match.gl} - ${match.gv}</div>
-                                        <span class="time" style="background:#e0e0e0; color:#555;">${match.fecha}</span>
-                                    </div>
-                                    <div class="team"><span class="team-icon">⚽</span><span class="team-name">${match.teamV}</span></div>
-                                </div>
-                                <div class="dist-container">
-                                    <div class="dist-bar-wrapper">
-                                        <div class="dist-bar local" style="width:${pL}%"></div>
-                                        <div class="dist-bar empate" style="width:${pE}%"></div>
-                                        <div class="dist-bar visit" style="width:${pV}%"></div>
-                                    </div>
-                                    <div class="dist-labels"><span>${localBets} L</span><span>${tieBets} E</span><span>${visitBets} V</span></div>
-                                </div>
-                                <button class="toggle-btn" id="btn_hist_${index}" onclick="togglePred('pred_hist_${index}', 'btn_hist_${index}')">VER PRONÓSTICOS ▼</button>
-                                <ul class="predictions" id="pred_hist_${index}">${predsHtml}</ul>
-                            </div>`;
-                    });
-                    containerH.innerHTML = histHtml;
-                }
-
-                // ---- RENDERIZAR PESTAÑA DE LLAVES (Pestaña 3) ----
-                // Diseño Placeholder Premium hasta que configures los Dieciseisavos en el Excel
-                document.getElementById("bracket-container").innerHTML = `
-                    <div class="loader" style="padding: 60px 20px; text-align: center;">
-                        <div style="font-size: 4rem; margin-bottom: 15px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));">🏆</div>
-                        <h2 style="color: var(--primary); margin: 0 0 10px 0; font-weight: 900;">Fase Final</h2>
-                        <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin: 0; padding: 0 10px;">
-                            El cuadro oficial de <strong>Dieciseisavos</strong> y las rondas de eliminación directa aparecerán aquí de forma automática una vez se definan los clasificados.
-                        </p>
-                    </div>
-                `;
-
-                // 2. CARGAR TABLA DE POSICIONES (Pestaña 4)
-                const resBoard = await fetch(urlTabla);
-                const csvBoard = await resBoard.text();
-                const rowsB = parseCSV(csvBoard);
-                
-                const hB = rowsB[0].map(h => h.toString().trim().toUpperCase());
-                let idxName = hB.indexOf("JUGADOR"); if(idxName === -1) idxName = 1;
-                let idxPts = hB.indexOf("PUNTOS TOTALES"); if(idxPts === -1) idxPts = 2;
-                let idxMU = hB.indexOf("MU"); let idxAT = hB.indexOf("AT"); let idxAG = hB.indexOf("AG");
-
-                globalPlayersList = [];
-                for(let i=1; i<rowsB.length; i++) {
-                    let cols = rowsB[i];
-                    if(!cols[idxName]) continue;
-                    
-                    globalPlayersList.push({
-                        nombre: cols[idxName], puntos: parseInt(cols[idxPts]) || 0,
-                        mu: idxMU !== -1 ? (parseInt(cols[idxMU])||0) : 0,
-                        at: idxAT !== -1 ? (parseInt(cols[idxAT])||0) : 0,
-                        ag: idxAG !== -1 ? (parseInt(cols[idxAG])||0) : 0
-                    });
-                }
-
-                globalPlayersList.sort((a, b) => b.puntos - a.puntos);
-
-                let maxMU = -1, maxAT = -1, maxAG = -1; let nMU = "-", nAT = "-", nAG = "-";
-                
-                let searchHtml = `
-                    <div class="search-wrapper">
-                        <span class="search-icon">🔍</span>
-                        <input type="text" id="strat-search" class="search-input" placeholder="Buscar estratega..." onkeyup="filterStrategists()">
-                    </div>`;
-
-                let boardHtml = `<div class="leaderboard-card"><table class="pos-table" id="table-board">
-                                 <tr><th>#</th><th>Estratega (Toca para ver stats)</th><th>Puntos</th></tr>`;
-                
-                let currentRank = 1; let previousPts = -1;
-
-                globalPlayersList.forEach((p, index) => {
-                    if (p.puntos !== previousPts) { currentRank = index + 1; previousPts = p.puntos; }
-                    if(p.mu > maxMU){ maxMU = p.mu; nMU = p.nombre.split(" ")[0]; }
-                    if(p.at > maxAT){ maxAT = p.at; nAT = p.nombre.split(" ")[0]; }
-                    if(p.ag > maxAG){ maxAG = p.ag; nAG = p.nombre.split(" ")[0]; }
-
-                    let trendHtml = `<span class="trend" style="color:var(--text-muted)">●</span>`;
-                    let podiumClass = "";
-                    if (currentRank === 1) { trendHtml = `<span class="trend">👑</span>`; podiumClass = "podium-1"; } 
-                    else if (currentRank === 2) { trendHtml = `<span class="trend">🥈</span>`; podiumClass = "podium-2"; } 
-                    else if (currentRank === 3) { trendHtml = `<span class="trend">🥉</span>`; podiumClass = "podium-3"; } 
-                    else if (currentRank > 3 && currentRank <= 5) { trendHtml = `<span class="trend" style="color:var(--accent)">▲</span>`; } 
-                    else if (currentRank >= 10) { trendHtml = `<span class="trend" style="color:#e53935">▼</span>`; }
-
-                    boardHtml += `<tr class="strat-row ${podiumClass}" data-name="${p.nombre}" onclick="openModal('${p.nombre}', ${p.puntos}, ${p.mu}, ${p.at}, ${p.ag})">
-                                    <td>${currentRank}</td><td>${trendHtml} ${p.nombre}</td><td><span class="pts-badge">${p.puntos}</span></td>
-                                  </tr>`;
-                });
-                boardHtml += `</table></div>`;
-                
-                let fameHtml = `
-                    <div class="wall-of-fame">
-                        <div class="fame-item">🎯 <span>${nAT}</span><br><small>Líder de Precisión (AT)</small></div>
-                        <div class="fame-item">🔥 <span>${nMU}</span><br><small>Líder de Chepazos (Mu)</small></div>
-                        <div class="fame-item">🩹 <span>${nAG}</span><br><small>Líder de Consolación (AG)</small></div>
-                    </div>`;
-
-                document.getElementById('leaderboard-container').innerHTML = searchHtml + fameHtml + boardHtml;
-
-            } catch (error) {
-                document.getElementById("status").innerText = "Sin conexión al VAR 🔴";
-                console.error(error);
-            }
-        }
-
-        function togglePred(listId, btnId) {
-            document.getElementById(listId).classList.toggle('active');
-            let btn = document.getElementById(btnId);
-            btn.classList.toggle('active');
-            btn.innerText = btn.classList.contains('active') ? "OCULTAR PRONÓSTICOS ▲" : "VER PRONÓSTICOS ▼";
-        }
-
-        window.onload = loadData;
-    </script>
-</body>
-</html>
+                                    if(numL > numV) localBets++; else if(numL < numV) visit
