@@ -281,8 +281,8 @@
 
         async function loadData() {
             try {
-                // 1. CARGAR PARTIDOS Y MAPEAR COLUMNAS DINÁMICAMENTE
-                const resMatches = await fetch(urlPartidos);
+                // ROMPE-CACHÉ: Obliga a Google y al navegador a traer el dato fresco (¡Adiós NaN!)
+                const resMatches = await fetch(urlPartidos + "&_t=" + new Date().getTime());
                 const csvMatches = await resMatches.text();
                 const rowsM = parseCSV(csvMatches);
                 
@@ -322,7 +322,7 @@
                 let idxRealV = hM_upper.findIndex(h => h.includes("REAL") && h.includes("VISITANTE"));
                 if(idxRealV === -1) idxRealV = 6;
 
-                // DETECCIÓN DE PARTICIPANTES (La versión original y precisa que siempre funcionó)
+                // DETECCIÓN DE PARTICIPANTES 
                 const players = [];
                 headerM.forEach((colName, idx) => {
                     if (colName && colName.includes("(L)")) {
@@ -346,9 +346,7 @@
                     let isLive = (colA.includes("VIVO") || colA.includes("JUEGO"));
 
                     let matchNumStr = cols[idxMatchNum] ? String(cols[idxMatchNum]).trim() : String(i);
-                    
-                    // LECTURA DE FECHA CORREGIDA (Ya no borra textos que empiezan por número)
-                    let fechaPartido = (idxFecha !== -1 && cols[idxFecha]) ? String(cols[idxFecha]).trim().replace(/ 00:00:00/g, '') : "";
+                    let fechaPartido = (idxFecha !== -1 && cols[idxFecha] && isNaN(parseInt(cols[idxFecha]))) ? String(cols[idxFecha]).trim().replace(/ 00:00:00/g, '') : "";
                     let horaPartido = (idxHora !== -1 && cols[idxHora] && String(cols[idxHora]).includes(":")) ? String(cols[idxHora]).trim() : "";
                     
                     let teamL = (idxTeamL !== -1 && cols[idxTeamL]) ? String(cols[idxTeamL]).trim() : "";
@@ -359,15 +357,19 @@
                     let glRaw = (idxRealL !== -1 && cols[idxRealL] !== undefined) ? String(cols[idxRealL]).trim() : "";
                     let gvRaw = (idxRealV !== -1 && cols[idxRealV] !== undefined) ? String(cols[idxRealV]).trim() : "";
                     
-                    let glNum = parseInt(glRaw);
-                    let gvNum = parseInt(gvRaw);
+                    // ESCUDO ANTI-FANTASMAS: Obligamos a que de verdad haya un número (Ej. "2") y no letras o guiones
+                    let hasScores = /\d/.test(glRaw) && /\d/.test(gvRaw);
                     
                     if(isLive) {
-                        upcomingMatches.push({teamL, teamV, cols, status: "LIVE", gl: glRaw, gv: gvRaw, matchNum: matchNumStr, fecha: fechaPartido, hora: horaPartido});
-                    } else if(isNaN(glNum) || isNaN(gvNum)) {
+                        let glLive = /\d/.test(glRaw) ? parseInt(glRaw) : 0;
+                        let gvLive = /\d/.test(gvRaw) ? parseInt(gvRaw) : 0;
+                        upcomingMatches.push({teamL, teamV, cols, status: "LIVE", gl: glLive, gv: gvLive, matchNum: matchNumStr, fecha: fechaPartido, hora: horaPartido});
+                    } else if(!hasScores) {
+                        // Si borraste el número en Excel, se viene para acá obligatoriamente
                         upcomingMatches.push({teamL, teamV, cols, status: "PRÓXIMO", gl: "", gv: "", matchNum: matchNumStr, fecha: fechaPartido, hora: horaPartido});
                     } else {
-                        finishedMatches.push({teamL, teamV, cols, status: "FINALIZADO", gl: glNum, gv: gvNum, matchNum: matchNumStr, fecha: fechaPartido, hora: horaPartido});
+                        // Ya no hay posibilidad de que arroje NaN en el historial
+                        finishedMatches.push({teamL, teamV, cols, status: "FINALIZADO", gl: parseInt(glRaw), gv: parseInt(gvRaw), matchNum: matchNumStr, fecha: fechaPartido, hora: horaPartido});
                     }
                 }
 
@@ -409,9 +411,7 @@
                         if(match.status === "LIVE") {
                             cardClass = "match-card live-card";
                             liveBadgeHtml = `<span class="time live">🔴 EN VIVO</span>`;
-                            let displayGL = !isNaN(parseInt(match.gl)) ? parseInt(match.gl) : "0";
-                            let displayGV = !isNaN(parseInt(match.gv)) ? parseInt(match.gv) : "0";
-                            statusCenterHtml = `<div class="live-score-badge">${displayGL}<span class="live-dot">🔴</span>${displayGV}</div>`;
+                            statusCenterHtml = `<div class="live-score-badge">${match.gl}<span class="live-dot">🔴</span>${match.gv}</div>`;
                         } else {
                             statusCenterHtml = `<div class="match-sched"><span class="date-val">${match.fecha || 'Partido # '+match.matchNum}</span><span class="time-val">${match.hora || '--:--'}</span></div>`;
                         }
@@ -508,7 +508,7 @@
                 `;
 
                 // ---- CARGAR TABLA DE POSICIONES CON LÓGICA DE TENDENCIA ----
-                const resBoard = await fetch(urlTabla);
+                const resBoard = await fetch(urlTabla + "&_t=" + new Date().getTime());
                 const csvBoard = await resBoard.text();
                 const rowsB = parseCSV(csvBoard);
                 
