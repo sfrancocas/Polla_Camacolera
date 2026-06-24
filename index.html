@@ -286,7 +286,7 @@
                 const csvMatches = await resMatches.text();
                 const rowsM = parseCSV(csvMatches);
                 
-                // RADAR DE ENCABEZADOS: Busca en las primeras 10 filas dónde están los participantes
+                // RADAR DE ENCABEZADOS
                 let headerM = [];
                 let headerRowIdx = 0;
                 for(let r=0; r<Math.min(10, rowsM.length); r++) {
@@ -301,32 +301,34 @@
                 
                 const hM_upper = headerM.map(h => String(h || "").trim().toUpperCase());
                 
-                // Identificadores de columnas con seguro anticaídas
                 let idxMatchNum = hM_upper.findIndex(h => h.includes("PARTIDO"));
                 if(idxMatchNum === -1) idxMatchNum = 0;
                 
-                let idxTeamL = hM_upper.findIndex(h => h.includes("LOCAL") && !h.includes("REAL") && !h.includes("("));
-                let idxTeamV = hM_upper.findIndex(h => h.includes("VISITANTE") && !h.includes("REAL") && !h.includes("("));
-                let idxRealL = hM_upper.findIndex(h => h.includes("REAL") && h.includes("LOCAL"));
-                let idxRealV = hM_upper.findIndex(h => h.includes("REAL") && h.includes("VISITANTE"));
-                
                 let idxFecha = hM_upper.findIndex(h => h.includes("FECHA"));
+                if(idxFecha === -1) idxFecha = 1;
+                
                 let idxHora = hM_upper.findIndex(h => h.includes("HORA"));
+                if(idxHora === -1) idxHora = 2;
+                
+                let idxTeamL = hM_upper.findIndex(h => h.includes("LOCAL") && !h.includes("REAL") && !h.includes("("));
+                if(idxTeamL === -1) idxTeamL = 3;
+                
+                let idxTeamV = hM_upper.findIndex(h => h.includes("VISITANTE") && !h.includes("REAL") && !h.includes("("));
+                if(idxTeamV === -1) idxTeamV = 4;
+                
+                let idxRealL = hM_upper.findIndex(h => h.includes("REAL") && h.includes("LOCAL"));
+                if(idxRealL === -1) idxRealL = 5;
+                
+                let idxRealV = hM_upper.findIndex(h => h.includes("REAL") && h.includes("VISITANTE"));
+                if(idxRealV === -1) idxRealV = 6;
 
-                // Solo asigna columnas si la palabra FECHA no está, y solo si no choca con Equipo Local
-                if (idxFecha === -1 && idxTeamL !== 1) idxFecha = 1;
-                if (idxHora === -1 && idxTeamL !== 2) idxHora = 2;
-
-                // DETECCIÓN DINÁMICA DE PARTICIPANTES
+                // DETECCIÓN DE PARTICIPANTES (La versión original y precisa que siempre funcionó)
                 const players = [];
                 headerM.forEach((colName, idx) => {
-                    let colStr = String(colName || "").trim();
-                    if (colStr.toUpperCase().endsWith("(L)") || colStr.toUpperCase().includes("(L)")) {
-                        let cleanName = colStr.replace(/\([lL]\)/g, "").trim();
-                        let idxV = headerM.findIndex(h => {
-                            let hStr = String(h || "").trim().toUpperCase();
-                            return hStr.includes(cleanName.toUpperCase()) && hStr.includes("(V)");
-                        });
+                    if (colName && colName.includes("(L)")) {
+                        let cleanName = colName.replace("(L)", "").trim();
+                        let vName = cleanName + " (V)";
+                        let idxV = headerM.findIndex(h => h && (h.trim() === vName || h.trim() === cleanName + "(V)"));
                         if (idxV !== -1) {
                             players.push({ name: cleanName, idxL: idx, idxV: idxV });
                         }
@@ -352,7 +354,6 @@
                     
                     if(!teamL || !teamV || teamL.toUpperCase().includes("LOCAL") || teamL.toUpperCase().includes("EQUIPO")) continue;
                     
-                    // Extrae valores reales con parseo matemático estricto
                     let glRaw = (idxRealL !== -1 && cols[idxRealL] !== undefined) ? String(cols[idxRealL]).trim() : "";
                     let gvRaw = (idxRealV !== -1 && cols[idxRealV] !== undefined) ? String(cols[idxRealV]).trim() : "";
                     
@@ -385,19 +386,20 @@
                             let pV = match.cols[p.idxV] !== undefined ? String(match.cols[p.idxV]).trim() : "";
                             let score = "-";
                             
-                            let numL = parseInt(pL.replace(/o/gi, '0')); 
-                            let numV = parseInt(pV.replace(/o/gi, '0'));
-                            
-                            if(!isNaN(numL) && !isNaN(numV)) {
-                                score = numL + " - " + numV;
-                                totalBets++;
-                                if(numL > numV) localBets++; 
-                                else if(numL < numV) visitBets++; 
-                                else tieBets++;
+                            // Versión de conteo segura
+                            if(pL !== "" && pV !== "") {
+                                score = String(`${pL} - ${pV}`).replace(/\.0/g, '').replace(/o/gi, '0');
+                                let numL = parseInt(String(pL).replace(/o/gi, '0')); 
+                                let numV = parseInt(String(pV).replace(/o/gi, '0'));
+                                if(!isNaN(numL) && !isNaN(numV)) {
+                                    totalBets++;
+                                    if(numL > numV) localBets++; else if(numL < numV) visitBets++; else tieBets++;
+                                }
                             }
                             predsHtml += `<li class="pred-row"><span class="player-name">${p.name}</span> <span class="pred-score">${score}</span></li>`;
                         });
 
+                        // Variables estadísticas (corregidas sin conflicto de nombres)
                         let pctL = totalBets ? Math.round((localBets/totalBets)*100) : 0;
                         let pctE = totalBets ? Math.round((tieBets/totalBets)*100) : 0;
                         let pctV = totalBets ? Math.round((visitBets/totalBets)*100) : 0;
@@ -450,15 +452,14 @@
                             let pV = match.cols[p.idxV] !== undefined ? String(match.cols[p.idxV]).trim() : "";
                             let score = "-";
                             
-                            let numL = parseInt(pL.replace(/o/gi, '0')); 
-                            let numV = parseInt(pV.replace(/o/gi, '0'));
-                            
-                            if(!isNaN(numL) && !isNaN(numV)) {
-                                score = numL + " - " + numV;
-                                totalBets++;
-                                if(numL > numV) localBets++; 
-                                else if(numL < numV) visitBets++; 
-                                else tieBets++;
+                            if(pL !== "" && pV !== "") {
+                                score = String(`${pL} - ${pV}`).replace(/\.0/g, '').replace(/o/gi, '0');
+                                let numL = parseInt(String(pL).replace(/o/gi, '0')); 
+                                let numV = parseInt(String(pV).replace(/o/gi, '0'));
+                                if(!isNaN(numL) && !isNaN(numV)) {
+                                    totalBets++;
+                                    if(numL > numV) localBets++; else if(numL < numV) visitBets++; else tieBets++;
+                                }
                             }
                             predsHtml += `<li class="pred-row"><span class="player-name">${p.name}</span> <span class="pred-score">${score}</span></li>`;
                         });
