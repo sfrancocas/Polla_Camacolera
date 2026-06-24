@@ -128,7 +128,7 @@
 
         .pos-table td:nth-child(2) { text-align: left; font-weight: 700; color: var(--primary);}
         .pts-badge { background: var(--accent); color: white; padding: 4px 10px; border-radius: 12px; font-weight: bold; }
-        .trend { font-size: 0.85rem; margin-right: 5px; display: inline-block; width: 16px; text-align: center; }
+        .trend { font-size: 0.85rem; display: inline-block; width: 14px; text-align: center; margin-left: 3px;}
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 200; align-items: center; justify-content: center; padding: 20px;}
         .modal.active { display: flex; animation: fadeIn 0.3s; }
@@ -346,7 +346,9 @@
                     let isLive = (colA.includes("VIVO") || colA.includes("JUEGO"));
 
                     let matchNumStr = cols[idxMatchNum] ? String(cols[idxMatchNum]).trim() : String(i);
-                    let fechaPartido = (idxFecha !== -1 && cols[idxFecha] && isNaN(parseInt(cols[idxFecha]))) ? String(cols[idxFecha]).trim().replace(/ 00:00:00/g, '') : "";
+                    
+                    // LECTURA DE FECHA CORREGIDA (Ya no borra textos que empiezan por número)
+                    let fechaPartido = (idxFecha !== -1 && cols[idxFecha]) ? String(cols[idxFecha]).trim().replace(/ 00:00:00/g, '') : "";
                     let horaPartido = (idxHora !== -1 && cols[idxHora] && String(cols[idxHora]).includes(":")) ? String(cols[idxHora]).trim() : "";
                     
                     let teamL = (idxTeamL !== -1 && cols[idxTeamL]) ? String(cols[idxTeamL]).trim() : "";
@@ -386,7 +388,6 @@
                             let pV = match.cols[p.idxV] !== undefined ? String(match.cols[p.idxV]).trim() : "";
                             let score = "-";
                             
-                            // Versión de conteo segura
                             if(pL !== "" && pV !== "") {
                                 score = String(`${pL} - ${pV}`).replace(/\.0/g, '').replace(/o/gi, '0');
                                 let numL = parseInt(String(pL).replace(/o/gi, '0')); 
@@ -399,7 +400,6 @@
                             predsHtml += `<li class="pred-row"><span class="player-name">${p.name}</span> <span class="pred-score">${score}</span></li>`;
                         });
 
-                        // Variables estadísticas (corregidas sin conflicto de nombres)
                         let pctL = totalBets ? Math.round((localBets/totalBets)*100) : 0;
                         let pctE = totalBets ? Math.round((tieBets/totalBets)*100) : 0;
                         let pctV = totalBets ? Math.round((visitBets/totalBets)*100) : 0;
@@ -507,12 +507,14 @@
                     </div>
                 `;
 
-                // ---- CARGAR TABLA DE POSICIONES ----
+                // ---- CARGAR TABLA DE POSICIONES CON LÓGICA DE TENDENCIA ----
                 const resBoard = await fetch(urlTabla);
                 const csvBoard = await resBoard.text();
                 const rowsB = parseCSV(csvBoard);
                 
                 const hB = rowsB[0].map(h => String(h || "").trim().toUpperCase());
+                
+                let idxPosPrev = hB.indexOf("POSICIÓN"); if(idxPosPrev === -1) idxPosPrev = 0;
                 let idxName = hB.indexOf("JUGADOR"); if(idxName === -1) idxName = 1;
                 let idxPts = hB.indexOf("PUNTOS TOTALES"); if(idxPts === -1) idxPts = 2;
                 let idxMU = hB.indexOf("MU"); let idxAT = hB.indexOf("AT"); let idxAG = hB.indexOf("AG");
@@ -525,6 +527,7 @@
                     globalPlayersList.push({
                         nombre: String(cols[idxName]), 
                         puntos: parseInt(cols[idxPts]) || 0,
+                        posPrev: parseInt(cols[idxPosPrev]) || 99, 
                         mu: idxMU !== -1 ? (parseInt(cols[idxMU])||0) : 0,
                         at: idxAT !== -1 ? (parseInt(cols[idxAT])||0) : 0,
                         ag: idxAG !== -1 ? (parseInt(cols[idxAG])||0) : 0
@@ -553,16 +556,23 @@
                     if(p.at > maxAT){ maxAT = p.at; nAT = String(p.nombre || "-").split(" ")[0]; }
                     if(p.ag > maxAG){ maxAG = p.ag; nAG = String(p.nombre || "-").split(" ")[0]; }
 
-                    let trendHtml = `<span class="trend" style="color:var(--text-muted)">●</span>`;
                     let podiumClass = "";
-                    if (currentRank === 1) { trendHtml = `<span class="trend">👑</span>`; podiumClass = "podium-1"; } 
-                    else if (currentRank === 2) { trendHtml = `<span class="trend">🥈</span>`; podiumClass = "podium-2"; } 
-                    else if (currentRank === 3) { trendHtml = `<span class="trend">🥉</span>`; podiumClass = "podium-3"; } 
-                    else if (currentRank > 3 && currentRank <= 5) { trendHtml = `<span class="trend" style="color:var(--accent)">▲</span>`; } 
-                    else if (currentRank >= 10) { trendHtml = `<span class="trend" style="color:#e53935">▼</span>`; }
+                    let medalHtml = "";
+                    if (currentRank === 1) { medalHtml = `👑`; podiumClass = "podium-1"; } 
+                    else if (currentRank === 2) { medalHtml = `🥈`; podiumClass = "podium-2"; } 
+                    else if (currentRank === 3) { medalHtml = `🥉`; podiumClass = "podium-3"; } 
+
+                    let trendHtml = `<span class="trend" style="color:var(--text-muted); font-size:0.75rem;">●</span>`;
+                    if (currentRank < p.posPrev) {
+                        trendHtml = `<span class="trend" style="color:var(--accent); font-size:0.85rem;">▲</span>`;
+                    } else if (currentRank > p.posPrev) {
+                        trendHtml = `<span class="trend" style="color:#e53935; font-size:0.85rem;">▼</span>`;
+                    }
 
                     boardHtml += `<tr class="strat-row ${podiumClass}" data-name="${p.nombre}" onclick="openModal('${p.nombre}', ${p.puntos}, ${p.mu}, ${p.at}, ${p.ag})">
-                                    <td>${currentRank}</td><td>${trendHtml} ${p.nombre}</td><td><span class="pts-badge">${p.puntos}</span></td>
+                                    <td>${currentRank} ${trendHtml}</td>
+                                    <td><span style="display:inline-block; width:18px;">${medalHtml}</span> ${p.nombre}</td>
+                                    <td><span class="pts-badge">${p.puntos}</span></td>
                                   </tr>`;
                 });
                 boardHtml += `</table></div>`;
