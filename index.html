@@ -192,20 +192,14 @@
         const urlTabla = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5-A3wQAPUD3raKLrhfkiKWU62m6V7xFLsXY-vO_UdxCSADMwQSmkEecyGTqfpCJr2yYL6IghQ_B3i/pub?gid=187955950&single=true&output=csv";
 
         const frasesGalpon = [
-            "El que no arriesga, no gana puntos.",
-            "Pónganse el casco, que empezaron a llover batacazos. 👷‍♂️",
-            "Ese pronóstico tiene menos cimientos que obra de practicante. 🧱",
-            "El VAR nos negó la licencia de construcción para ese gol. 🚫",
-            "Apostando como VIS, esperando resultados estrato 6. 🏠",
-            "La estrategia de varios se quedó en obra gris. 🏢",
-            "La precisión de Diana asusta... ¿Tiene los planos del Mundial? 🎯",
-            "Manuela demostrando que un buen chepazo salva cualquier proyecto. 🔥",
-            "Manuel sacando puntos de consolación de debajo de los escombros. 🩹",
-            "Dicen que Sergio hace sus pronósticos tirando línea en AutoCAD. 💻",
-            "Viviana y Paula van calladitas, pero facturando como en cierre de mes. 🤑",
-            "J.Pablo y J.Sebastián defienden sus puntos como residentes de obra. 🏗️",
-            "Mónica y Angélica le tienen más fe al 0-0 que al contratista. 😅",
-            "Valeria y Luisa ya están calculando el presupuesto del premio mayor. 💰"
+            "El que no arriesga, se queda en el fondo de la tabla mirando. 👀",
+            "Hay pronósticos que duelen más que un gol en contra al minuto 90. 💔",
+            "El VAR está revisando la fe ciega que le tenían a ese empate. 🖥️🔍",
+            "Mucho análisis táctico internacional para terminar ganando por un autogol. 🤦‍♂️",
+            "Manuela demostrando que un buen chepazo vale más que mil horas de análisis. 🍀",
+            "Manuel rascando puntos de consolación como si fueran el último tinto de la oficina. ☕",
+            "Dicen que Sergio usa algoritmos de la NASA solo para terminar poniendo un 1-0. 💻",
+            "Pidiendo la hora desde el primer tiempo para no perder esos punticos. ⏱️🥵"
         ];
 
         let globalPlayersList = []; 
@@ -281,7 +275,7 @@
 
         async function loadData() {
             try {
-                // ROMPE-CACHÉ: Obliga a Google y al navegador a traer el dato fresco (¡Adiós NaN!)
+                // ROMPE-CACHÉ: Trae el dato fresco
                 const resMatches = await fetch(urlPartidos + "&_t=" + new Date().getTime());
                 const csvMatches = await resMatches.text();
                 const rowsM = parseCSV(csvMatches);
@@ -346,8 +340,10 @@
                     let isLive = (colA.includes("VIVO") || colA.includes("JUEGO"));
 
                     let matchNumStr = cols[idxMatchNum] ? String(cols[idxMatchNum]).trim() : String(i);
-                    let fechaPartido = (idxFecha !== -1 && cols[idxFecha] && isNaN(parseInt(cols[idxFecha]))) ? String(cols[idxFecha]).trim().replace(/ 00:00:00/g, '') : "";
-                    let horaPartido = (idxHora !== -1 && cols[idxHora] && String(cols[idxHora]).includes(":")) ? String(cols[idxHora]).trim() : "";
+                    
+                    // LECTURA DE FECHA CORREGIDA: Totalmente liberada
+                    let fechaPartido = (idxFecha !== -1 && cols[idxFecha]) ? String(cols[idxFecha]).trim().replace(/ 00:00:00/g, '') : "";
+                    let horaPartido = (idxHora !== -1 && cols[idxHora]) ? String(cols[idxHora]).trim() : "";
                     
                     let teamL = (idxTeamL !== -1 && cols[idxTeamL]) ? String(cols[idxTeamL]).trim() : "";
                     let teamV = (idxTeamV !== -1 && cols[idxTeamV]) ? String(cols[idxTeamV]).trim() : "";
@@ -357,7 +353,7 @@
                     let glRaw = (idxRealL !== -1 && cols[idxRealL] !== undefined) ? String(cols[idxRealL]).trim() : "";
                     let gvRaw = (idxRealV !== -1 && cols[idxRealV] !== undefined) ? String(cols[idxRealV]).trim() : "";
                     
-                    // ESCUDO ANTI-FANTASMAS: Obligamos a que de verdad haya un número (Ej. "2") y no letras o guiones
+                    // ESCUDO ANTI-FANTASMAS
                     let hasScores = /\d/.test(glRaw) && /\d/.test(gvRaw);
                     
                     if(isLive) {
@@ -365,10 +361,8 @@
                         let gvLive = /\d/.test(gvRaw) ? parseInt(gvRaw) : 0;
                         upcomingMatches.push({teamL, teamV, cols, status: "LIVE", gl: glLive, gv: gvLive, matchNum: matchNumStr, fecha: fechaPartido, hora: horaPartido});
                     } else if(!hasScores) {
-                        // Si borraste el número en Excel, se viene para acá obligatoriamente
                         upcomingMatches.push({teamL, teamV, cols, status: "PRÓXIMO", gl: "", gv: "", matchNum: matchNumStr, fecha: fechaPartido, hora: horaPartido});
                     } else {
-                        // Ya no hay posibilidad de que arroje NaN en el historial
                         finishedMatches.push({teamL, teamV, cols, status: "FINALIZADO", gl: parseInt(glRaw), gv: parseInt(gvRaw), matchNum: matchNumStr, fecha: fechaPartido, hora: horaPartido});
                     }
                 }
@@ -507,7 +501,7 @@
                     </div>
                 `;
 
-                // ---- CARGAR TABLA DE POSICIONES CON LÓGICA DE TENDENCIA ----
+                // ---- CARGAR TABLA DE POSICIONES ----
                 const resBoard = await fetch(urlTabla + "&_t=" + new Date().getTime());
                 const csvBoard = await resBoard.text();
                 const rowsB = parseCSV(csvBoard);
