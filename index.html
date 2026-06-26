@@ -283,8 +283,8 @@
 
         async function loadData() {
             try {
-                // ROMPE-CACHÉ: Trae el dato fresco
-                const resMatches = await fetch(urlPartidos + "&_t=" + new Date().getTime());
+                // ROMPE-CACHÉ VÍA PARÁMETRO SEGURO Y FECHA:
+                const resMatches = await fetch(urlPartidos, { cache: "no-store" });
                 const csvMatches = await resMatches.text();
                 const rowsM = parseCSV(csvMatches);
                 
@@ -495,7 +495,7 @@
                     containerH.innerHTML = histHtml;
                 }
 
-                // ---- RENDERIZAR PESTAÑA DE LLAVES (NUEVO DISEÑO FASE FINAL) ----
+                // ---- RENDERIZAR PESTAÑA DE LLAVES (NUEVO DISEÑO FASE FINAL CON FECHAS Y ESTADIOS) ----
                 document.getElementById("bracket-container").innerHTML = `
                     <div style="text-align: center; margin-bottom: 20px;">
                         <h2 style="color: var(--primary); margin: 0 0 5px 0; font-weight: 900;">🏆 Dieciseisavos de Final</h2>
@@ -503,6 +503,10 @@
                     </div>
 
                     <div class="match-card" style="border-top: 4px solid #fbc02d;">
+                        <div style="text-align:center; padding: 10px; border-bottom: 1px solid var(--border-color); background-color: rgba(11, 83, 148, 0.05);">
+                            <span style="display:block; font-size: 0.8rem; font-weight: 800; color: var(--primary);">📅 Dom 28 de junio • 14:00 COT</span>
+                            <span style="display:block; font-size: 0.7rem; font-weight: 600; color: var(--text-muted); margin-top: 3px;">🏟️ Estadio Los Ángeles</span>
+                        </div>
                         <div class="match-info" style="padding: 15px;">
                             <div class="team"><span class="team-icon">🇿🇦</span><span class="team-name" style="font-size: 0.95rem;">Sudáfrica</span></div>
                             <div class="match-status">
@@ -514,6 +518,10 @@
                     </div>
 
                     <div class="match-card" style="border-top: 4px solid #fbc02d;">
+                        <div style="text-align:center; padding: 10px; border-bottom: 1px solid var(--border-color); background-color: rgba(11, 83, 148, 0.05);">
+                            <span style="display:block; font-size: 0.8rem; font-weight: 800; color: var(--primary);">📅 Lun 29 de junio • 12:00 COT</span>
+                            <span style="display:block; font-size: 0.7rem; font-weight: 600; color: var(--text-muted); margin-top: 3px;">🏟️ Estadio Houston</span>
+                        </div>
                         <div class="match-info" style="padding: 15px;">
                             <div class="team"><span class="team-icon">🇧🇷</span><span class="team-name" style="font-size: 0.95rem;">Brasil</span></div>
                             <div class="match-status">
@@ -525,6 +533,10 @@
                     </div>
 
                     <div class="match-card" style="border-top: 4px solid #fbc02d;">
+                        <div style="text-align:center; padding: 10px; border-bottom: 1px solid var(--border-color); background-color: rgba(11, 83, 148, 0.05);">
+                            <span style="display:block; font-size: 0.8rem; font-weight: 800; color: var(--primary);">📅 Lun 29 de junio • 20:00 COT</span>
+                            <span style="display:block; font-size: 0.7rem; font-weight: 600; color: var(--text-muted); margin-top: 3px;">🏟️ Estadio Monterrey</span>
+                        </div>
                         <div class="match-info" style="padding: 15px;">
                             <div class="team"><span class="team-icon">🇳🇱</span><span class="team-name" style="font-size: 0.95rem;">Países Bajos</span></div>
                             <div class="match-status">
@@ -548,7 +560,7 @@
                 `;
 
                 // ---- CARGAR TABLA DE POSICIONES CON LÓGICA DE TENDENCIA ----
-                const resBoard = await fetch(urlTabla + "&_t=" + new Date().getTime());
+                const resBoard = await fetch(urlTabla, { cache: "no-store" });
                 const csvBoard = await resBoard.text();
                 const rowsB = parseCSV(csvBoard);
                 
