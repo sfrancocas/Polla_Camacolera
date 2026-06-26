@@ -196,9 +196,17 @@
             "Hay pronósticos que duelen más que un gol en contra al minuto 90. 💔",
             "El VAR está revisando la fe ciega que le tenían a ese empate. 🖥️🔍",
             "Mucho análisis táctico internacional para terminar ganando por un autogol. 🤦‍♂️",
+            "Diana no es de este planeta... ¿Alguien le puede revisar la bola de cristal? 🔮",
             "Manuela demostrando que un buen chepazo vale más que mil horas de análisis. 🍀",
             "Manuel rascando puntos de consolación como si fueran el último tinto de la oficina. ☕",
             "Dicen que Sergio usa algoritmos de la NASA solo para terminar poniendo un 1-0. 💻",
+            "Viviana y Paula van calladitas, facturando puntos mientras los demás sufren. 🤫",
+            "J.Pablo y J.Sebastián defendiendo su posición colgados del travesaño. 🥅",
+            "Mónica y Angélica le tienen más fe al 0-0 que a que llegue rápido el viernes. 😅",
+            "Valeria y Luisa ya están buscando tiquetes de vacaciones con el premio mayor. ✈️💰",
+            "Ese pronóstico tiene menos futuro que promesa de político en campaña. 🤥",
+            "Apostando con mentalidad de campeones, pero sufriendo los partidos como novatos. 🏆",
+            "Algunos le rezan a todos los santos, otros simplemente esperan un milagro matemático. 🧮",
             "Pidiendo la hora desde el primer tiempo para no perder esos punticos. ⏱️🥵"
         ];
 
@@ -340,8 +348,6 @@
                     let isLive = (colA.includes("VIVO") || colA.includes("JUEGO"));
 
                     let matchNumStr = cols[idxMatchNum] ? String(cols[idxMatchNum]).trim() : String(i);
-                    
-                    // LECTURA DE FECHA CORREGIDA: Totalmente liberada
                     let fechaPartido = (idxFecha !== -1 && cols[idxFecha]) ? String(cols[idxFecha]).trim().replace(/ 00:00:00/g, '') : "";
                     let horaPartido = (idxHora !== -1 && cols[idxHora]) ? String(cols[idxHora]).trim() : "";
                     
@@ -353,7 +359,6 @@
                     let glRaw = (idxRealL !== -1 && cols[idxRealL] !== undefined) ? String(cols[idxRealL]).trim() : "";
                     let gvRaw = (idxRealV !== -1 && cols[idxRealV] !== undefined) ? String(cols[idxRealV]).trim() : "";
                     
-                    // ESCUDO ANTI-FANTASMAS
                     let hasScores = /\d/.test(glRaw) && /\d/.test(gvRaw);
                     
                     if(isLive) {
@@ -490,18 +495,59 @@
                     containerH.innerHTML = histHtml;
                 }
 
-                // ---- RENDERIZAR PESTAÑA DE LLAVES ----
+                // ---- RENDERIZAR PESTAÑA DE LLAVES (NUEVO DISEÑO FASE FINAL) ----
                 document.getElementById("bracket-container").innerHTML = `
-                    <div class="loader" style="padding: 60px 20px; text-align: center;">
-                        <div style="font-size: 4rem; margin-bottom: 15px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));">🏆</div>
-                        <h2 style="color: var(--primary); margin: 0 0 10px 0; font-weight: 900;">Fase Final</h2>
-                        <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin: 0; padding: 0 10px;">
-                            El cuadro oficial de <strong>Dieciseisavos</strong> y las rondas de eliminación directa aparecerán aquí de forma automática una vez se definan los clasificados.
-                        </p>
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <h2 style="color: var(--primary); margin: 0 0 5px 0; font-weight: 900;">🏆 Dieciseisavos de Final</h2>
+                        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">Cruces confirmados hasta el momento</p>
+                    </div>
+
+                    <div class="match-card" style="border-top: 4px solid #fbc02d;">
+                        <div class="match-info" style="padding: 15px;">
+                            <div class="team"><span class="team-icon">🇿🇦</span><span class="team-name" style="font-size: 0.95rem;">Sudáfrica</span></div>
+                            <div class="match-status">
+                                <span class="vs" style="font-size: 0.75rem; background: #fffde7; padding: 3px 8px; border-radius: 10px; color: #f57f17; font-weight:800; letter-spacing:0.5px">CONFIRMADO</span>
+                                <span style="font-size:1.2rem; font-weight:900; color:var(--text-muted); margin-top:5px;">VS</span>
+                            </div>
+                            <div class="team"><span class="team-icon">🇨🇦</span><span class="team-name" style="font-size: 0.95rem;">Canadá</span></div>
+                        </div>
+                    </div>
+
+                    <div class="match-card" style="border-top: 4px solid #fbc02d;">
+                        <div class="match-info" style="padding: 15px;">
+                            <div class="team"><span class="team-icon">🇧🇷</span><span class="team-name" style="font-size: 0.95rem;">Brasil</span></div>
+                            <div class="match-status">
+                                <span class="vs" style="font-size: 0.75rem; background: #fffde7; padding: 3px 8px; border-radius: 10px; color: #f57f17; font-weight:800; letter-spacing:0.5px">CONFIRMADO</span>
+                                <span style="font-size:1.2rem; font-weight:900; color:var(--text-muted); margin-top:5px;">VS</span>
+                            </div>
+                            <div class="team"><span class="team-icon">🇯🇵</span><span class="team-name" style="font-size: 0.95rem;">Japón</span></div>
+                        </div>
+                    </div>
+
+                    <div class="match-card" style="border-top: 4px solid #fbc02d;">
+                        <div class="match-info" style="padding: 15px;">
+                            <div class="team"><span class="team-icon">🇳🇱</span><span class="team-name" style="font-size: 0.95rem;">Países Bajos</span></div>
+                            <div class="match-status">
+                                <span class="vs" style="font-size: 0.75rem; background: #fffde7; padding: 3px 8px; border-radius: 10px; color: #f57f17; font-weight:800; letter-spacing:0.5px">CONFIRMADO</span>
+                                <span style="font-size:1.2rem; font-weight:900; color:var(--text-muted); margin-top:5px;">VS</span>
+                            </div>
+                            <div class="team"><span class="team-icon">🇲🇦</span><span class="team-name" style="font-size: 0.95rem;">Marruecos</span></div>
+                        </div>
+                    </div>
+
+                    <div class="match-card history-card" style="opacity: 0.7; border-top: 4px solid #ccc; margin-top: 30px;">
+                        <div class="match-info" style="padding: 15px;">
+                            <div class="team"><span class="team-icon" style="filter:grayscale(1)">❓</span><span class="team-name" style="font-size: 0.9rem;">Por definir</span></div>
+                            <div class="match-status">
+                                <span class="vs" style="font-size: 0.7rem; background: #eee; padding: 3px 8px; border-radius: 10px;">13 LLAVES RESTANTES</span>
+                                <span style="font-size:1.2rem; font-weight:900; color:var(--text-muted); margin-top:5px;">VS</span>
+                            </div>
+                            <div class="team"><span class="team-icon" style="filter:grayscale(1)">❓</span><span class="team-name" style="font-size: 0.9rem;">Por definir</span></div>
+                        </div>
                     </div>
                 `;
 
-                // ---- CARGAR TABLA DE POSICIONES ----
+                // ---- CARGAR TABLA DE POSICIONES CON LÓGICA DE TENDENCIA ----
                 const resBoard = await fetch(urlTabla + "&_t=" + new Date().getTime());
                 const csvBoard = await resBoard.text();
                 const rowsB = parseCSV(csvBoard);
