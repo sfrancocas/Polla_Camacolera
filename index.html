@@ -495,7 +495,7 @@
                     containerH.innerHTML = histHtml;
                 }
 
-                // ---- RENDERIZAR PESTAÑA DE LLAVES (NUEVO DISEÑO FASE FINAL CON FECHAS Y ESTADIOS) ----
+                // ---- RENDERIZAR PESTAÑA DE LLAVES (CON RECONOCIMIENTOS DE ACIERTOS) ----
                 document.getElementById("bracket-container").innerHTML = `
                     <div style="text-align: center; margin-bottom: 20px;">
                         <h2 style="color: var(--primary); margin: 0 0 5px 0; font-weight: 900;">🏆 Dieciseisavos de Final</h2>
@@ -515,6 +515,9 @@
                             </div>
                             <div class="team"><span class="team-icon">🇨🇦</span><span class="team-name" style="font-size: 0.95rem;">Canadá</span></div>
                         </div>
+                        <div style="background: #fff8e1; padding: 10px; border-top: 1px solid #ffecb3; font-size: 0.8rem; color: #f57f17; text-align: center;">
+                            <strong>💔 Ningún estratega acertó esta llave</strong>
+                        </div>
                     </div>
 
                     <div class="match-card" style="border-top: 4px solid #fbc02d;">
@@ -529,6 +532,9 @@
                                 <span style="font-size:1.2rem; font-weight:900; color:var(--text-muted); margin-top:5px;">VS</span>
                             </div>
                             <div class="team"><span class="team-icon">🇯🇵</span><span class="team-name" style="font-size: 0.95rem;">Japón</span></div>
+                        </div>
+                        <div style="background: #e8f5e9; padding: 10px; border-top: 1px solid #c8e6c9; font-size: 0.8rem; color: #2e7d32; text-align: center;">
+                            <strong>🎯 Acertaron:</strong> Paula, Viviana, Manuel, Luisa, Manuela
                         </div>
                     </div>
 
@@ -545,13 +551,34 @@
                             </div>
                             <div class="team"><span class="team-icon">🇲🇦</span><span class="team-name" style="font-size: 0.95rem;">Marruecos</span></div>
                         </div>
+                        <div style="background: #e8f5e9; padding: 10px; border-top: 1px solid #c8e6c9; font-size: 0.8rem; color: #2e7d32; text-align: center;">
+                            <strong>🎯 Acertaron:</strong> Paula, Viviana, JuanP, Mónica, Manuel, Diana, Luisa, Manuela
+                        </div>
+                    </div>
+
+                    <div class="match-card" style="border-top: 4px solid #fbc02d;">
+                        <div style="text-align:center; padding: 10px; border-bottom: 1px solid var(--border-color); background-color: rgba(11, 83, 148, 0.05);">
+                            <span style="display:block; font-size: 0.8rem; font-weight: 800; color: var(--primary);">📅 Mar 30 de junio • 12:00 COT</span>
+                            <span style="display:block; font-size: 0.7rem; font-weight: 600; color: var(--text-muted); margin-top: 3px;">🏟️ AT&T Stadium (Dallas)</span>
+                        </div>
+                        <div class="match-info" style="padding: 15px;">
+                            <div class="team"><span class="team-icon">🇨🇮</span><span class="team-name" style="font-size: 0.95rem;">C. de Marfil</span></div>
+                            <div class="match-status">
+                                <span class="vs" style="font-size: 0.75rem; background: #fffde7; padding: 3px 8px; border-radius: 10px; color: #f57f17; font-weight:800; letter-spacing:0.5px">CONFIRMADO</span>
+                                <span style="font-size:1.2rem; font-weight:900; color:var(--text-muted); margin-top:5px;">VS</span>
+                            </div>
+                            <div class="team"><span class="team-icon">🇳🇴</span><span class="team-name" style="font-size: 0.95rem;">Noruega</span></div>
+                        </div>
+                        <div style="background: #e8f5e9; padding: 10px; border-top: 1px solid #c8e6c9; font-size: 0.8rem; color: #2e7d32; text-align: center;">
+                            <strong>🎯 Acertaron:</strong> Paula, Sebastián, Mónica
+                        </div>
                     </div>
 
                     <div class="match-card history-card" style="opacity: 0.7; border-top: 4px solid #ccc; margin-top: 30px;">
                         <div class="match-info" style="padding: 15px;">
                             <div class="team"><span class="team-icon" style="filter:grayscale(1)">❓</span><span class="team-name" style="font-size: 0.9rem;">Por definir</span></div>
                             <div class="match-status">
-                                <span class="vs" style="font-size: 0.7rem; background: #eee; padding: 3px 8px; border-radius: 10px;">13 LLAVES RESTANTES</span>
+                                <span class="vs" style="font-size: 0.7rem; background: #eee; padding: 3px 8px; border-radius: 10px;">12 LLAVES RESTANTES</span>
                                 <span style="font-size:1.2rem; font-weight:900; color:var(--text-muted); margin-top:5px;">VS</span>
                             </div>
                             <div class="team"><span class="team-icon" style="filter:grayscale(1)">❓</span><span class="team-name" style="font-size: 0.9rem;">Por definir</span></div>
