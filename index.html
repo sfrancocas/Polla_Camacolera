@@ -104,8 +104,9 @@
         .search-input:focus { border-color: var(--primary); box-shadow: 0 2px 8px rgba(11, 83, 148, 0.15); }
         .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 1.1rem; color: var(--text-muted); pointer-events: none; }
 
-        .wall-of-fame { display: flex; justify-content: space-between; margin-bottom: 20px; gap: 10px;}
-        .fame-item { flex: 1; background: var(--card-bg); padding: 10px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        /* Ajuste para 4 premios en cuadrícula 2x2 en celulares */
+        .wall-of-fame { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
+        .fame-item { background: var(--card-bg); padding: 10px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .fame-item span { font-weight: 800; font-size: 0.9rem; color: var(--primary); display: inline-block; margin-bottom: 2px;}
         .fame-item small { display: block; font-size: 0.65rem; color: var(--text-muted); margin-top: 4px; font-weight: bold; line-height: 1.2;}
 
@@ -133,19 +134,19 @@
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 200; align-items: center; justify-content: center; padding: 20px;}
         .modal.active { display: flex; animation: fadeIn 0.3s; }
         
-        .modal-content { background: var(--card-bg); padding: 25px; border-radius: 16px; width: 100%; max-width: 320px; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border-top: 6px solid var(--primary); text-align: center;}
+        .modal-content { background: var(--card-bg); padding: 25px; border-radius: 16px; width: 100%; max-width: 340px; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border-top: 6px solid var(--primary); text-align: center;}
         .close-btn { position: absolute; top: 10px; right: 15px; font-size: 1.8rem; font-weight: bold; cursor: pointer; color: var(--text-muted); transition: color 0.2s;}
         .close-btn:hover { color: #e53935; }
         
         .modal-name { font-size: 1.3rem; font-weight: 900; color: var(--primary); margin: 5px 0 20px 0;}
-        .modal-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: left;}
-        .stat-box { background: rgba(0,0,0,0.03); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); text-align: center;}
-        .stat-box span { display: block; font-size: 1.5rem; font-weight: 900; color: var(--text-main); margin-bottom: 4px;}
-        .stat-box small { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;}
+        .modal-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; text-align: left;}
+        .stat-box { background: rgba(0,0,0,0.03); padding: 10px; border-radius: 10px; border: 1px solid var(--border-color); text-align: center;}
+        .stat-box span { display: block; font-size: 1.4rem; font-weight: 900; color: var(--text-main); margin-bottom: 2px;}
+        .stat-box small { font-size: 0.65rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; line-height: 1.2; display: block;}
         
         .stat-total { grid-column: span 2; background: #e8f5e9; border-color: var(--accent); color: var(--accent); margin-top: 5px;}
         body.dark-mode .stat-total { background: #1b3a1b; }
-        .stat-total span { color: var(--accent); font-size: 2rem;}
+        .stat-total span { color: var(--accent); font-size: 1.8rem;}
 
         .loader { text-align: center; padding: 40px; color: var(--text-muted); font-weight: 600;}
     </style>
@@ -179,9 +180,10 @@
             <h2 class="modal-name" id="m-name">Nombre</h2>
             
             <div class="modal-stats-grid">
-                <div class="stat-box"><span id="m-at">0</span><small>Aciertos Exactos (AT)</small></div>
-                <div class="stat-box"><span id="m-mu">0</span><small>Marcador Único (MU)</small></div>
-                <div class="stat-box" style="grid-column: span 2;"><span id="m-ag">0</span><small>Consolación por Goles (AG)</small></div>
+                <div class="stat-box"><span id="m-at">0</span><small>Marcadores Exactos (AT)</small></div>
+                <div class="stat-box"><span id="m-mu">0</span><small>Marcadores Únicos (MU)</small></div>
+                <div class="stat-box"><span id="m-ag">0</span><small>Diferencia / Goles (AG)</small></div>
+                <div class="stat-box" style="background: #fff8e1; border-color: #ffe082;"><span id="m-llaves" style="color: #f57f17;">0</span><small style="color: #b78103;">Llaves Acertadas</small></div>
                 <div class="stat-box stat-total"><span id="m-pts">0</span><small>Puntos Totales</small></div>
             </div>
         </div>
@@ -201,7 +203,7 @@
             "Manuel rascando puntos de consolación como si fueran el último tinto de la oficina. ☕",
             "Dicen que Sergio usa algoritmos de la NASA solo para terminar poniendo un 1-0. 💻",
             "Viviana y Paula van calladitas, facturando puntos mientras los demás sufren. 🤫",
-            "J.Pablo y J.Sebastián defendiendo su posición colgados del travesaño. 🥅",
+            "J.Pablo y J.Sebastián defienden su posición colgados del travesaño. 🥅",
             "Mónica y Angélica le tienen más fe al 0-0 que a que llegue rápido el viernes. 😅",
             "Valeria y Luisa ya están buscando tiquetes de vacaciones con el premio mayor. ✈️💰",
             "Ese pronóstico tiene menos futuro que promesa de político en campaña. 🤥",
@@ -234,12 +236,14 @@
             document.getElementById(tab + '-container').classList.add('active');
         }
 
-        function openModal(name, pts, mu, at, ag) {
+        // Modal adaptado para recibir y pintar la cantidad de llaves
+        function openModal(name, pts, mu, at, ag, llaves) {
             document.getElementById('m-name').innerText = name;
             document.getElementById('m-pts').innerText = pts;
             document.getElementById('m-mu').innerText = mu;
             document.getElementById('m-at').innerText = at;
             document.getElementById('m-ag').innerText = ag;
+            document.getElementById('m-llaves').innerText = llaves;
             document.getElementById('player-modal').classList.add('active');
         }
 
@@ -283,7 +287,7 @@
 
         async function loadData() {
             try {
-                // ROMPE-CACHÉ VÍA PARÁMETRO SEGURO Y FECHA:
+                // Descarga de datos
                 const resMatches = await fetch(urlPartidos, { cache: "no-store" });
                 const csvMatches = await resMatches.text();
                 const rowsM = parseCSV(csvMatches);
@@ -305,22 +309,16 @@
                 
                 let idxMatchNum = hM_upper.findIndex(h => h.includes("PARTIDO"));
                 if(idxMatchNum === -1) idxMatchNum = 0;
-                
                 let idxFecha = hM_upper.findIndex(h => h.includes("FECHA"));
                 if(idxFecha === -1) idxFecha = 1;
-                
                 let idxHora = hM_upper.findIndex(h => h.includes("HORA"));
                 if(idxHora === -1) idxHora = 2;
-                
                 let idxTeamL = hM_upper.findIndex(h => h.includes("LOCAL") && !h.includes("REAL") && !h.includes("("));
                 if(idxTeamL === -1) idxTeamL = 3;
-                
                 let idxTeamV = hM_upper.findIndex(h => h.includes("VISITANTE") && !h.includes("REAL") && !h.includes("("));
                 if(idxTeamV === -1) idxTeamV = 4;
-                
                 let idxRealL = hM_upper.findIndex(h => h.includes("REAL") && h.includes("LOCAL"));
                 if(idxRealL === -1) idxRealL = 5;
-                
                 let idxRealV = hM_upper.findIndex(h => h.includes("REAL") && h.includes("VISITANTE"));
                 if(idxRealV === -1) idxRealV = 6;
 
@@ -495,7 +493,7 @@
                     containerH.innerHTML = histHtml;
                 }
 
-                // ---- RENDERIZAR PESTAÑA DE LLAVES (CON RECONOCIMIENTOS DE ACIERTOS) ----
+                // ---- RENDERIZAR PESTAÑA DE LLAVES (NUEVO DISEÑO FASE FINAL) ----
                 document.getElementById("bracket-container").innerHTML = `
                     <div style="text-align: center; margin-bottom: 20px;">
                         <h2 style="color: var(--primary); margin: 0 0 5px 0; font-weight: 900;">🏆 Dieciseisavos de Final</h2>
@@ -586,7 +584,7 @@
                     </div>
                 `;
 
-                // ---- CARGAR TABLA DE POSICIONES CON LÓGICA DE TENDENCIA ----
+                // ---- CARGAR TABLA DE POSICIONES Y CÁLCULO DE LÍDER DE CERRAJERÍA ----
                 const resBoard = await fetch(urlTabla, { cache: "no-store" });
                 const csvBoard = await resBoard.text();
                 const rowsB = parseCSV(csvBoard);
@@ -597,25 +595,35 @@
                 let idxName = hB.indexOf("JUGADOR"); if(idxName === -1) idxName = 1;
                 let idxPts = hB.indexOf("PUNTOS TOTALES"); if(idxPts === -1) idxPts = 2;
                 let idxMU = hB.indexOf("MU"); let idxAT = hB.indexOf("AT"); let idxAG = hB.indexOf("AG");
+                
+                // Mapear la columna de puntos de llaves de tu Excel
+                let idxPtosLlaves = hB.indexOf("PTOS LLAVES");
 
                 globalPlayersList = [];
                 for(let i=1; i<rowsB.length; i++) {
                     let cols = rowsB[i] || [];
                     if(cols.length <= idxName || !cols[idxName]) continue;
                     
+                    let ptosLlavesRaw = idxPtosLlaves !== -1 ? (parseInt(cols[idxPtosLlaves]) || 0) : 0;
+                    // Cada llave da 5 puntos, dividimos por 5 para saber la CANTIDAD de llaves acertadas
+                    let cantidadLlaves = Math.round(ptosLlavesRaw / 5);
+
                     globalPlayersList.push({
                         nombre: String(cols[idxName]), 
                         puntos: parseInt(cols[idxPts]) || 0,
                         posPrev: parseInt(cols[idxPosPrev]) || 99, 
                         mu: idxMU !== -1 ? (parseInt(cols[idxMU])||0) : 0,
                         at: idxAT !== -1 ? (parseInt(cols[idxAT])||0) : 0,
-                        ag: idxAG !== -1 ? (parseInt(cols[idxAG])||0) : 0
+                        ag: idxAG !== -1 ? (parseInt(cols[idxAG])||0) : 0,
+                        llaves: cantidadLlaves
                     });
                 }
 
                 globalPlayersList.sort((a, b) => b.puntos - a.puntos);
 
-                let maxMU = -1, maxAT = -1, maxAG = -1; let nMU = "-", nAT = "-", nAG = "-";
+                // Iniciar variables para el Muro de la Fama
+                let maxMU = -1, maxAT = -1, maxAG = -1, maxLlaves = -1; 
+                let nMU = "-", nAT = "-", nAG = "-", nLlaves = "-";
                 
                 let searchHtml = `
                     <div class="search-wrapper">
@@ -634,6 +642,7 @@
                     if(p.mu > maxMU){ maxMU = p.mu; nMU = String(p.nombre || "-").split(" ")[0]; }
                     if(p.at > maxAT){ maxAT = p.at; nAT = String(p.nombre || "-").split(" ")[0]; }
                     if(p.ag > maxAG){ maxAG = p.ag; nAG = String(p.nombre || "-").split(" ")[0]; }
+                    if(p.llaves > maxLlaves){ maxLlaves = p.llaves; nLlaves = String(p.nombre || "-").split(" ")[0]; }
 
                     let podiumClass = "";
                     let medalHtml = "";
@@ -648,7 +657,8 @@
                         trendHtml = `<span class="trend" style="color:#e53935; font-size:0.85rem;">▼</span>`;
                     }
 
-                    boardHtml += `<tr class="strat-row ${podiumClass}" data-name="${p.nombre}" onclick="openModal('${p.nombre}', ${p.puntos}, ${p.mu}, ${p.at}, ${p.ag})">
+                    // Se pasa el nuevo parámetro p.llaves a la función openModal al hacer clic
+                    boardHtml += `<tr class="strat-row ${podiumClass}" data-name="${p.nombre}" onclick="openModal('${p.nombre}', ${p.puntos}, ${p.mu}, ${p.at}, ${p.ag}, ${p.llaves})">
                                     <td>${currentRank} ${trendHtml}</td>
                                     <td><span style="display:inline-block; width:18px;">${medalHtml}</span> ${p.nombre}</td>
                                     <td><span class="pts-badge">${p.puntos}</span></td>
@@ -656,11 +666,13 @@
                 });
                 boardHtml += `</table></div>`;
                 
+                // Muro de la fama actualizado con Cuadrícula 2x2 para celulares
                 let fameHtml = `
                     <div class="wall-of-fame">
                         <div class="fame-item">🎯 <span>${nAT}</span><br><small>Líder de Precisión (AT)</small></div>
                         <div class="fame-item">🔥 <span>${nMU}</span><br><small>Líder de Chepazos (Mu)</small></div>
                         <div class="fame-item">🩹 <span>${nAG}</span><br><small>Líder de Consolación (AG)</small></div>
+                        <div class="fame-item">🗝️ <span>${nLlaves}</span><br><small>Líder de Cerrajería</small></div>
                     </div>`;
 
                 document.getElementById('leaderboard-container').innerHTML = searchHtml + fameHtml + boardHtml;
