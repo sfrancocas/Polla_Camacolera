@@ -61,7 +61,7 @@
         .match-card.history-card { border-top: 4px solid #777777; opacity: 0.95; }
         
         .match-info { display: flex; justify-content: space-between; align-items: center; padding: 20px 15px 10px 15px; }
-        .team { display: flex; flex-direction: column; align-items: center; width: 38%; }
+        .team { display: flex; flex-direction: column; align-items: center; width: 38%; text-align:center; }
         .team-icon { font-size: 1.8rem; margin-bottom: 8px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));}
         .team-name { font-weight: 700; font-size: 1.05rem; text-align: center; color: var(--primary);}
         .match-status { display: flex; flex-direction: column; align-items: center; width: 24%; }
@@ -104,7 +104,6 @@
         .search-input:focus { border-color: var(--primary); box-shadow: 0 2px 8px rgba(11, 83, 148, 0.15); }
         .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 1.1rem; color: var(--text-muted); pointer-events: none; }
 
-        /* Ajuste para 4 premios en cuadrícula 2x2 en celulares */
         .wall-of-fame { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
         .fame-item { background: var(--card-bg); padding: 10px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .fame-item span { font-weight: 800; font-size: 0.9rem; color: var(--primary); display: inline-block; margin-bottom: 2px;}
@@ -236,7 +235,6 @@
             document.getElementById(tab + '-container').classList.add('active');
         }
 
-        // Modal adaptado para recibir y pintar la cantidad de llaves
         function openModal(name, pts, mu, at, ag, llaves) {
             document.getElementById('m-name').innerText = name;
             document.getElementById('m-pts').innerText = pts;
@@ -287,12 +285,11 @@
 
         async function loadData() {
             try {
-                // Descarga de datos
+                // ROMPE-CACHÉ SEGURO
                 const resMatches = await fetch(urlPartidos, { cache: "no-store" });
                 const csvMatches = await resMatches.text();
                 const rowsM = parseCSV(csvMatches);
                 
-                // RADAR DE ENCABEZADOS
                 let headerM = [];
                 let headerRowIdx = 0;
                 for(let r=0; r<Math.min(10, rowsM.length); r++) {
@@ -322,7 +319,6 @@
                 let idxRealV = hM_upper.findIndex(h => h.includes("REAL") && h.includes("VISITANTE"));
                 if(idxRealV === -1) idxRealV = 6;
 
-                // DETECCIÓN DE PARTICIPANTES 
                 const players = [];
                 headerM.forEach((colName, idx) => {
                     if (colName && colName.includes("(L)")) {
@@ -356,7 +352,6 @@
                     
                     let glRaw = (idxRealL !== -1 && cols[idxRealL] !== undefined) ? String(cols[idxRealL]).trim() : "";
                     let gvRaw = (idxRealV !== -1 && cols[idxRealV] !== undefined) ? String(cols[idxRealV]).trim() : "";
-                    
                     let hasScores = /\d/.test(glRaw) && /\d/.test(gvRaw);
                     
                     if(isLive) {
@@ -493,98 +488,56 @@
                     containerH.innerHTML = histHtml;
                 }
 
-                // ---- RENDERIZAR PESTAÑA DE LLAVES (NUEVO DISEÑO FASE FINAL) ----
-                document.getElementById("bracket-container").innerHTML = `
+                // ---- RENDERIZAR PESTAÑA DE LLAVES CON ARREGLO DINÁMICO (32 EQUIPOS) ----
+                const bracketData = [
+                    { f: "Dom 28 de junio • 14:00 COT", e: "Estadio Los Ángeles", eL: "Sudáfrica", fL: "🇿🇦", eV: "Canadá", fV: "🇨🇦", a: "💔 <strong>Ningún estratega acertó esta llave</strong>", cb: "#fff8e1", ct: "#f57f17" },
+                    { f: "Lun 29 de junio • 12:00 COT", e: "Estadio Houston", eL: "Brasil", fL: "🇧🇷", eV: "Japón", fV: "🇯🇵", a: "🎯 <strong>Acertaron:</strong> Paula, Viviana, Manuel, Luisa, Manuela", cb: "#e8f5e9", ct: "#2e7d32" },
+                    { f: "Lun 29 de junio • 15:30 COT", e: "Por confirmar", eL: "Alemania", fL: "🇩🇪", eV: "Paraguay", fV: "🇵🇾", a: "⏳ Pendiente de verificación por el VAR", cb: "#f5f5f5", ct: "#555" },
+                    { f: "Lun 29 de junio • 20:00 COT", e: "Estadio Monterrey", eL: "Países Bajos", fL: "🇳🇱", eV: "Marruecos", fV: "🇲🇦", a: "🎯 <strong>Acertaron:</strong> Paula, Viviana, JuanP, Mónica, Manuel, Diana, Luisa, Manuela", cb: "#e8f5e9", ct: "#2e7d32" },
+                    { f: "Mar 30 de junio • 12:00 COT", e: "AT&T Stadium (Dallas)", eL: "C. de Marfil", fL: "🇨🇮", eV: "Noruega", fV: "🇳🇴", a: "🎯 <strong>Acertaron:</strong> Paula, Sebastián, Mónica", cb: "#e8f5e9", ct: "#2e7d32" },
+                    { f: "Mar 30 de junio • 16:00 COT", e: "Por confirmar", eL: "Francia", fL: "🇫🇷", eV: "Suecia", fV: "🇸🇪", a: "⏳ Pendiente de verificación por el VAR", cb: "#f5f5f5", ct: "#555" },
+                    { f: "Mar 30 de junio • 20:00 COT", e: "Por confirmar", eL: "México", fL: "🇲🇽", eV: "Ecuador", fV: "🇪🇨", a: "⏳ Pendiente de verificación por el VAR", cb: "#f5f5f5", ct: "#555" },
+                    { f: "Mié 1 de julio • 11:00 COT", e: "Por confirmar", eL: "Inglaterra", fL: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", eV: "RD Congo", fV: "🇨🇩", a: "⏳ Pendiente de verificación por el VAR", cb: "#f5f5f5", ct: "#555" },
+                    { f: "Mié 1 de julio • 15:00 COT", e: "Por confirmar", eL: "Bélgica", fL: "🇧🇪", eV: "Senegal", fV: "🇸🇳", a: "⏳ Pendiente de verificación por el VAR", cb: "#f5f5f5", ct: "#555" },
+                    { f: "Mié 1 de julio • 19:00 COT", e: "Por confirmar", eL: "Estados Unidos", fL: "🇺🇸", eV: "Bosnia y Her.", fV: "🇧🇦", a: "⏳ Pendiente de verificación por el VAR", cb: "#f5f5f5", ct: "#555" },
+                    { f: "Jue 2 de julio • 14:00 COT", e: "Por confirmar", eL: "España", fL: "🇪🇸", eV: "Austria", fV: "🇦🇹", a: "⏳ Pendiente de verificación por el VAR", cb: "#f5f5f5", ct: "#555" },
+                    { f: "Jue 2 de julio • 18:00 COT", e: "Por confirmar", eL: "Portugal", fL: "🇵🇹", eV: "Croacia", fV: "🇭🇷", a: "⏳ Pendiente de verificación por el VAR", cb: "#f5f5f5", ct: "#555" },
+                    { f: "Jue 2 de julio • 22:00 COT", e: "Por confirmar", eL: "Suiza", fL: "🇨🇭", eV: "Argelia", fV: "🇩🇿", a: "⏳ Pendiente de verificación por el VAR", cb: "#f5f5f5", ct: "#555" },
+                    { f: "Vie 3 de julio • 13:00 COT", e: "Por confirmar", eL: "Australia", fL: "🇦🇺", eV: "Egipto", fV: "🇪🇬", a: "⏳ Pendiente de verificación por el VAR", cb: "#f5f5f5", ct: "#555" },
+                    { f: "Vie 3 de julio • 17:00 COT", e: "Por confirmar", eL: "Argentina", fL: "🇦🇷", eV: "Cabo Verde", fV: "🇨🇻", a: "⏳ Pendiente de verificación por el VAR", cb: "#f5f5f5", ct: "#555" },
+                    { f: "Vie 3 de julio • 20:30 COT", e: "Por confirmar", eL: "Colombia", fL: "🇨🇴", eV: "Ghana", fV: "🇬🇭", a: "⏳ Pendiente de verificación por el VAR", cb: "#f5f5f5", ct: "#555" }
+                ];
+
+                let bracketHtml = `
                     <div style="text-align: center; margin-bottom: 20px;">
                         <h2 style="color: var(--primary); margin: 0 0 5px 0; font-weight: 900;">🏆 Dieciseisavos de Final</h2>
-                        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">Cruces confirmados hasta el momento</p>
-                    </div>
+                        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">Los 32 mejores clasificados del mundo</p>
+                    </div>`;
 
+                bracketData.forEach(llave => {
+                    bracketHtml += `
                     <div class="match-card" style="border-top: 4px solid #fbc02d;">
                         <div style="text-align:center; padding: 10px; border-bottom: 1px solid var(--border-color); background-color: rgba(11, 83, 148, 0.05);">
-                            <span style="display:block; font-size: 0.8rem; font-weight: 800; color: var(--primary);">📅 Dom 28 de junio • 14:00 COT</span>
-                            <span style="display:block; font-size: 0.7rem; font-weight: 600; color: var(--text-muted); margin-top: 3px;">🏟️ Estadio Los Ángeles</span>
+                            <span style="display:block; font-size: 0.8rem; font-weight: 800; color: var(--primary);">📅 ${llave.f}</span>
+                            <span style="display:block; font-size: 0.7rem; font-weight: 600; color: var(--text-muted); margin-top: 3px;">🏟️ ${llave.e}</span>
                         </div>
                         <div class="match-info" style="padding: 15px;">
-                            <div class="team"><span class="team-icon">🇿🇦</span><span class="team-name" style="font-size: 0.95rem;">Sudáfrica</span></div>
+                            <div class="team"><span class="team-icon">${llave.fL}</span><span class="team-name" style="font-size: 0.95rem;">${llave.eL}</span></div>
                             <div class="match-status">
                                 <span class="vs" style="font-size: 0.75rem; background: #fffde7; padding: 3px 8px; border-radius: 10px; color: #f57f17; font-weight:800; letter-spacing:0.5px">CONFIRMADO</span>
                                 <span style="font-size:1.2rem; font-weight:900; color:var(--text-muted); margin-top:5px;">VS</span>
                             </div>
-                            <div class="team"><span class="team-icon">🇨🇦</span><span class="team-name" style="font-size: 0.95rem;">Canadá</span></div>
+                            <div class="team"><span class="team-icon">${llave.fV}</span><span class="team-name" style="font-size: 0.95rem;">${llave.eV}</span></div>
                         </div>
-                        <div style="background: #fff8e1; padding: 10px; border-top: 1px solid #ffecb3; font-size: 0.8rem; color: #f57f17; text-align: center;">
-                            <strong>💔 Ningún estratega acertó esta llave</strong>
+                        <div style="background: ${llave.cb}; padding: 10px; border-top: 1px solid var(--border-color); font-size: 0.8rem; color: ${llave.ct}; text-align: center;">
+                            ${llave.a}
                         </div>
-                    </div>
+                    </div>`;
+                });
 
-                    <div class="match-card" style="border-top: 4px solid #fbc02d;">
-                        <div style="text-align:center; padding: 10px; border-bottom: 1px solid var(--border-color); background-color: rgba(11, 83, 148, 0.05);">
-                            <span style="display:block; font-size: 0.8rem; font-weight: 800; color: var(--primary);">📅 Lun 29 de junio • 12:00 COT</span>
-                            <span style="display:block; font-size: 0.7rem; font-weight: 600; color: var(--text-muted); margin-top: 3px;">🏟️ Estadio Houston</span>
-                        </div>
-                        <div class="match-info" style="padding: 15px;">
-                            <div class="team"><span class="team-icon">🇧🇷</span><span class="team-name" style="font-size: 0.95rem;">Brasil</span></div>
-                            <div class="match-status">
-                                <span class="vs" style="font-size: 0.75rem; background: #fffde7; padding: 3px 8px; border-radius: 10px; color: #f57f17; font-weight:800; letter-spacing:0.5px">CONFIRMADO</span>
-                                <span style="font-size:1.2rem; font-weight:900; color:var(--text-muted); margin-top:5px;">VS</span>
-                            </div>
-                            <div class="team"><span class="team-icon">🇯🇵</span><span class="team-name" style="font-size: 0.95rem;">Japón</span></div>
-                        </div>
-                        <div style="background: #e8f5e9; padding: 10px; border-top: 1px solid #c8e6c9; font-size: 0.8rem; color: #2e7d32; text-align: center;">
-                            <strong>🎯 Acertaron:</strong> Paula, Viviana, Manuel, Luisa, Manuela
-                        </div>
-                    </div>
+                document.getElementById("bracket-container").innerHTML = bracketHtml;
 
-                    <div class="match-card" style="border-top: 4px solid #fbc02d;">
-                        <div style="text-align:center; padding: 10px; border-bottom: 1px solid var(--border-color); background-color: rgba(11, 83, 148, 0.05);">
-                            <span style="display:block; font-size: 0.8rem; font-weight: 800; color: var(--primary);">📅 Lun 29 de junio • 20:00 COT</span>
-                            <span style="display:block; font-size: 0.7rem; font-weight: 600; color: var(--text-muted); margin-top: 3px;">🏟️ Estadio Monterrey</span>
-                        </div>
-                        <div class="match-info" style="padding: 15px;">
-                            <div class="team"><span class="team-icon">🇳🇱</span><span class="team-name" style="font-size: 0.95rem;">Países Bajos</span></div>
-                            <div class="match-status">
-                                <span class="vs" style="font-size: 0.75rem; background: #fffde7; padding: 3px 8px; border-radius: 10px; color: #f57f17; font-weight:800; letter-spacing:0.5px">CONFIRMADO</span>
-                                <span style="font-size:1.2rem; font-weight:900; color:var(--text-muted); margin-top:5px;">VS</span>
-                            </div>
-                            <div class="team"><span class="team-icon">🇲🇦</span><span class="team-name" style="font-size: 0.95rem;">Marruecos</span></div>
-                        </div>
-                        <div style="background: #e8f5e9; padding: 10px; border-top: 1px solid #c8e6c9; font-size: 0.8rem; color: #2e7d32; text-align: center;">
-                            <strong>🎯 Acertaron:</strong> Paula, Viviana, JuanP, Mónica, Manuel, Diana, Luisa, Manuela
-                        </div>
-                    </div>
-
-                    <div class="match-card" style="border-top: 4px solid #fbc02d;">
-                        <div style="text-align:center; padding: 10px; border-bottom: 1px solid var(--border-color); background-color: rgba(11, 83, 148, 0.05);">
-                            <span style="display:block; font-size: 0.8rem; font-weight: 800; color: var(--primary);">📅 Mar 30 de junio • 12:00 COT</span>
-                            <span style="display:block; font-size: 0.7rem; font-weight: 600; color: var(--text-muted); margin-top: 3px;">🏟️ AT&T Stadium (Dallas)</span>
-                        </div>
-                        <div class="match-info" style="padding: 15px;">
-                            <div class="team"><span class="team-icon">🇨🇮</span><span class="team-name" style="font-size: 0.95rem;">C. de Marfil</span></div>
-                            <div class="match-status">
-                                <span class="vs" style="font-size: 0.75rem; background: #fffde7; padding: 3px 8px; border-radius: 10px; color: #f57f17; font-weight:800; letter-spacing:0.5px">CONFIRMADO</span>
-                                <span style="font-size:1.2rem; font-weight:900; color:var(--text-muted); margin-top:5px;">VS</span>
-                            </div>
-                            <div class="team"><span class="team-icon">🇳🇴</span><span class="team-name" style="font-size: 0.95rem;">Noruega</span></div>
-                        </div>
-                        <div style="background: #e8f5e9; padding: 10px; border-top: 1px solid #c8e6c9; font-size: 0.8rem; color: #2e7d32; text-align: center;">
-                            <strong>🎯 Acertaron:</strong> Paula, Sebastián, Mónica
-                        </div>
-                    </div>
-
-                    <div class="match-card history-card" style="opacity: 0.7; border-top: 4px solid #ccc; margin-top: 30px;">
-                        <div class="match-info" style="padding: 15px;">
-                            <div class="team"><span class="team-icon" style="filter:grayscale(1)">❓</span><span class="team-name" style="font-size: 0.9rem;">Por definir</span></div>
-                            <div class="match-status">
-                                <span class="vs" style="font-size: 0.7rem; background: #eee; padding: 3px 8px; border-radius: 10px;">12 LLAVES RESTANTES</span>
-                                <span style="font-size:1.2rem; font-weight:900; color:var(--text-muted); margin-top:5px;">VS</span>
-                            </div>
-                            <div class="team"><span class="team-icon" style="filter:grayscale(1)">❓</span><span class="team-name" style="font-size: 0.9rem;">Por definir</span></div>
-                        </div>
-                    </div>
-                `;
-
-                // ---- CARGAR TABLA DE POSICIONES Y CÁLCULO DE LÍDER DE CERRAJERÍA ----
+                // ---- CARGAR TABLA DE POSICIONES CON LÓGICA DE TENDENCIA Y LLAVES ----
                 const resBoard = await fetch(urlTabla, { cache: "no-store" });
                 const csvBoard = await resBoard.text();
                 const rowsB = parseCSV(csvBoard);
@@ -595,8 +548,6 @@
                 let idxName = hB.indexOf("JUGADOR"); if(idxName === -1) idxName = 1;
                 let idxPts = hB.indexOf("PUNTOS TOTALES"); if(idxPts === -1) idxPts = 2;
                 let idxMU = hB.indexOf("MU"); let idxAT = hB.indexOf("AT"); let idxAG = hB.indexOf("AG");
-                
-                // Mapear la columna de puntos de llaves de tu Excel
                 let idxPtosLlaves = hB.indexOf("PTOS LLAVES");
 
                 globalPlayersList = [];
@@ -605,7 +556,6 @@
                     if(cols.length <= idxName || !cols[idxName]) continue;
                     
                     let ptosLlavesRaw = idxPtosLlaves !== -1 ? (parseInt(cols[idxPtosLlaves]) || 0) : 0;
-                    // Cada llave da 5 puntos, dividimos por 5 para saber la CANTIDAD de llaves acertadas
                     let cantidadLlaves = Math.round(ptosLlavesRaw / 5);
 
                     globalPlayersList.push({
@@ -621,7 +571,6 @@
 
                 globalPlayersList.sort((a, b) => b.puntos - a.puntos);
 
-                // Iniciar variables para el Muro de la Fama
                 let maxMU = -1, maxAT = -1, maxAG = -1, maxLlaves = -1; 
                 let nMU = "-", nAT = "-", nAG = "-", nLlaves = "-";
                 
@@ -657,7 +606,6 @@
                         trendHtml = `<span class="trend" style="color:#e53935; font-size:0.85rem;">▼</span>`;
                     }
 
-                    // Se pasa el nuevo parámetro p.llaves a la función openModal al hacer clic
                     boardHtml += `<tr class="strat-row ${podiumClass}" data-name="${p.nombre}" onclick="openModal('${p.nombre}', ${p.puntos}, ${p.mu}, ${p.at}, ${p.ag}, ${p.llaves})">
                                     <td>${currentRank} ${trendHtml}</td>
                                     <td><span style="display:inline-block; width:18px;">${medalHtml}</span> ${p.nombre}</td>
@@ -666,7 +614,6 @@
                 });
                 boardHtml += `</table></div>`;
                 
-                // Muro de la fama actualizado con Cuadrícula 2x2 para celulares
                 let fameHtml = `
                     <div class="wall-of-fame">
                         <div class="fame-item">🎯 <span>${nAT}</span><br><small>Líder de Precisión (AT)</small></div>
