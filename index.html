@@ -318,12 +318,33 @@
                 let idxRealV = hM_upper.findIndex(h => h.includes("REAL") && h.includes("VISITANTE"));
                 if(idxRealV === -1) idxRealV = 6;
 
+                // DETECCIÓN DE PARTICIPANTES (FILTRO RESILIENTE RESTAURADO)
                 const players = [];
                 headerM.forEach((colName, idx) => {
-                    if (colName && colName.includes("(L)")) {
-                        let cleanName = colName.replace("(L)", "").trim();
-                        let vName = cleanName + " (V)";
-                        let idxV = headerM.findIndex(h => h && (h.trim() === vName || h.trim() === cleanName + "(V)"));
+                    let original = String(colName || "").trim();
+                    let upper = original.toUpperCase();
+                    
+                    if (upper.includes("(L)")) {
+                        let cleanName = original.replace(/\(\s*[Ll]\s*\)/i, "").trim();
+                        let safeNameL = cleanName.toUpperCase().replace(/[^A-Z0-9]/g, "");
+                        
+                        let idxV = headerM.findIndex((h, i) => {
+                            if (i <= idx) return false; 
+                            let vUpper = String(h || "").toUpperCase();
+                            if (vUpper.includes("(V)")) {
+                                let safeNameV = vUpper.replace(/\(\s*[Vv]\s*\)/i, "").replace(/[^A-Z0-9]/g, "");
+                                return safeNameL === safeNameV;
+                            }
+                            return false;
+                        });
+                        
+                        if (idxV === -1 && idx + 1 < headerM.length) {
+                            let nextCol = String(headerM[idx+1] || "").toUpperCase();
+                            if (!nextCol.includes("(L)") && !nextCol.includes("REAL")) {
+                                idxV = idx + 1;
+                            }
+                        }
+
                         if (idxV !== -1) {
                             players.push({ name: cleanName, idxL: idx, idxV: idxV });
                         }
@@ -487,56 +508,18 @@
                     containerH.innerHTML = histHtml;
                 }
 
-                // ---- RENDERIZAR PESTAÑA DE LLAVES CON ARREGLO DINÁMICO (32 EQUIPOS) ----
-                const bracketData = [
-                    { f: "Dom 28 de junio • 14:00 COT", e: "Estadio Los Ángeles", eL: "Sudáfrica", fL: "🇿🇦", eV: "Canadá", fV: "🇨🇦", a: "💔 <strong>Ningún estratega acertó esta llave</strong>", cb: "#fff8e1", ct: "#f57f17" },
-                    { f: "Lun 29 de junio • 12:00 COT", e: "Estadio Houston", eL: "Brasil", fL: "🇧🇷", eV: "Japón", fV: "🇯🇵", a: "🎯 <strong>Acertaron:</strong> Paula, Viviana, Manuel, Luisa, Manuela", cb: "#e8f5e9", ct: "#2e7d32" },
-                    { f: "Lun 29 de junio • 15:30 COT", e: "Por confirmar", eL: "Alemania", fL: "🇩🇪", eV: "Paraguay", fV: "🇵🇾", a: "🎯 <strong>Acertaron:</strong> Paula, Angélica, Diana", cb: "#e8f5e9", ct: "#2e7d32" },
-                    { f: "Lun 29 de junio • 20:00 COT", e: "Estadio Monterrey", eL: "Países Bajos", fL: "🇳🇱", eV: "Marruecos", fV: "🇲🇦", a: "🎯 <strong>Acertaron:</strong> Paula, Viviana, JuanP, Mónica, Manuel, Diana, Luisa, Manuela", cb: "#e8f5e9", ct: "#2e7d32" },
-                    { f: "Mar 30 de junio • 12:00 COT", e: "AT&T Stadium (Dallas)", eL: "C. de Marfil", fL: "🇨🇮", eV: "Noruega", fV: "🇳🇴", a: "🎯 <strong>Acertaron:</strong> Paula, Sebastián, Mónica", cb: "#e8f5e9", ct: "#2e7d32" },
-                    { f: "Mar 30 de junio • 16:00 COT", e: "Por confirmar", eL: "Francia", fL: "🇫🇷", eV: "Suecia", fV: "🇸🇪", a: "💔 <strong>Ningún estratega acertó esta llave</strong>", cb: "#fff8e1", ct: "#f57f17" },
-                    { f: "Mar 30 de junio • 20:00 COT", e: "Por confirmar", eL: "México", fL: "🇲🇽", eV: "Ecuador", fV: "🇪🇨", a: "🎯 <strong>Acertaron:</strong> Viviana, Mónica", cb: "#e8f5e9", ct: "#2e7d32" },
-                    { f: "Mié 1 de julio • 11:00 COT", e: "Por confirmar", eL: "Inglaterra", fL: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", eV: "RD Congo", fV: "🇨🇩", a: "💔 <strong>Ningún estratega acertó esta llave</strong>", cb: "#fff8e1", ct: "#f57f17" },
-                    { f: "Mié 1 de julio • 15:00 COT", e: "Por confirmar", eL: "Bélgica", fL: "🇧🇪", eV: "Senegal", fV: "🇸🇳", a: "💔 <strong>Ningún estratega acertó esta llave</strong>", cb: "#fff8e1", ct: "#f57f17" },
-                    { f: "Mié 1 de julio • 19:00 COT", e: "Por confirmar", eL: "Estados Unidos", fL: "🇺🇸", eV: "Bosnia y Her.", fV: "🇧🇦", a: "🎯 <strong>Acertaron:</strong> Paula, Mónica, Luisa", cb: "#e8f5e9", ct: "#2e7d32" },
-                    { f: "Jue 2 de julio • 14:00 COT", e: "Por confirmar", eL: "España", fL: "🇪🇸", eV: "Austria", fV: "🇦🇹", a: "🎯 <strong>Acertaron:</strong> Paula, Sebastián, Viviana, JuanP, Angélica, Diana, Luisa", cb: "#e8f5e9", ct: "#2e7d32" },
-                    { f: "Jue 2 de julio • 18:00 COT", e: "Por confirmar", eL: "Portugal", fL: "🇵🇹", eV: "Croacia", fV: "🇭🇷", a: "🎯 <strong>Acertaron:</strong> Valeria, Luisa", cb: "#e8f5e9", ct: "#2e7d32" },
-                    { f: "Jue 2 de julio • 22:00 COT", e: "Por confirmar", eL: "Suiza", fL: "🇨🇭", eV: "Argelia", fV: "🇩🇿", a: "🎯 <strong>Acertaron:</strong> Diana", cb: "#e8f5e9", ct: "#2e7d32" },
-                    { f: "Vie 3 de julio • 13:00 COT", e: "Por confirmar", eL: "Australia", fL: "🇦🇺", eV: "Egipto", fV: "🇪🇬", a: "🎯 <strong>Acertaron:</strong> JuanP", cb: "#e8f5e9", ct: "#2e7d32" },
-                    { f: "Vie 3 de julio • 17:00 COT", e: "Por confirmar", eL: "Argentina", fL: "🇦🇷", eV: "Cabo Verde", fV: "🇨🇻", a: "💔 <strong>Ningún estratega acertó esta llave</strong>", cb: "#fff8e1", ct: "#f57f17" },
-                    { f: "Vie 3 de julio • 20:30 COT", e: "Por confirmar", eL: "Colombia", fL: "🇨🇴", eV: "Ghana", fV: "🇬🇭", a: "🎯 <strong>Acertaron:</strong> Valeria, Luisa", cb: "#e8f5e9", ct: "#2e7d32" }
-                ];
+                // ---- RENDERIZAR PESTAÑA DE LLAVES (MODO BLANCO/ESPERA DE OCTAVOS) ----
+                document.getElementById("bracket-container").innerHTML = `
+                    <div style="text-align: center; padding: 60px 20px;">
+                        <div style="font-size: 4rem; margin-bottom: 15px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));">🏆</div>
+                        <h2 style="color: var(--primary); margin: 0 0 10px 0; font-weight: 900;">Octavos de Final</h2>
+                        <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin: 0; padding: 0 10px;">
+                            La fase de Dieciseisavos ha terminado. La pestaña se actualizará automáticamente con los nuevos cruces oficiales de <strong>Octavos de Final</strong> tan pronto se confirmen los partidos.
+                        </p>
+                    </div>
+                `;
 
-                let bracketHtml = `
-                    <div style="text-align: center; margin-bottom: 20px;">
-                        <h2 style="color: var(--primary); margin: 0 0 5px 0; font-weight: 900;">🏆 Dieciseisavos de Final</h2>
-                        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">Los 32 mejores clasificados del mundo</p>
-                    </div>`;
-
-                bracketData.forEach(llave => {
-                    bracketHtml += `
-                    <div class="match-card" style="border-top: 4px solid #fbc02d;">
-                        <div style="text-align:center; padding: 10px; border-bottom: 1px solid var(--border-color); background-color: rgba(11, 83, 148, 0.05);">
-                            <span style="display:block; font-size: 0.8rem; font-weight: 800; color: var(--primary);">📅 ${llave.f}</span>
-                            <span style="display:block; font-size: 0.7rem; font-weight: 600; color: var(--text-muted); margin-top: 3px;">🏟️ ${llave.e}</span>
-                        </div>
-                        <div class="match-info" style="padding: 15px;">
-                            <div class="team"><span class="team-icon">${llave.fL}</span><span class="team-name" style="font-size: 0.95rem;">${llave.eL}</span></div>
-                            <div class="match-status">
-                                <span class="vs" style="font-size: 0.75rem; background: #fffde7; padding: 3px 8px; border-radius: 10px; color: #f57f17; font-weight:800; letter-spacing:0.5px">CONFIRMADO</span>
-                                <span style="font-size:1.2rem; font-weight:900; color:var(--text-muted); margin-top:5px;">VS</span>
-                            </div>
-                            <div class="team"><span class="team-icon">${llave.fV}</span><span class="team-name" style="font-size: 0.95rem;">${llave.eV}</span></div>
-                        </div>
-                        <div style="background: ${llave.cb}; padding: 10px; border-top: 1px solid var(--border-color); font-size: 0.8rem; color: ${llave.ct}; text-align: center;">
-                            ${llave.a}
-                        </div>
-                    </div>`;
-                });
-
-                document.getElementById("bracket-container").innerHTML = bracketHtml;
-
-                // ---- CARGAR TABLA DE POSICIONES ----
+                // ---- CARGAR TABLA DE POSICIONES CON LÓGICA DE TENDENCIA Y LLAVES ----
                 const resBoard = await fetch(urlTabla, { cache: "no-store" });
                 const csvBoard = await resBoard.text();
                 const rowsB = parseCSV(csvBoard);
@@ -555,7 +538,6 @@
                     if(cols.length <= idxName || !cols[idxName]) continue;
                     
                     let ptosLlavesRaw = idxPtosLlaves !== -1 ? (parseInt(cols[idxPtosLlaves]) || 0) : 0;
-                    // El cálculo sigue leyendo dinámicamente lo que inyecte tu Excel
                     let cantidadLlaves = Math.round(ptosLlavesRaw / 5);
 
                     globalPlayersList.push({
@@ -627,6 +609,16 @@
             } catch (error) {
                 document.getElementById("status").innerText = "Sin conexión al VAR 🔴";
                 console.error(error);
+            }
+        }
+
+        function togglePred(listId, btnId) {
+            let list = document.getElementById(listId);
+            if(list) list.classList.toggle('active');
+            let btn = document.getElementById(btnId);
+            if(btn) {
+                btn.classList.toggle('active');
+                btn.innerText = btn.classList.contains('active') ? "OCULTAR PRONÓSTICOS ▲" : "VER PRONÓSTICOS ▼";
             }
         }
 
