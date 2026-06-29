@@ -133,7 +133,7 @@
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 200; align-items: center; justify-content: center; padding: 20px;}
         .modal.active { display: flex; animation: fadeIn 0.3s; }
         
-        .modal-content { background: var(--card-bg); padding: 25px; border-radius: 16px; width: 100%; max-width: 340px; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border-top: 6px solid var(--primary); text-align: center;}
+        .modal-content { background: var(--card-bg); padding: 25px; border-radius: 16px; width: 100%; max-width: 320px; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border-top: 6px solid var(--primary); text-align: center;}
         .close-btn { position: absolute; top: 10px; right: 15px; font-size: 1.8rem; font-weight: bold; cursor: pointer; color: var(--text-muted); transition: color 0.2s;}
         .close-btn:hover { color: #e53935; }
         
@@ -183,7 +183,7 @@
                 <div class="stat-box"><span id="m-mu">0</span><small>Marcadores Únicos (MU)</small></div>
                 <div class="stat-box"><span id="m-ag">0</span><small>Diferencia / Goles (AG)</small></div>
                 <div class="stat-box" style="background: #fff8e1; border-color: #ffe082;"><span id="m-llaves" style="color: #f57f17;">0</span><small style="color: #b78103;">Llaves Acertadas</small></div>
-                <div class="stat-box stat-total"><span id="m-pts">0</span><small>Puntos Totales</small></div>
+                <div class="stat-box stat-total"><span id="m-pts">0</span><small>Puntos Totales (Fase Regular + Final)</small></div>
             </div>
         </div>
     </div>
@@ -285,7 +285,6 @@
 
         async function loadData() {
             try {
-                // ROMPE-CACHÉ SEGURO
                 const resMatches = await fetch(urlPartidos, { cache: "no-store" });
                 const csvMatches = await resMatches.text();
                 const rowsM = parseCSV(csvMatches);
@@ -537,7 +536,7 @@
 
                 document.getElementById("bracket-container").innerHTML = bracketHtml;
 
-                // ---- CARGAR TABLA DE POSICIONES CON LÓGICA DE TENDENCIA Y LLAVES ----
+                // ---- CARGAR TABLA DE POSICIONES ----
                 const resBoard = await fetch(urlTabla, { cache: "no-store" });
                 const csvBoard = await resBoard.text();
                 const rowsB = parseCSV(csvBoard);
@@ -556,6 +555,7 @@
                     if(cols.length <= idxName || !cols[idxName]) continue;
                     
                     let ptosLlavesRaw = idxPtosLlaves !== -1 ? (parseInt(cols[idxPtosLlaves]) || 0) : 0;
+                    // El cálculo sigue leyendo dinámicamente lo que inyecte tu Excel
                     let cantidadLlaves = Math.round(ptosLlavesRaw / 5);
 
                     globalPlayersList.push({
@@ -627,16 +627,6 @@
             } catch (error) {
                 document.getElementById("status").innerText = "Sin conexión al VAR 🔴";
                 console.error(error);
-            }
-        }
-
-        function togglePred(listId, btnId) {
-            let list = document.getElementById(listId);
-            if(list) list.classList.toggle('active');
-            let btn = document.getElementById(btnId);
-            if(btn) {
-                btn.classList.toggle('active');
-                btn.innerText = btn.classList.contains('active') ? "OCULTAR PRONÓSTICOS ▲" : "VER PRONÓSTICOS ▼";
             }
         }
 
