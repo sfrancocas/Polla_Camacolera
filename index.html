@@ -183,7 +183,7 @@
                 <div class="stat-box"><span id="m-mu">0</span><small>Marcadores Únicos (MU)</small></div>
                 <div class="stat-box"><span id="m-ag">0</span><small>Diferencia / Goles (AG)</small></div>
                 <div class="stat-box" style="background: #fff8e1; border-color: #ffe082;"><span id="m-llaves" style="color: #f57f17;">0</span><small style="color: #b78103;">Llaves Acertadas</small></div>
-                <div class="stat-box stat-total"><span id="m-pts">0</span><small>Puntos Totales (Fase Regular + Final)</small></div>
+                <div class="stat-box stat-total"><span id="m-pts">0</span><small>Puntos Totales</small></div>
             </div>
         </div>
     </div>
@@ -285,6 +285,7 @@
 
         async function loadData() {
             try {
+                // ROMPE-CACHÉ SEGURO
                 const resMatches = await fetch(urlPartidos, { cache: "no-store" });
                 const csvMatches = await resMatches.text();
                 const rowsM = parseCSV(csvMatches);
@@ -318,7 +319,7 @@
                 let idxRealV = hM_upper.findIndex(h => h.includes("REAL") && h.includes("VISITANTE"));
                 if(idxRealV === -1) idxRealV = 6;
 
-                // DETECCIÓN DE PARTICIPANTES (FILTRO RESILIENTE RESTAURADO)
+                // DETECCIÓN DE PARTICIPANTES (FILTRO RESILIENTE)
                 const players = [];
                 headerM.forEach((colName, idx) => {
                     let original = String(colName || "").trim();
@@ -508,16 +509,52 @@
                     containerH.innerHTML = histHtml;
                 }
 
-                // ---- RENDERIZAR PESTAÑA DE LLAVES (MODO BLANCO/ESPERA DE OCTAVOS) ----
-                document.getElementById("bracket-container").innerHTML = `
-                    <div style="text-align: center; padding: 60px 20px;">
-                        <div style="font-size: 4rem; margin-bottom: 15px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));">🏆</div>
-                        <h2 style="color: var(--primary); margin: 0 0 10px 0; font-weight: 900;">Octavos de Final</h2>
-                        <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin: 0; padding: 0 10px;">
-                            La fase de Dieciseisavos ha terminado. La pestaña se actualizará automáticamente con los nuevos cruces oficiales de <strong>Octavos de Final</strong> tan pronto se confirmen los partidos.
-                        </p>
-                    </div>
-                `;
+                // ---- RENDERIZAR PESTAÑA DE LLAVES DE OCTAVOS DE FINAL ----
+                const bracketData = [
+                    { f: "Sáb 4 de julio • 12:00 COT", e: "Por confirmar", eL: "Canadá", fL: "🇨🇦", eV: "Marruecos", fV: "🇲🇦", a: "🎯 <strong>Acertaron:</strong> Sebastián, Viviana, Diana", cb: "#e8f5e9", ct: "#2e7d32" },
+                    { f: "Fecha por confirmar", e: "Por confirmar", eL: "Por definir", fL: "❓", eV: "Por definir", fV: "❓", a: "⏳ Pendiente de verificación por el VAR", cb: "#f5f5f5", ct: "#555" },
+                    { f: "Fecha por confirmar", e: "Por confirmar", eL: "Por definir", fL: "❓", eV: "Por definir", fV: "❓", a: "⏳ Pendiente de verificación por el VAR", cb: "#f5f5f5", ct: "#555" },
+                    { f: "Fecha por confirmar", e: "Por confirmar", eL: "Por definir", fL: "❓", eV: "Por definir", fV: "❓", a: "⏳ Pendiente de verificación por el VAR", cb: "#f5f5f5", ct: "#555" },
+                    { f: "Fecha por confirmar", e: "Por confirmar", eL: "Por definir", fL: "❓", eV: "Por definir", fV: "❓", a: "⏳ Pendiente de verificación por el VAR", cb: "#f5f5f5", ct: "#555" },
+                    { f: "Fecha por confirmar", e: "Por confirmar", eL: "Por definir", fL: "❓", eV: "Por definir", fV: "❓", a: "⏳ Pendiente de verificación por el VAR", cb: "#f5f5f5", ct: "#555" },
+                    { f: "Fecha por confirmar", e: "Por confirmar", eL: "Por definir", fL: "❓", eV: "Por definir", fV: "❓", a: "⏳ Pendiente de verificación por el VAR", cb: "#f5f5f5", ct: "#555" },
+                    { f: "Fecha por confirmar", e: "Por confirmar", eL: "Por definir", fL: "❓", eV: "Por definir", fV: "❓", a: "⏳ Pendiente de verificación por el VAR", cb: "#f5f5f5", ct: "#555" }
+                ];
+
+                let bracketHtml = `
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <h2 style="color: var(--primary); margin: 0 0 5px 0; font-weight: 900;">🏆 Octavos de Final</h2>
+                        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">Los 16 mejores clasificados del mundo</p>
+                    </div>`;
+
+                bracketData.forEach(llave => {
+                    let opacidad = llave.eL === "Por definir" ? "opacity: 0.7;" : "";
+                    let banderaL = llave.fL === "❓" ? `<span class="team-icon" style="filter:grayscale(1)">❓</span>` : `<span class="team-icon">${llave.fL}</span>`;
+                    let banderaV = llave.fV === "❓" ? `<span class="team-icon" style="filter:grayscale(1)">❓</span>` : `<span class="team-icon">${llave.fV}</span>`;
+                    let status = llave.eL === "Por definir" ? "7 LLAVES RESTANTES" : "CONFIRMADO";
+                    let statusColor = llave.eL === "Por definir" ? "background: #eee; color: #555;" : "background: #fffde7; color: #f57f17;";
+
+                    bracketHtml += `
+                    <div class="match-card" style="border-top: 4px solid #fbc02d; ${opacidad}">
+                        <div style="text-align:center; padding: 10px; border-bottom: 1px solid var(--border-color); background-color: rgba(11, 83, 148, 0.05);">
+                            <span style="display:block; font-size: 0.8rem; font-weight: 800; color: var(--primary);">📅 ${llave.f}</span>
+                            <span style="display:block; font-size: 0.7rem; font-weight: 600; color: var(--text-muted); margin-top: 3px;">🏟️ ${llave.e}</span>
+                        </div>
+                        <div class="match-info" style="padding: 15px;">
+                            <div class="team">${banderaL}<span class="team-name" style="font-size: 0.95rem;">${llave.eL}</span></div>
+                            <div class="match-status">
+                                <span class="vs" style="font-size: 0.7rem; ${statusColor} padding: 3px 8px; border-radius: 10px; font-weight:800; letter-spacing:0.5px">${status}</span>
+                                <span style="font-size:1.2rem; font-weight:900; color:var(--text-muted); margin-top:5px;">VS</span>
+                            </div>
+                            <div class="team">${banderaV}<span class="team-name" style="font-size: 0.95rem;">${llave.eV}</span></div>
+                        </div>
+                        <div style="background: ${llave.cb}; padding: 10px; border-top: 1px solid var(--border-color); font-size: 0.8rem; color: ${llave.ct}; text-align: center;">
+                            ${llave.a}
+                        </div>
+                    </div>`;
+                });
+
+                document.getElementById("bracket-container").innerHTML = bracketHtml;
 
                 // ---- CARGAR TABLA DE POSICIONES CON LÓGICA DE TENDENCIA Y LLAVES ----
                 const resBoard = await fetch(urlTabla, { cache: "no-store" });
