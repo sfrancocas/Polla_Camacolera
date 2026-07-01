@@ -99,15 +99,11 @@
         .toggle-btn { width: 100%; background: var(--card-bg); border: none; padding: 15px; color: var(--primary); font-weight: 700; cursor: pointer; border-top: 1px solid var(--border-color); transition: background 0.2s;}
         .toggle-btn:hover { filter: brightness(0.95); }
 
-        .search-wrapper { margin-bottom: 15px; position: relative; }
-        .search-input { width: 100%; padding: 12px 16px 12px 40px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-main); font-size: 0.95rem; font-weight: 600; outline: none; transition: all 0.3s; box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
-        .search-input:focus { border-color: var(--primary); box-shadow: 0 2px 8px rgba(11, 83, 148, 0.15); }
-        .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 1.1rem; color: var(--text-muted); pointer-events: none; }
-
-        .wall-of-fame { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
-        .fame-item { background: var(--card-bg); padding: 10px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .fame-item span { font-weight: 800; font-size: 0.9rem; color: var(--primary); display: inline-block; margin-bottom: 2px;}
-        .fame-item small { display: block; font-size: 0.65rem; color: var(--text-muted); margin-top: 4px; font-weight: bold; line-height: 1.2;}
+        .wall-of-fame { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 25px; }
+        .fame-item { background: var(--card-bg); padding: 15px 10px; border-radius: 16px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.06); display: flex; flex-direction: column; align-items: center; border-top: 3px solid var(--primary); }
+        .fame-img { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; margin-bottom: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); background: white; border: 2px solid var(--bg-color); }
+        .fame-item span { font-weight: 900; font-size: 0.95rem; color: var(--primary); display: inline-block; margin-bottom: 2px;}
+        .fame-item small { display: block; font-size: 0.65rem; color: var(--text-muted); margin-top: 4px; font-weight: 800; line-height: 1.2; text-transform: uppercase;}
 
         .leaderboard-card { background: var(--card-bg); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden; }
         .pos-table { width: 100%; border-collapse: collapse; text-align: center; }
@@ -196,7 +192,8 @@
         // ==========================================
         // 📸 DICCIONARIO DE FOTOS DE LOS JUGADORES
         // ==========================================
-        // PEGA AQUÍ LOS ENLACES DE GOOGLE DRIVE DIRECTAMENTE (¡No tienes que convertirlos!)
+        // Pega aquí los enlaces directos de Postimages (que terminen en .jpg o .png)
+        // Si lo dejas vacío "", se pondrá la inicial con un color bonito automáticamente.
         const playerPhotos = {
             "Sergio": "https://i.postimg.cc/L4vSPvLx/Sergio.png", 
             "Diana": "https://i.postimg.cc/hvtHMWT9/Diana.png",
@@ -212,22 +209,10 @@
             "Angélica": "https://i.postimg.cc/wxWKMMYW/Angelica.png"
         };
 
-        // Función que transforma los links normales de Google Drive a links directos mágicamente
-        function getDirectDriveLink(url) {
-            if (!url) return "";
-            if (url.includes("drive.google.com/file/d/")) {
-                const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-                if (match && match[1]) {
-                    return `https://drive.google.com/uc?export=view&id=${match[1]}`;
-                }
-            }
-            return url;
-        }
-
         function getAvatarUrl(name) {
             let rawUrl = playerPhotos[name] || playerPhotos[name.trim()] || "";
-            if (rawUrl !== "" && rawUrl !== "Pega_el_link_de_Drive_aqui") {
-                return getDirectDriveLink(rawUrl);
+            if (rawUrl !== "") {
+                return rawUrl;
             }
             let colors = ["1976D2", "388E3C", "F57C00", "D32F2F", "7B1FA2", "00796B", "C2185B", "455A64"];
             let randomColor = colors[name.length % colors.length];
@@ -279,7 +264,6 @@
 
         function openModal(name, pts, mu, at, ag, llaves) {
             document.getElementById('m-name').innerText = name;
-            // NUEVO: CARGAR LA IMAGEN AL ABRIR EL MODAL
             document.getElementById('m-avatar').src = getAvatarUrl(name);
             document.getElementById('m-pts').innerText = pts;
             document.getElementById('m-mu').innerText = mu;
@@ -294,15 +278,6 @@
         window.onclick = function(event) {
             let modal = document.getElementById('player-modal');
             if (event.target == modal) { closeModal(); }
-        }
-
-        function filterStrategists() {
-            let query = document.getElementById("strat-search").value.toLowerCase().trim();
-            let rows = document.querySelectorAll(".strat-row");
-            rows.forEach(row => {
-                let name = row.getAttribute("data-name").toLowerCase();
-                if(name.includes(query)) { row.style.display = ""; } else { row.style.display = "none"; }
-            });
         }
 
         function parseCSV(text) {
@@ -442,7 +417,6 @@
                         let predsHtml = "";
                         let localBets = 0, tieBets = 0, visitBets = 0, totalBets = 0;
 
-                        // Si el partido está PRÓXIMO, no procesamos los pronósticos para no subirlos al código fuente.
                         if (match.status !== "PRÓXIMO") {
                             players.forEach(p => {
                                 let pL = match.cols[p.idxL] !== undefined ? String(match.cols[p.idxL]).trim() : "";
@@ -459,7 +433,6 @@
                                     }
                                 }
                                 
-                                // NUEVO: MOSTRAR FOTO Y NOMBRE DEL JUGADOR EN LA LISTA
                                 let avatar = getAvatarUrl(p.name);
                                 predsHtml += `<li class="pred-row">
                                     <div style="display: flex; align-items: center; gap: 10px;">
@@ -485,7 +458,6 @@
                             statusCenterHtml = `<div class="match-sched"><span class="date-val">${match.fecha || 'Partido # '+match.matchNum}</span><span class="time-val">${match.hora || '--:--'}</span></div>`;
                         }
 
-                        // LÓGICA DE BLOQUEO PARA PARTIDOS PRÓXIMOS
                         let distContainerHtml = "";
                         let actionBtnHtml = "";
                         let predsUlHtml = "";
@@ -496,7 +468,7 @@
                                     <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">🕵️‍♂️ TENDENCIAS Y PRONÓSTICOS OCULTOS</span>
                                 </div>`;
                             actionBtnHtml = `<button class="toggle-btn" style="color: #999; cursor: default; opacity: 0.8;" disabled>🔒 PRONÓSTICOS CERRADOS</button>`;
-                            predsUlHtml = `<ul class="predictions" id="pred_${index}"></ul>`; // Vacío por seguridad
+                            predsUlHtml = `<ul class="predictions" id="pred_${index}"></ul>`;
                         } else {
                             distContainerHtml = `
                                 <div class="dist-container">
@@ -550,7 +522,6 @@
                                 }
                             }
                             
-                            // NUEVO: MOSTRAR FOTO Y NOMBRE DEL JUGADOR EN LA LISTA
                             let avatar = getAvatarUrl(p.name);
                             predsHtml += `<li class="pred-row">
                                 <div style="display: flex; align-items: center; gap: 10px;">
@@ -603,7 +574,6 @@
                     { f: "Fecha por confirmar", e: "Por confirmar", eL: "Por definir", fL: "❓", eV: "Por definir", fV: "❓", a: "⏳ Pendiente de verificación por el VAR", cb: "#f5f5f5", ct: "#555" },
                     { f: "Fecha por confirmar", e: "Por confirmar", eL: "Por definir", fL: "❓", eV: "Por definir", fV: "❓", a: "⏳ Pendiente de verificación por el VAR", cb: "#f5f5f5", ct: "#555" },
                     { f: "Fecha por confirmar", e: "Por confirmar", eL: "Por definir", fL: "❓", eV: "Por definir", fV: "❓", a: "⏳ Pendiente de verificación por el VAR", cb: "#f5f5f5", ct: "#555" }
-
                 ];
 
                 let bracketHtml = `
@@ -678,12 +648,6 @@
                 let maxMU = -1, maxAT = -1, maxAG = -1, maxLlaves = -1; 
                 let nMU = "-", nAT = "-", nAG = "-", nLlaves = "-";
                 
-                let searchHtml = `
-                    <div class="search-wrapper">
-                        <span class="search-icon">🔍</span>
-                        <input type="text" id="strat-search" class="search-input" placeholder="Buscar estratega..." onkeyup="filterStrategists()">
-                    </div>`;
-
                 let boardHtml = `<div class="leaderboard-card"><table class="pos-table" id="table-board">
                                  <tr><th>#</th><th>Estratega (Toca para ver stats)</th><th>Puntos</th></tr>`;
                 
@@ -710,7 +674,6 @@
                         trendHtml = `<span class="trend" style="color:#e53935; font-size:0.85rem;">▼</span>`;
                     }
 
-                    // NUEVO: MOSTRAR LA FOTO EN LA TABLA DE POSICIONES
                     let avatar = getAvatarUrl(p.nombre);
 
                     boardHtml += `<tr class="strat-row ${podiumClass}" data-name="${p.nombre}" onclick="openModal('${p.nombre}', ${p.puntos}, ${p.mu}, ${p.at}, ${p.ag}, ${p.llaves})">
@@ -725,15 +688,40 @@
                 });
                 boardHtml += `</table></div>`;
                 
+                // Obtenemos las URLs de las fotos de los líderes
+                let imgAT = getAvatarUrl(nAT);
+                let imgMU = getAvatarUrl(nMU);
+                let imgAG = getAvatarUrl(nAG);
+                let imgLlaves = getAvatarUrl(nLlaves);
+
                 let fameHtml = `
+                    <div style="text-align: center; margin-bottom: 15px;">
+                        <h2 style="color: var(--primary); margin: 0 0 5px 0; font-weight: 900;">🏆 Cuadro de Honor</h2>
+                    </div>
                     <div class="wall-of-fame">
-                        <div class="fame-item">🎯 <span>${nAT}</span><br><small>Líder de Precisión (AT)</small></div>
-                        <div class="fame-item">🔥 <span>${nMU}</span><br><small>Líder de Chepazos (Mu)</small></div>
-                        <div class="fame-item">🩹 <span>${nAG}</span><br><small>Líder de Consolación (AG)</small></div>
-                        <div class="fame-item">🗝️ <span>${nLlaves}</span><br><small>Líder de Cerrajería</small></div>
+                        <div class="fame-item" style="border-top-color: #2196F3;">
+                            <img src="${imgAT}" class="fame-img">
+                            <span>🎯 ${nAT}</span>
+                            <small>Precisión (AT)</small>
+                        </div>
+                        <div class="fame-item" style="border-top-color: #FF9800;">
+                            <img src="${imgMU}" class="fame-img">
+                            <span>🔥 ${nMU}</span>
+                            <small>Chepazos (MU)</small>
+                        </div>
+                        <div class="fame-item" style="border-top-color: #4CAF50;">
+                            <img src="${imgAG}" class="fame-img">
+                            <span>🩹 ${nAG}</span>
+                            <small>Consolación (AG)</small>
+                        </div>
+                        <div class="fame-item" style="border-top-color: #9C27B0;">
+                            <img src="${imgLlaves}" class="fame-img">
+                            <span>🗝️ ${nLlaves}</span>
+                            <small>Cerrajería (Lla)</small>
+                        </div>
                     </div>`;
 
-                document.getElementById('leaderboard-container').innerHTML = searchHtml + fameHtml + boardHtml;
+                document.getElementById('leaderboard-container').innerHTML = fameHtml + boardHtml;
 
             } catch (error) {
                 document.getElementById("status").innerText = "Sin conexión al VAR 🔴";
