@@ -192,6 +192,47 @@
         const urlPartidos = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5-A3wQAPUD3raKLrhfkiKWU62m6V7xFLsXY-vO_UdxCSADMwQSmkEecyGTqfpCJr2yYL6IghQ_B3i/pub?gid=658946236&single=true&output=csv";
         const urlTabla = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5-A3wQAPUD3raKLrhfkiKWU62m6V7xFLsXY-vO_UdxCSADMwQSmkEecyGTqfpCJr2yYL6IghQ_B3i/pub?gid=187955950&single=true&output=csv";
 
+        // ==========================================
+        // 📸 DICCIONARIO DE FOTOS DE LOS JUGADORES
+        // ==========================================
+        // PEGA AQUÍ LOS ENLACES DE GOOGLE DRIVE DIRECTAMENTE (¡No tienes que convertirlos!)
+        const playerPhotos = {
+            "Sergio": "https://drive.google.com/file/d/1HLL2ZP-CujdbG9fdorXPE2rXfuJPB1At/view?usp=drive_link", 
+            "Diana": "https://drive.google.com/file/d/1uek8hLrb2rcu-kJUBMMC1J9WY4Sys7g2/view?usp=drive_link",
+            "Manuela": "https://drive.google.com/file/d/1uzldLCKlt8_vZMhV0hvwhoIiWJYnK_-t/view?usp=drive_link",
+            "Manuel": "https://drive.google.com/file/d/1XQvlO1Vy0YN437ENBopbk7DHA1mZdvJH/view?usp=drive_link",
+            "Paula": "https://drive.google.com/file/d/1OhsViBtmIpq3XVnhJz_ewiaALVkRP8wC/view?usp=drive_link",
+            "Viviana": "https://drive.google.com/file/d/1kaNWzAUQ5j3znmFAskZwElWh9XsbI45b/view?usp=drive_link",
+            "JuanP": "https://drive.google.com/file/d/1U1MSpMK3MS5C05RuHV1F8ZX2rJ7kvelC/view?usp=drive_link",
+            "Mónica": "https://drive.google.com/file/d/1mnvymg_LTZg8tb47OxeRKkFqQsVDN2--/view?usp=drive_link",
+            "Sebastián": "",
+            "Luisa": "https://drive.google.com/file/d/1xlMJaBbkImAM8JGkdDRfYptw-9qTtmJc/view?usp=drive_link",
+            "Valeria": "https://drive.google.com/file/d/1yczy8iznAVLc5JV94c8xTw7ar1iH4zji/view?usp=drive_link",
+            "Angélica": "https://drive.google.com/file/d/199ChSt9nZ3XfCjDYLg0ezzyr7LP5J7aP/view?usp=drive_link"
+        };
+
+        // Función que transforma los links normales de Google Drive a links directos mágicamente
+        function getDirectDriveLink(url) {
+            if (!url) return "";
+            if (url.includes("drive.google.com/file/d/")) {
+                const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                if (match && match[1]) {
+                    return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+                }
+            }
+            return url;
+        }
+
+        function getAvatarUrl(name) {
+            let rawUrl = playerPhotos[name] || playerPhotos[name.trim()] || "";
+            if (rawUrl !== "" && rawUrl !== "Pega_el_link_de_Drive_aqui") {
+                return getDirectDriveLink(rawUrl);
+            }
+            let colors = ["1976D2", "388E3C", "F57C00", "D32F2F", "7B1FA2", "00796B", "C2185B", "455A64"];
+            let randomColor = colors[name.length % colors.length];
+            return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${randomColor}&color=fff&bold=true&rounded=true`;
+        }	
+        
         const frasesGalpon = [
             "El que no arriesga, se queda en el fondo de la tabla mirando. 👀",
             "Hay pronósticos que duelen más que un gol en contra al minuto 90. 💔",
