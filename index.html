@@ -386,7 +386,7 @@
                     }
                 }
 
-                // ---- RENDERIZAR PARTIDOS DEL DÍA ----
+                // ---- RENDERIZAR PARTIDOS DEL DÍA (CON BLOQUEO ANTI-ESPIA) ----
                 const matchesToShow = upcomingMatches.slice(0, 6);
                 const containerM = document.getElementById("matches-container");
                 containerM.innerHTML = "";
@@ -398,22 +398,25 @@
                         let predsHtml = "";
                         let localBets = 0, tieBets = 0, visitBets = 0, totalBets = 0;
 
-                        players.forEach(p => {
-                            let pL = match.cols[p.idxL] !== undefined ? String(match.cols[p.idxL]).trim() : "";
-                            let pV = match.cols[p.idxV] !== undefined ? String(match.cols[p.idxV]).trim() : "";
-                            let score = "-";
-                            
-                            if(pL !== "" && pV !== "") {
-                                score = String(`${pL} - ${pV}`).replace(/\.0/g, '').replace(/o/gi, '0');
-                                let numL = parseInt(String(pL).replace(/o/gi, '0')); 
-                                let numV = parseInt(String(pV).replace(/o/gi, '0'));
-                                if(!isNaN(numL) && !isNaN(numV)) {
-                                    totalBets++;
-                                    if(numL > numV) localBets++; else if(numL < numV) visitBets++; else tieBets++;
+                        // Si el partido está PRÓXIMO, no procesamos los pronósticos para no subirlos al código fuente.
+                        if (match.status !== "PRÓXIMO") {
+                            players.forEach(p => {
+                                let pL = match.cols[p.idxL] !== undefined ? String(match.cols[p.idxL]).trim() : "";
+                                let pV = match.cols[p.idxV] !== undefined ? String(match.cols[p.idxV]).trim() : "";
+                                let score = "-";
+                                
+                                if(pL !== "" && pV !== "") {
+                                    score = String(`${pL} - ${pV}`).replace(/\.0/g, '').replace(/o/gi, '0');
+                                    let numL = parseInt(String(pL).replace(/o/gi, '0')); 
+                                    let numV = parseInt(String(pV).replace(/o/gi, '0'));
+                                    if(!isNaN(numL) && !isNaN(numV)) {
+                                        totalBets++;
+                                        if(numL > numV) localBets++; else if(numL < numV) visitBets++; else tieBets++;
+                                    }
                                 }
-                            }
-                            predsHtml += `<li class="pred-row"><span class="player-name">${p.name}</span> <span class="pred-score">${score}</span></li>`;
-                        });
+                                predsHtml += `<li class="pred-row"><span class="player-name">${p.name}</span> <span class="pred-score">${score}</span></li>`;
+                            });
+                        }
 
                         let pctL = totalBets ? Math.round((localBets/totalBets)*100) : 0;
                         let pctE = totalBets ? Math.round((tieBets/totalBets)*100) : 0;
@@ -429,13 +432,20 @@
                             statusCenterHtml = `<div class="match-sched"><span class="date-val">${match.fecha || 'Partido # '+match.matchNum}</span><span class="time-val">${match.hora || '--:--'}</span></div>`;
                         }
 
-                        containerM.innerHTML += `
-                            <div class="${cardClass}">
-                                <div class="match-info">
-                                    <div class="team"><span class="team-icon">⚽</span><span class="team-name">${match.teamL}</span></div>
-                                    <div class="match-status"><span class="vs">VS</span>${statusCenterHtml}${liveBadgeHtml}</div>
-                                    <div class="team"><span class="team-icon">⚽</span><span class="team-name">${match.teamV}</span></div>
-                                </div>
+                        // LÓGICA DE BLOQUEO PARA PARTIDOS PRÓXIMOS
+                        let distContainerHtml = "";
+                        let actionBtnHtml = "";
+                        let predsUlHtml = "";
+
+                        if (match.status === "PRÓXIMO") {
+                            distContainerHtml = `
+                                <div class="dist-container" style="text-align:center; padding-bottom: 15px; border-bottom: 1px solid var(--border-color);">
+                                    <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">🕵️‍♂️ TENDENCIAS Y PRONÓSTICOS OCULTOS</span>
+                                </div>`;
+                            actionBtnHtml = `<button class="toggle-btn" style="color: #999; cursor: default; opacity: 0.8;" disabled>🔒 PRONÓSTICOS CERRADOS</button>`;
+                            predsUlHtml = `<ul class="predictions" id="pred_${index}"></ul>`; // Vacío por seguridad
+                        } else {
+                            distContainerHtml = `
                                 <div class="dist-container">
                                     <div class="dist-bar-wrapper">
                                         <div class="dist-bar local" style="width:${pctL}%"></div>
@@ -443,9 +453,21 @@
                                         <div class="dist-bar visit" style="width:${pctV}%"></div>
                                     </div>
                                     <div class="dist-labels"><span>${localBets} L</span><span>${tieBets} E</span><span>${visitBets} V</span></div>
+                                </div>`;
+                            actionBtnHtml = `<button class="toggle-btn" id="btn_${index}" onclick="togglePred('pred_${index}', 'btn_${index}')">VER PRONÓSTICOS ▼</button>`;
+                            predsUlHtml = `<ul class="predictions" id="pred_${index}">${predsHtml}</ul>`;
+                        }
+
+                        containerM.innerHTML += `
+                            <div class="${cardClass}">
+                                <div class="match-info">
+                                    <div class="team"><span class="team-icon">⚽</span><span class="team-name">${match.teamL}</span></div>
+                                    <div class="match-status"><span class="vs">VS</span>${statusCenterHtml}${liveBadgeHtml}</div>
+                                    <div class="team"><span class="team-icon">⚽</span><span class="team-name">${match.teamV}</span></div>
                                 </div>
-                                <button class="toggle-btn" id="btn_${index}" onclick="togglePred('pred_${index}', 'btn_${index}')">VER PRONÓSTICOS ▼</button>
-                                <ul class="predictions" id="pred_${index}">${predsHtml}</ul>
+                                ${distContainerHtml}
+                                ${actionBtnHtml}
+                                ${predsUlHtml}
                             </div>`;
                     });
                 }
@@ -519,6 +541,7 @@
                     { f: "Fecha por confirmar", e: "Por confirmar", eL: "Por definir", fL: "❓", eV: "Por definir", fV: "❓", a: "⏳ Pendiente de verificación por el VAR", cb: "#f5f5f5", ct: "#555" },
                     { f: "Fecha por confirmar", e: "Por confirmar", eL: "Por definir", fL: "❓", eV: "Por definir", fV: "❓", a: "⏳ Pendiente de verificación por el VAR", cb: "#f5f5f5", ct: "#555" },
                     { f: "Fecha por confirmar", e: "Por confirmar", eL: "Por definir", fL: "❓", eV: "Por definir", fV: "❓", a: "⏳ Pendiente de verificación por el VAR", cb: "#f5f5f5", ct: "#555" }
+
                 ];
 
                 let bracketHtml = `
