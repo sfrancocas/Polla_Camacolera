@@ -195,18 +195,18 @@
         // Pega aquí los enlaces directos de Postimages (que terminen en .jpg o .png)
         // Si lo dejas vacío "", se pondrá la inicial con un color bonito automáticamente.
         const playerPhotos = {
-            "Sergio": "https://i.postimg.cc/L4vSPvLx/Sergio.png", 
-            "Diana": "https://i.postimg.cc/hvtHMWT9/Diana.png",
-            "Manuela": "https://i.postimg.cc/bY6Xrrfm/Manuela.png",
-            "Manuel": "https://i.postimg.cc/ZnsXM7xP/Manuel.png",
-            "Paula": "https://i.postimg.cc/h4MnmMTV/Paula.png",
-            "Viviana": "https://i.postimg.cc/nrh6TbBD/Viviana.png",
-            "JuanP": "https://i.postimg.cc/Kj8dQSB3/Juan-Pablo.png",
-            "Mónica": "https://i.postimg.cc/v8vYzGFb/Monica.png",
+            "Sergio": "", 
+            "Diana": "",
+            "Manuela": "",
+            "Manuel": "",
+            "Paula": "",
+            "Viviana": "",
+            "JuanP": "",
+            "Mónica": "https://i.postimg.cc/v8vYzGFb/Monica.png", // Ejemplo
             "Sebastián": "",
-            "Luisa": "https://i.postimg.cc/gc4ph48r/Luisa.png",
-            "Valeria": "https://i.postimg.cc/zXc1tBd8/Valeria.png",
-            "Angélica": "https://i.postimg.cc/wxWKMMYW/Angelica.png"
+            "Luisa": "",
+            "Valeria": "",
+            "Angélica": ""
         };
 
         function getAvatarUrl(name) {
@@ -338,7 +338,7 @@
                 let idxRealV = hM_upper.findIndex(h => h.includes("REAL") && h.includes("VISITANTE"));
                 if(idxRealV === -1) idxRealV = 6;
 
-                // DETECCIÓN DE PARTICIPANTES (FILTRO RESILIENTE)
+                // DETECCIÓN DE PARTICIPANTES
                 const players = [];
                 headerM.forEach((colName, idx) => {
                     let original = String(colName || "").trim();
@@ -405,7 +405,7 @@
                     }
                 }
 
-                // ---- RENDERIZAR PARTIDOS DEL DÍA (CON BLOQUEO ANTI-ESPIA) ----
+                // ---- RENDERIZAR PARTIDOS DEL DÍA ----
                 const matchesToShow = upcomingMatches.slice(0, 6);
                 const containerM = document.getElementById("matches-container");
                 containerM.innerHTML = "";
@@ -611,38 +611,124 @@
 
                 document.getElementById("bracket-container").innerHTML = bracketHtml;
 
-                // ---- CARGAR TABLA DE POSICIONES CON LÓGICA DE TENDENCIA Y LLAVES ----
+                // ---- MOTOR DE CÁLCULO AUTOMÁTICO DE PUNTOS ----
+                
+                // 1. Matriz de reglas de puntuación según la fase (Mundial 2026)
+                const scoring = {
+                    "GRUPOS": { at: 10, parcial: 7, trend: 5, oneteam: 2, mu: 10 },
+                    "16VOS":  { at: 12, parcial: 7, trend: 5, oneteam: 2, mu: 12 },
+                    "8VOS":   { at: 12, parcial: 7, trend: 5, oneteam: 2, mu: 12 },
+                    "4TOS":   { at: 15, parcial: 7, trend: 5, oneteam: 0, mu: 0 },
+                    "SEMI":   { at: 20, parcial: 10, trend: 7, oneteam: 0, mu: 0 },
+                    "3RO":    { at: 20, parcial: 10, trend: 7, oneteam: 0, mu: 0 },
+                    "FINAL":  { at: 50, parcial: 20, trend: 15, oneteam: 0, mu: 0 }
+                };
+
+                // 2. Inicializar los contadores para cada jugador
+                let playerStats = {};
+                players.forEach(p => {
+                    playerStats[p.name] = { nombre: p.name, puntos: 0, mu: 0, at: 0, ag: 0, llaves: 0, posPrev: 99 };
+                });
+
+                // 3. Evaluar cada partido FINALIZADO
+                finishedMatches.forEach(match => {
+                    let mNum = parseInt(match.matchNum) || 1;
+                    
+                    // Detectar la fase por el número de partido
+                    let phase = "GRUPOS";
+                    if (mNum > 72 && mNum <= 88) phase = "16VOS";
+                    else if (mNum > 88 && mNum <= 96) phase = "8VOS";
+                    else if (mNum > 96 && mNum <= 100) phase = "4TOS";
+                    else if (mNum > 100 && mNum <= 102) phase = "SEMI";
+                    else if (mNum === 103) phase = "3RO";
+                    else if (mNum === 104) phase = "FINAL";
+
+                    let sc = scoring[phase];
+                    let rl = match.gl; // Goles reales Local
+                    let rv = match.gv; // Goles reales Visitante
+                    let realTrend = rl > rv ? 1 : (rl < rv ? -1 : 0);
+
+                    // Buscar si hay Marcador Único (MU)
+                    let correctExacts = [];
+                    players.forEach(p => {
+                        let pL = match.cols[p.idxL] !== undefined ? String(match.cols[p.idxL]).trim() : "";
+                        let pV = match.cols[p.idxV] !== undefined ? String(match.cols[p.idxV]).trim() : "";
+                        if(pL !== "" && pV !== "") {
+                            let numL = parseInt(pL.replace(/o/gi, '0'));
+                            let numV = parseInt(pV.replace(/o/gi, '0'));
+                            if (numL === rl && numV === rv) correctExacts.push(p.name);
+                        }
+                    });
+                    let isMU = correctExacts.length === 1;
+
+                    // Asignar puntos a cada jugador
+                    players.forEach(p => {
+                        let pL = match.cols[p.idxL] !== undefined ? String(match.cols[p.idxL]).trim() : "";
+                        let pV = match.cols[p.idxV] !== undefined ? String(match.cols[p.idxV]).trim() : "";
+                        
+                        if(pL !== "" && pV !== "") {
+                            let pl = parseInt(pL.replace(/o/gi, '0'));
+                            let pv = parseInt(pV.replace(/o/gi, '0'));
+                            
+                            if(!isNaN(pl) && !isNaN(pv)) {
+                                let playerTrend = pl > pv ? 1 : (pl < pv ? -1 : 0);
+                                let trendMatch = (realTrend === playerTrend);
+                                let partialMatch = (pl === rl || pv === rv);
+                                let isAT = (pl === rl && pv === rv);
+
+                                if (isAT) {
+                                    playerStats[p.name].at += 1;
+                                    playerStats[p.name].puntos += sc.at;
+                                    if (isMU) { // Bono de Marcador Único
+                                        playerStats[p.name].mu += 1;
+                                        playerStats[p.name].puntos += sc.mu;
+                                    }
+                                } else if (trendMatch && partialMatch) {
+                                    playerStats[p.name].ag += 1;
+                                    playerStats[p.name].puntos += sc.parcial;
+                                } else if (trendMatch && !partialMatch) {
+                                    playerStats[p.name].ag += 1;
+                                    playerStats[p.name].puntos += sc.trend;
+                                } else if (!trendMatch && partialMatch) {
+                                    if (sc.oneteam > 0) {
+                                        playerStats[p.name].ag += 1;
+                                        playerStats[p.name].puntos += sc.oneteam;
+                                    }
+                                }
+                            }
+                        }
+                    });
+                });
+
+                // 4. Leer posiciones anteriores y Puntos de LLAVES desde el Google Sheet (Tabla)
                 const resBoard = await fetch(urlTabla, { cache: "no-store" });
                 const csvBoard = await resBoard.text();
                 const rowsB = parseCSV(csvBoard);
-                
                 const hB = rowsB[0].map(h => String(h || "").trim().toUpperCase());
                 
-                let idxPosPrev = hB.indexOf("POSICIÓN"); if(idxPosPrev === -1) idxPosPrev = 0;
                 let idxName = hB.indexOf("JUGADOR"); if(idxName === -1) idxName = 1;
-                let idxPts = hB.indexOf("PUNTOS TOTALES"); if(idxPts === -1) idxPts = 2;
-                let idxMU = hB.indexOf("MU"); let idxAT = hB.indexOf("AT"); let idxAG = hB.indexOf("AG");
+                let idxPosPrev = hB.indexOf("POSICIÓN");
                 let idxPtosLlaves = hB.indexOf("PTOS LLAVES");
 
-                globalPlayersList = [];
                 for(let i=1; i<rowsB.length; i++) {
                     let cols = rowsB[i] || [];
-                    if(cols.length <= idxName || !cols[idxName]) continue;
+                    let name = String(cols[idxName] || "").trim();
+                    let statKey = Object.keys(playerStats).find(k => k.toLowerCase() === name.toLowerCase());
                     
-                    let ptosLlavesRaw = idxPtosLlaves !== -1 ? (parseInt(cols[idxPtosLlaves]) || 0) : 0;
-                    let cantidadLlaves = Math.round(ptosLlavesRaw / 5);
+                    if (statKey) {
+                        playerStats[statKey].posPrev = parseInt(cols[idxPosPrev]) || 99;
+                        
+                        // Sumar los puntos de llaves manuales que provienen de la hoja de Google
+                        let ptosLlavesRaw = idxPtosLlaves !== -1 ? (parseInt(cols[idxPtosLlaves]) || 0) : 0;
+                        let cantidadLlaves = Math.round(ptosLlavesRaw / 5); // Lógica original para calcular # de llaves
 
-                    globalPlayersList.push({
-                        nombre: String(cols[idxName]), 
-                        puntos: parseInt(cols[idxPts]) || 0,
-                        posPrev: parseInt(cols[idxPosPrev]) || 99, 
-                        mu: idxMU !== -1 ? (parseInt(cols[idxMU])||0) : 0,
-                        at: idxAT !== -1 ? (parseInt(cols[idxAT])||0) : 0,
-                        ag: idxAG !== -1 ? (parseInt(cols[idxAG])||0) : 0,
-                        llaves: cantidadLlaves
-                    });
+                        playerStats[statKey].puntos += ptosLlavesRaw;
+                        playerStats[statKey].llaves = cantidadLlaves; 
+                    }
                 }
 
+                // 5. Convertir a Array y Ordenar por puntaje final
+                globalPlayersList = Object.values(playerStats);
                 globalPlayersList.sort((a, b) => b.puntos - a.puntos);
 
                 let maxMU = -1, maxAT = -1, maxAG = -1, maxLlaves = -1; 
