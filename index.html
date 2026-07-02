@@ -141,6 +141,9 @@
         .stat-total span { color: var(--accent); font-size: 1.8rem;}
 
         .loader { text-align: center; padding: 40px; color: var(--text-muted); font-weight: 600;}
+        
+        .toggle-btn { width: 100%; background: var(--card-bg); border: none; padding: 15px; color: var(--primary); font-weight: 700; cursor: pointer; border-top: 1px solid var(--border-color); transition: background 0.2s;}
+        .toggle-btn:hover { filter: brightness(0.95); }
     </style>
 </head>
 <body>
@@ -643,7 +646,6 @@
 
                 // ---- MOTOR DE CÁLCULO AUTOMÁTICO DE PUNTOS ----
                 
-                // 1. Matriz de reglas de puntuación según la fase
                 const scoring = {
                     "GRUPOS": { at: 10, parcial: 7, trend: 5, oneteam: 2, mu: 10 },
                     "16VOS":  { at: 12, parcial: 7, trend: 5, oneteam: 2, mu: 12 },
@@ -654,19 +656,15 @@
                     "FINAL":  { at: 50, parcial: 20, trend: 15, oneteam: 0, mu: 0 }
                 };
 
-                // 2. Inicializar los contadores para cada jugador
                 let playerStats = {};
                 players.forEach(p => {
                     playerStats[p.name] = { nombre: p.name, puntos: 0, mu: 0, at: 0, ag: 0, llaves: 0, posPrev: 99 };
                 });
 
-                // 3. Evaluar cada partido FINALIZADO
                 finishedMatches.forEach(match => {
                     let numMatchStr = String(match.matchNum).match(/\d+/); 
-                    // Si no tiene número, usamos la fila de excel restándole el header como salvavidas
                     let mNum = numMatchStr ? parseInt(numMatchStr[0]) : (match.rowIndex - headerRowIdx);
 
-                    // Detectar la fase por el número de partido (Mundial 104 partidos)
                     let phase = "GRUPOS";
                     if (mNum > 72 && mNum <= 88) phase = "16VOS";
                     else if (mNum > 88 && mNum <= 96) phase = "8VOS";
@@ -676,11 +674,10 @@
                     else if (mNum === 104) phase = "FINAL";
 
                     let sc = scoring[phase];
-                    let rl = match.gl; // Goles reales Local
-                    let rv = match.gv; // Goles reales Visitante
+                    let rl = match.gl; 
+                    let rv = match.gv; 
                     let realTrend = rl > rv ? 1 : (rl < rv ? -1 : 0);
 
-                    // Buscar si hay Marcador Único (MU)
                     let correctExacts = [];
                     players.forEach(p => {
                         let pL = match.cols[p.idxL] !== undefined ? String(match.cols[p.idxL]).trim() : "";
@@ -693,7 +690,6 @@
                     });
                     let isMU = correctExacts.length === 1;
 
-                    // Asignar puntos a cada jugador
                     players.forEach(p => {
                         let pL = match.cols[p.idxL] !== undefined ? String(match.cols[p.idxL]).trim() : "";
                         let pV = match.cols[p.idxV] !== undefined ? String(match.cols[p.idxV]).trim() : "";
@@ -710,21 +706,21 @@
 
                                 if (isAT) {
                                     playerStats[p.name].at += 1;
-                                    playerStats[p.name].puntos += sc.at;
-                                    if (isMU) { // Bono de Marcador Único
+                                    playerStats[p.name].puntos += sc.at; 
+                                    if (isMU) { 
                                         playerStats[p.name].mu += 1;
-                                        playerStats[p.name].puntos += sc.mu;
+                                        playerStats[p.name].puntos += sc.mu; 
                                     }
                                 } else if (trendMatch && partialMatch) {
                                     playerStats[p.name].ag += 1;
-                                    playerStats[p.name].puntos += sc.parcial;
+                                    playerStats[p.name].puntos += sc.parcial; 
                                 } else if (trendMatch && !partialMatch) {
                                     playerStats[p.name].ag += 1;
-                                    playerStats[p.name].puntos += sc.trend;
+                                    playerStats[p.name].puntos += sc.trend; 
                                 } else if (!trendMatch && partialMatch) {
                                     if (sc.oneteam > 0) {
                                         playerStats[p.name].ag += 1;
-                                        playerStats[p.name].puntos += sc.oneteam;
+                                        playerStats[p.name].puntos += sc.oneteam; 
                                     }
                                 }
                             }
@@ -732,7 +728,7 @@
                     });
                 });
 
-                // 4. Leer posiciones anteriores y Puntos de LLAVES desde el Google Sheet (Tabla)
+                // ---- LECTURA FLEXIBLE DE TABLA DE POSICIONES Y CANTIDAD DE LLAVES ----
                 const resBoard = await fetch(urlTabla, { cache: "no-store" });
                 const csvBoard = await resBoard.text();
                 const rowsB = parseCSV(csvBoard);
@@ -741,7 +737,10 @@
                 let idxName = hB.findIndex(h => h.includes("JUGADOR") || h.includes("NOMBRE")); 
                 if(idxName === -1) idxName = 1;
                 let idxPosPrev = hB.findIndex(h => h.includes("POSICI"));
-                let idxPtosLlaves = hB.findIndex(h => h.includes("LLAVES"));
+                
+                // NUEVA LÓGICA: Buscar explícitamente "CANTIDAD LLAVES" o "# LLAVES"
+                let idxPtosLlaves = hB.findIndex(h => h === "PTOS LLAVES" || h === "PUNTOS LLAVES" || h.includes("PTOS"));
+                let idxCantLlaves = hB.findIndex(h => h === "CANTIDAD LLAVES" || h === "# LLAVES" || h.includes("CANTIDAD"));
 
                 for(let i=1; i<rowsB.length; i++) {
                     let cols = rowsB[i] || [];
@@ -751,16 +750,21 @@
                     if (statKey) {
                         playerStats[statKey].posPrev = parseInt(cols[idxPosPrev]) || 99;
                         
-                        // Sumar los puntos de llaves manuales (si los tienes en la tabla)
                         let ptosLlavesRaw = idxPtosLlaves !== -1 ? (parseInt(cols[idxPtosLlaves]) || 0) : 0;
-                        let cantidadLlaves = Math.round(ptosLlavesRaw / 5); // Lógica para calcular # de llaves
+                        
+                        // Si existe la nueva columna de cantidad, la lee. Si no, usa la división clásica como respaldo.
+                        let cantidadLlaves = 0;
+                        if (idxCantLlaves !== -1) {
+                            cantidadLlaves = parseInt(cols[idxCantLlaves]) || 0;
+                        } else {
+                            cantidadLlaves = Math.round(ptosLlavesRaw / 5); 
+                        }
 
                         playerStats[statKey].puntos += ptosLlavesRaw;
                         playerStats[statKey].llaves = cantidadLlaves; 
                     }
                 }
 
-                // 5. Convertir a Array y Ordenar por puntaje final
                 globalPlayersList = Object.values(playerStats);
                 globalPlayersList.sort((a, b) => b.puntos - a.puntos);
 
