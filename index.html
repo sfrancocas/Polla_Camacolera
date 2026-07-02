@@ -25,7 +25,7 @@
         }
 
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        body { margin: 0; padding: 0; background-color: var(--bg-color); color: var(--text-main); padding-bottom: 60px; transition: background 0.3s;}
+        body { margin: 0; padding: 0; background-color: var(--bg-color); color: var(--text-main); padding-bottom: 80px; transition: background 0.3s;}
         
         .app-header {
             background-color: #0b5394;
@@ -62,8 +62,8 @@
         
         .match-info { display: flex; justify-content: space-between; align-items: center; padding: 20px 15px 10px 15px; }
         .team { display: flex; flex-direction: column; align-items: center; width: 38%; text-align:center; }
-        .team-icon { font-size: 1.8rem; margin-bottom: 8px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));}
-        .team-name { font-weight: 700; font-size: 1.05rem; text-align: center; color: var(--primary);}
+        .team-icon { font-size: 2.2rem; margin-bottom: 4px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));}
+        .team-name { font-weight: 700; font-size: 0.95rem; text-align: center; color: var(--primary); line-height: 1.1;}
         .match-status { display: flex; flex-direction: column; align-items: center; width: 24%; }
         .vs { font-size: 1.1rem; font-weight: 900; color: var(--text-muted); margin-bottom: 3px; }
         
@@ -97,10 +97,21 @@
         body.dark-mode .pred-score { background: #0d47a1; color: white; }
 
         .wall-of-fame { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 25px; }
-        .fame-item { background: var(--card-bg); padding: 15px 10px; border-radius: 16px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.06); display: flex; flex-direction: column; align-items: center; border-top: 3px solid var(--primary); }
-        .fame-img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; margin-bottom: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); background: white; border: 3px solid var(--bg-color); }
-        .fame-item span { font-weight: 900; font-size: 0.95rem; color: var(--primary); display: inline-block; margin-bottom: 2px;}
-        .fame-item small { display: block; font-size: 0.65rem; color: var(--text-muted); margin-top: 4px; font-weight: 800; line-height: 1.2; text-transform: uppercase;}
+        .fame-item { background: var(--card-bg); padding: 15px 10px; border-radius: 16px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.06); display: flex; flex-direction: column; align-items: center; border-top: 3px solid var(--primary); position: relative; overflow: hidden;}
+        .fame-img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; margin-bottom: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); background: white; border: 3px solid var(--bg-color); z-index: 2;}
+        .fame-item span { font-weight: 900; font-size: 0.95rem; color: var(--primary); display: inline-block; margin-bottom: 2px; z-index: 2;}
+        .fame-item small { display: block; font-size: 0.65rem; color: var(--text-muted); margin-top: 4px; font-weight: 800; line-height: 1.2; text-transform: uppercase; z-index: 2;}
+
+        .insights-card { background: linear-gradient(135deg, #1e3c72, #2a5298); border-radius: 12px; padding: 15px; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.15); margin-bottom: 20px; display: flex; justify-content: space-between; gap: 10px;}
+        .insight-box { flex: 1; text-align: center; background: rgba(255,255,255,0.1); border-radius: 8px; padding: 10px;}
+        .insight-box h4 { margin: 0 0 5px 0; font-size: 0.7rem; text-transform: uppercase; color: #bbdefb; letter-spacing: 0.5px;}
+        .insight-box p { margin: 0; font-size: 0.9rem; font-weight: bold; line-height: 1.3;}
+        .insight-box span { font-size: 1.5rem; display: block; margin-bottom: 5px;}
+
+        .next-match-banner { background: var(--accent); color: white; border-radius: 12px; padding: 15px; text-align: center; font-weight: 800; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; position: relative; overflow: hidden;}
+        .next-match-banner h3 { margin: 0 0 5px 0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.8);}
+        .next-match-banner .teams { font-size: 1.3rem; margin-bottom: 8px;}
+        .next-match-banner .timer { font-size: 2rem; font-family: monospace; letter-spacing: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.2);}
 
         .leaderboard-card { background: var(--card-bg); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden; }
         .pos-table { width: 100%; border-collapse: collapse; text-align: center; }
@@ -126,24 +137,33 @@
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 200; align-items: center; justify-content: center; padding: 20px;}
         .modal.active { display: flex; animation: fadeIn 0.3s; }
         
-        .modal-content { background: var(--card-bg); padding: 25px; border-radius: 16px; width: 100%; max-width: 320px; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border-top: 6px solid var(--primary); text-align: center;}
+        .modal-content { background: var(--card-bg); padding: 25px 20px; border-radius: 16px; width: 100%; max-width: 340px; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border-top: 6px solid var(--primary); text-align: center;}
         .close-btn { position: absolute; top: 10px; right: 15px; font-size: 1.8rem; font-weight: bold; cursor: pointer; color: var(--text-muted); transition: color 0.2s;}
         .close-btn:hover { color: #e53935; }
         
-        .modal-name { font-size: 1.3rem; font-weight: 900; color: var(--primary); margin: 5px 0 20px 0;}
-        .modal-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; text-align: left;}
+        .modal-name { font-size: 1.3rem; font-weight: 900; color: var(--primary); margin: 5px 0 15px 0;}
+        .modal-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: left;}
         .stat-box { background: rgba(0,0,0,0.03); padding: 10px; border-radius: 10px; border: 1px solid var(--border-color); text-align: center;}
         .stat-box span { display: block; font-size: 1.4rem; font-weight: 900; color: var(--text-main); margin-bottom: 2px;}
-        .stat-box small { font-size: 0.65rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; line-height: 1.2; display: block;}
+        .stat-box small { font-size: 0.6rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; line-height: 1.2; display: block;}
         
-        .stat-total { grid-column: span 2; background: #e8f5e9; border-color: var(--accent); color: var(--accent); margin-top: 5px;}
+        .stat-total { grid-column: span 2; background: #e8f5e9; border-color: var(--accent); color: var(--accent); margin-top: 5px; padding: 12px;}
         body.dark-mode .stat-total { background: #1b3a1b; }
         .stat-total span { color: var(--accent); font-size: 1.8rem;}
+
+        .chart-container { margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.02); border-radius: 10px; border: 1px solid var(--border-color); text-align: center;}
+        .chart-container h4 { margin: 0 0 10px 0; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;}
 
         .loader { text-align: center; padding: 40px; color: var(--text-muted); font-weight: 600;}
         
         .toggle-btn { width: 100%; background: var(--card-bg); border: none; padding: 15px; color: var(--primary); font-weight: 700; cursor: pointer; border-top: 1px solid var(--border-color); transition: background 0.2s;}
         .toggle-btn:hover { filter: brightness(0.95); }
+
+        /* Botón flotante para refrescar */
+        .fab-refresh { position: fixed; bottom: 20px; right: 20px; width: 55px; height: 55px; border-radius: 50%; background: var(--primary); color: white; border: none; font-size: 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; z-index: 100; transition: transform 0.2s; display: flex; align-items: center; justify-content: center;}
+        .fab-refresh:active { transform: scale(0.9); }
+        .spin { animation: spin 0.8s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -176,14 +196,21 @@
             <h2 class="modal-name" id="m-name">Nombre</h2>
             
             <div class="modal-stats-grid">
-                <div class="stat-box"><span id="m-at">0</span><small>Marcadores Exactos (AT)</small></div>
-                <div class="stat-box"><span id="m-mu">0</span><small>Marcadores Únicos (MU)</small></div>
-                <div class="stat-box"><span id="m-ag">0</span><small>Diferencia / Goles (AG)</small></div>
+                <div class="stat-box"><span id="m-at">0</span><small>Marcadores Exactos</small></div>
+                <div class="stat-box"><span id="m-mu">0</span><small>Marcadores Únicos</small></div>
+                <div class="stat-box"><span id="m-ag">0</span><small>Diferencia / Goles</small></div>
                 <div class="stat-box" style="background: #fff8e1; border-color: #ffe082;"><span id="m-llaves" style="color: #f57f17;">0</span><small style="color: #b78103;">Llaves Acertadas</small></div>
                 <div class="stat-box stat-total"><span id="m-pts">0</span><small>Puntos Totales</small></div>
             </div>
+            
+            <div class="chart-container">
+                <h4>📈 Rendimiento en el torneo</h4>
+                <div id="m-chart" style="width: 100%; height: 60px;"></div>
+            </div>
         </div>
     </div>
+
+    <button onclick="refreshData(this)" class="fab-refresh" id="fab-btn">🔄</button>
 
     <script>
         const urlPartidos = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5-A3wQAPUD3raKLrhfkiKWU62m6V7xFLsXY-vO_UdxCSADMwQSmkEecyGTqfpCJr2yYL6IghQ_B3i/pub?gid=658946236&single=true&output=csv";
@@ -191,7 +218,7 @@
         const urlLlaves = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5-A3wQAPUD3raKLrhfkiKWU62m6V7xFLsXY-vO_UdxCSADMwQSmkEecyGTqfpCJr2yYL6IghQ_B3i/pub?gid=1452253607&single=true&output=csv";
 
         // ==========================================
-        // 📸 DICCIONARIO DE FOTOS DE LOS JUGADORES
+        // 📸 FOTOS Y BANDERAS
         // ==========================================
         const playerPhotos = {
             "Sergio": "https://i.postimg.cc/L4vSPvLx/Sergio.png", 
@@ -208,36 +235,46 @@
             "Angélica": "https://i.postimg.cc/wxWKMMYW/Angelica.png"
         };
 
+        const countryFlags = {
+            "ARGENTINA": "🇦🇷", "BRASIL": "🇧🇷", "COLOMBIA": "🇨🇴", "MÉXICO": "🇲🇽",
+            "CANADÁ": "🇨🇦", "ESTADOS UNIDOS": "🇺🇸", "USA": "🇺🇸", "ESPAÑA": "🇪🇸", "FRANCIA": "🇫🇷",
+            "INGLATERRA": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "ALEMANIA": "🇩🇪", "ITALIA": "🇮🇹", "MARRUECOS": "🇲🇦",
+            "PARAGUAY": "🇵🇾", "URUGUAY": "🇺🇾", "ECUADOR": "🇪🇨", "NORUEGA": "🇳🇴",
+            "PORTUGAL": "🇵🇹", "JAPÓN": "🇯🇵", "SENEGAL": "🇸🇳", "BÉLGICA": "🇧🇪",
+            "PAÍSES BAJOS": "🇳🇱", "HOLANDA": "🇳🇱", "CROACIA": "🇭🇷", "PERÚ": "🇵🇪",
+            "CHILE": "🇨🇱", "VENEZUELA": "🇻🇪", "BOLIVIA": "🇧🇴", "COSTA RICA": "🇨🇷",
+            "SUIZA": "🇨🇭", "COREA DEL SUR": "🇰🇷", "DINAMARCA": "🇩🇰", "SUECIA": "🇩🇰", "POLONIA": "🇵🇱",
+            "AUSTRALIA": "🇦🇺", "IRÁN": "🇮🇷", "ARABIA SAUDITA": "🇸🇦", "QATAR": "🇶🇦", "EGIPTO": "🇪🇬",
+            "NIGERIA": "🇸🇳", "GHANA": "🇬🇭", "CAMERÚN": "🇨🇲", "TÚNEZ": "🇹🇳"
+        };
+
         function getAvatarUrl(name) {
             let rawUrl = playerPhotos[name] || playerPhotos[name.trim()] || "";
-            if (rawUrl !== "") {
-                return rawUrl;
-            }
+            if (rawUrl !== "") return rawUrl;
             let colors = ["1976D2", "388E3C", "F57C00", "D32F2F", "7B1FA2", "00796B", "C2185B", "455A64"];
             let randomColor = colors[name.length % colors.length];
             return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${randomColor}&color=fff&bold=true&rounded=true`;
-        }	
+        }
+
+        function getFlag(teamName) {
+            let cleanName = String(teamName).trim().toUpperCase();
+            return countryFlags[cleanName] || "⚽";
+        }
         
+        let globalPlayersList = {}; // Para guardar la historia gráfica de cada uno
+
         const frasesGalpon = [
             "El que no arriesga, se queda en el fondo de la tabla mirando. 👀",
             "Hay pronósticos que duelen más que un gol en contra al minuto 90. 💔",
             "El VAR está revisando la fe ciega que le tenían a ese empate. 🖥️🔍",
-            "Mucho análisis táctico internacional para terminar ganando por un autogol. 🤦‍♂️",
-            "Diana no es de este planeta... ¿Alguien le puede revisar la bola de cristal? 🔮",
-            "Manuela demostrando que un buen chepazo vale más que mil horas de análisis. 🍀",
-            "Manuel rascando puntos de consolación como si fueran el último tinto de la oficina. ☕",
-            "Dicen que Sergio usa algoritmos de la NASA solo para terminar poniendo un 1-0. 💻",
-            "Viviana y Paula van calladitas, facturando puntos mientras los demás sufren. 🤫",
-            "J.Pablo y J.Sebastián defienden su posición colgados del travesaño. 🥅",
-            "Mónica y Angélica le tienen más fe al 0-0 que a que llegue rápido el viernes. 😅",
-            "Valeria y Luisa ya están buscando tiquetes de vacaciones con el premio mayor. ✈️💰",
-            "Ese pronóstico tiene menos futuro que promesa de político en campaña. 🤥",
-            "Apostando con mentalidad de campeones, pero sufriendo los partidos como novatos. 🏆",
-            "Algunos le rezan a todos los santos, otros simplemente esperan un milagro matemático. 🧮",
+            "Mucho análisis táctico para terminar ganando por un autogol. 🤦‍♂️",
+            "¿Alguien le puede revisar la bola de cristal a los líderes? 🔮",
+            "Demostrando que un buen chepazo vale más que mil horas de análisis. 🍀",
+            "Rascando puntos de consolación como si fueran el último tinto de la oficina. ☕",
+            "Usando algoritmos de la NASA solo para terminar poniendo un 1-0. 💻",
+            "Apostando con mentalidad de campeones, pero sufriendo como novatos. 🏆",
             "Pidiendo la hora desde el primer tiempo para no perder esos punticos. ⏱️🥵"
         ];
-
-        let globalPlayersList = []; 
 
         setInterval(() => {
             let statusP = document.getElementById("status");
@@ -261,6 +298,30 @@
             document.getElementById(tab + '-container').classList.add('active');
         }
 
+        // DIBUJAR SPARKLINE SVG
+        function drawSparkline(history) {
+            if(!history || history.length < 2) return `<span style="color:#aaa; font-size:0.8rem;">Faltan partidos jugados</span>`;
+            let max = Math.max(...history, 1);
+            let min = Math.min(...history, 0);
+            let width = 280; let height = 40;
+            let points = history.map((val, i) => {
+                let x = (i / (history.length - 1)) * width;
+                let y = height - ((val - min) / (max - min || 1)) * height;
+                return `${x},${y}`;
+            }).join(" ");
+            
+            let circles = history.map((val, i) => {
+                let x = (i / (history.length - 1)) * width;
+                let y = height - ((val - min) / (max - min || 1)) * height;
+                return `<circle cx="${x}" cy="${y}" r="3.5" fill="var(--accent)"/>`;
+            }).join("");
+
+            return `<svg viewBox="-5 -10 ${width+10} ${height+20}" style="width:100%; height:100%; overflow:visible;">
+                <polyline points="${points}" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                ${circles}
+            </svg>`;
+        }
+
         function openModal(name, pts, mu, at, ag, llaves) {
             document.getElementById('m-name').innerText = name;
             document.getElementById('m-avatar').src = getAvatarUrl(name);
@@ -269,6 +330,10 @@
             document.getElementById('m-at').innerText = at;
             document.getElementById('m-ag').innerText = ag;
             document.getElementById('m-llaves').innerText = llaves;
+            
+            let history = globalPlayersList[name] ? globalPlayersList[name].historialPuntos : [];
+            document.getElementById('m-chart').innerHTML = drawSparkline(history);
+            
             document.getElementById('player-modal').classList.add('active');
         }
 
@@ -301,10 +366,22 @@
             return result;
         }
 
+        async function refreshData(btn) {
+            if(btn) btn.classList.add('spin');
+            document.querySelectorAll('.container').forEach(c => {
+                let text = c.id === 'matches-container' ? "Buscando partidos..." : "Actualizando...";
+                c.innerHTML = `<div class='loader'>${text} 🔄</div>`;
+            });
+            await loadData();
+            if(btn) {
+                setTimeout(() => btn.classList.remove('spin'), 500);
+            }
+        }
+
         async function loadData() {
             try {
                 // ROMPE-CACHÉ SEGURO
-                const resMatches = await fetch(urlPartidos, { cache: "no-store" });
+                const resMatches = await fetch(urlPartidos + "&t=" + new Date().getTime(), { cache: "no-store" });
                 const csvMatches = await resMatches.text();
                 const rowsM = parseCSV(csvMatches);
                 
@@ -322,51 +399,26 @@
                 
                 const hM_upper = headerM.map(h => String(h || "").trim().toUpperCase());
                 
-                let idxMatchNum = hM_upper.findIndex(h => h.includes("PARTIDO"));
-                if(idxMatchNum === -1) idxMatchNum = 0;
-                let idxFecha = hM_upper.findIndex(h => h.includes("FECHA"));
-                if(idxFecha === -1) idxFecha = 1;
-                let idxHora = hM_upper.findIndex(h => h.includes("HORA"));
-                if(idxHora === -1) idxHora = 2;
-                let idxTeamL = hM_upper.findIndex(h => h.includes("LOCAL") && !h.includes("REAL") && !h.includes("("));
-                if(idxTeamL === -1) idxTeamL = 3;
-                let idxTeamV = hM_upper.findIndex(h => h.includes("VISITANTE") && !h.includes("REAL") && !h.includes("("));
-                if(idxTeamV === -1) idxTeamV = 4;
-                let idxRealL = hM_upper.findIndex(h => h.includes("REAL") && h.includes("LOCAL"));
-                if(idxRealL === -1) idxRealL = 5;
-                let idxRealV = hM_upper.findIndex(h => h.includes("REAL") && h.includes("VISITANTE"));
-                if(idxRealV === -1) idxRealV = 6;
+                let idxMatchNum = hM_upper.findIndex(h => h.includes("PARTIDO")); if(idxMatchNum === -1) idxMatchNum = 0;
+                let idxFecha = hM_upper.findIndex(h => h.includes("FECHA")); if(idxFecha === -1) idxFecha = 1;
+                let idxHora = hM_upper.findIndex(h => h.includes("HORA")); if(idxHora === -1) idxHora = 2;
+                let idxTeamL = hM_upper.findIndex(h => h.includes("LOCAL") && !h.includes("REAL") && !h.includes("(")); if(idxTeamL === -1) idxTeamL = 3;
+                let idxTeamV = hM_upper.findIndex(h => h.includes("VISITANTE") && !h.includes("REAL") && !h.includes("(")); if(idxTeamV === -1) idxTeamV = 4;
+                let idxRealL = hM_upper.findIndex(h => h.includes("REAL") && h.includes("LOCAL")); if(idxRealL === -1) idxRealL = 5;
+                let idxRealV = hM_upper.findIndex(h => h.includes("REAL") && h.includes("VISITANTE")); if(idxRealV === -1) idxRealV = 6;
 
-                // DETECCIÓN DE PARTICIPANTES
                 const players = [];
                 headerM.forEach((colName, idx) => {
-                    let original = String(colName || "").trim();
-                    let upper = original.toUpperCase();
-                    
+                    let upper = String(colName || "").trim().toUpperCase();
                     if (upper.includes("(L)")) {
-                        let cleanName = original.replace(/\(\s*[Ll]\s*\)/i, "").trim();
+                        let cleanName = colName.replace(/\(\s*[Ll]\s*\)/i, "").trim();
                         let safeNameL = cleanName.toUpperCase().replace(/[^A-Z0-9]/g, "");
-                        
-                        let idxV = headerM.findIndex((h, i) => {
-                            if (i <= idx) return false; 
-                            let vUpper = String(h || "").toUpperCase();
-                            if (vUpper.includes("(V)")) {
-                                let safeNameV = vUpper.replace(/\(\s*[Vv]\s*\)/i, "").replace(/[^A-Z0-9]/g, "");
-                                return safeNameL === safeNameV;
-                            }
-                            return false;
-                        });
-                        
+                        let idxV = headerM.findIndex((h, i) => i > idx && String(h||"").toUpperCase().includes("(V)") && String(h||"").replace(/\(\s*[Vv]\s*\)/i, "").replace(/[^A-Z0-9]/g, "") === safeNameL);
                         if (idxV === -1 && idx + 1 < headerM.length) {
                             let nextCol = String(headerM[idx+1] || "").toUpperCase();
-                            if (!nextCol.includes("(L)") && !nextCol.includes("REAL")) {
-                                idxV = idx + 1;
-                            }
+                            if (!nextCol.includes("(L)") && !nextCol.includes("REAL")) idxV = idx + 1;
                         }
-
-                        if (idxV !== -1) {
-                            players.push({ name: cleanName, idxL: idx, idxV: idxV });
-                        }
+                        if (idxV !== -1) players.push({ name: cleanName, idxL: idx, idxV: idxV });
                     }
                 });
 
@@ -383,7 +435,6 @@
                     let matchNumStr = cols[idxMatchNum] ? String(cols[idxMatchNum]).trim() : String(i);
                     let fechaPartido = (idxFecha !== -1 && cols[idxFecha]) ? String(cols[idxFecha]).trim().replace(/ 00:00:00/g, '') : "";
                     let horaPartido = (idxHora !== -1 && cols[idxHora]) ? String(cols[idxHora]).trim() : "";
-                    
                     let teamL = (idxTeamL !== -1 && cols[idxTeamL]) ? String(cols[idxTeamL]).trim() : "";
                     let teamV = (idxTeamV !== -1 && cols[idxTeamV]) ? String(cols[idxTeamV]).trim() : "";
                     
@@ -394,9 +445,7 @@
                     let hasScores = /\d/.test(glRaw) && /\d/.test(gvRaw);
                     
                     if(isLive) {
-                        let glLive = /\d/.test(glRaw) ? parseInt(glRaw) : 0;
-                        let gvLive = /\d/.test(gvRaw) ? parseInt(gvRaw) : 0;
-                        upcomingMatches.push({teamL, teamV, cols, status: "LIVE", gl: glLive, gv: gvLive, matchNum: matchNumStr, fecha: fechaPartido, hora: horaPartido, rowIndex: i});
+                        upcomingMatches.push({teamL, teamV, cols, status: "LIVE", gl: parseInt(glRaw)||0, gv: parseInt(gvRaw)||0, matchNum: matchNumStr, fecha: fechaPartido, hora: horaPartido, rowIndex: i});
                     } else if(!hasScores) {
                         upcomingMatches.push({teamL, teamV, cols, status: "PRÓXIMO", gl: "", gv: "", matchNum: matchNumStr, fecha: fechaPartido, hora: horaPartido, rowIndex: i});
                     } else {
@@ -409,92 +458,185 @@
                 const containerM = document.getElementById("matches-container");
                 containerM.innerHTML = "";
                 
-                if(matchesToShow.length === 0) {
+                // Extra de Cuenta Regresiva (Banner)
+                if (matchesToShow.length > 0 && matchesToShow[0].status === "PRÓXIMO") {
+                    let pm = matchesToShow[0];
+                    containerM.innerHTML += `
+                        <div class="next-match-banner">
+                            <h3>⏳ Próximo Partido</h3>
+                            <div class="teams">${getFlag(pm.teamL)} ${pm.teamL} vs ${pm.teamV} ${getFlag(pm.teamV)}</div>
+                            <div style="font-size:0.9rem; background:rgba(0,0,0,0.15); display:inline-block; padding: 4px 12px; border-radius:12px; margin-top:5px;">📅 ${pm.fecha} • ⏰ ${pm.hora}</div>
+                        </div>`;
+                } else if(matchesToShow.length === 0) {
                     containerM.innerHTML = "<div class='loader'>⚽ No hay pronósticos pendientes en este momento. ¡Todo está jugado!</div>";
-                } else {
-                    matchesToShow.forEach((match, index) => {
-                        let predsHtml = "";
-                        let localBets = 0, tieBets = 0, visitBets = 0, totalBets = 0;
+                }
 
-                        if (match.status !== "PRÓXIMO") {
-                            players.forEach(p => {
-                                let pL = match.cols[p.idxL] !== undefined ? String(match.cols[p.idxL]).trim() : "";
-                                let pV = match.cols[p.idxV] !== undefined ? String(match.cols[p.idxV]).trim() : "";
-                                let score = "-";
-                                
-                                if(pL !== "" && pV !== "") {
-                                    score = String(`${pL} - ${pV}`).replace(/\.0/g, '').replace(/o/gi, '0');
-                                    let numL = parseInt(String(pL).replace(/o/gi, '0')); 
-                                    let numV = parseInt(String(pV).replace(/o/gi, '0'));
-                                    if(!isNaN(numL) && !isNaN(numV)) {
-                                        totalBets++;
-                                        if(numL > numV) localBets++; else if(numL < numV) visitBets++; else tieBets++;
-                                    }
+                matchesToShow.forEach((match, index) => {
+                    let predsHtml = "";
+                    let localBets = 0, tieBets = 0, visitBets = 0, totalBets = 0;
+
+                    if (match.status !== "PRÓXIMO") {
+                        players.forEach(p => {
+                            let pL = match.cols[p.idxL] !== undefined ? String(match.cols[p.idxL]).trim() : "";
+                            let pV = match.cols[p.idxV] !== undefined ? String(match.cols[p.idxV]).trim() : "";
+                            let score = "-";
+                            if(pL !== "" && pV !== "") {
+                                score = String(`${pL} - ${pV}`).replace(/\.0/g, '').replace(/o/gi, '0');
+                                let numL = parseInt(String(pL).replace(/o/gi, '0')); 
+                                let numV = parseInt(String(pV).replace(/o/gi, '0'));
+                                if(!isNaN(numL) && !isNaN(numV)) {
+                                    totalBets++;
+                                    if(numL > numV) localBets++; else if(numL < numV) visitBets++; else tieBets++;
+                                }
+                            }
+                            let avatar = getAvatarUrl(p.name);
+                            predsHtml += `<li class="pred-row">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <img src="${avatar}" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                    <span class="player-name">${p.name}</span>
+                                </div> 
+                                <span class="pred-score">${score}</span>
+                            </li>`;
+                        });
+                    }
+
+                    let pctL = totalBets ? Math.round((localBets/totalBets)*100) : 0;
+                    let pctE = totalBets ? Math.round((tieBets/totalBets)*100) : 0;
+                    let pctV = totalBets ? Math.round((visitBets/totalBets)*100) : 0;
+
+                    let statusCenterHtml = ""; let liveBadgeHtml = ""; let cardClass = "match-card";
+                    if(match.status === "LIVE") {
+                        cardClass = "match-card live-card";
+                        liveBadgeHtml = `<span class="time live">🔴 EN VIVO</span>`;
+                        statusCenterHtml = `<div class="live-score-badge">${match.gl}<span class="live-dot">🔴</span>${match.gv}</div>`;
+                    } else {
+                        statusCenterHtml = `<div class="match-sched"><span class="date-val">${match.fecha || 'Partido # '+match.matchNum}</span><span class="time-val">${match.hora || '--:--'}</span></div>`;
+                    }
+
+                    let distContainerHtml = ""; let actionBtnHtml = ""; let predsUlHtml = "";
+                    if (match.status === "PRÓXIMO") {
+                        distContainerHtml = `<div class="dist-container" style="text-align:center; padding-bottom: 15px; border-bottom: 1px solid var(--border-color);"><span style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">🕵️‍♂️ TENDENCIAS Y PRONÓSTICOS OCULTOS</span></div>`;
+                        actionBtnHtml = `<button class="toggle-btn" style="color: #999; cursor: default; opacity: 0.8;" disabled>🔒 PRONÓSTICOS CERRADOS</button>`;
+                        predsUlHtml = `<ul class="predictions" id="pred_${index}"></ul>`;
+                    } else {
+                        distContainerHtml = `
+                            <div class="dist-container">
+                                <div class="dist-bar-wrapper">
+                                    <div class="dist-bar local" style="width:${pctL}%"></div>
+                                    <div class="dist-bar empate" style="width:${pctE}%"></div>
+                                    <div class="dist-bar visit" style="width:${pctV}%"></div>
+                                </div>
+                                <div class="dist-labels"><span>${localBets} L</span><span>${tieBets} E</span><span>${visitBets} V</span></div>
+                            </div>`;
+                        actionBtnHtml = `<button class="toggle-btn" id="btn_${index}" onclick="togglePred('pred_${index}', 'btn_${index}')">VER PRONÓSTICOS ▼</button>`;
+                        predsUlHtml = `<ul class="predictions" id="pred_${index}">${predsHtml}</ul>`;
+                    }
+
+                    containerM.innerHTML += `
+                        <div class="${cardClass}">
+                            <div class="match-info">
+                                <div class="team"><span class="team-icon">${getFlag(match.teamL)}</span><span class="team-name">${match.teamL}</span></div>
+                                <div class="match-status"><span class="vs">VS</span>${statusCenterHtml}${liveBadgeHtml}</div>
+                                <div class="team"><span class="team-icon">${getFlag(match.teamV)}</span><span class="team-name">${match.teamV}</span></div>
+                            </div>
+                            ${distContainerHtml}
+                            ${actionBtnHtml}
+                            ${predsUlHtml}
+                        </div>`;
+                });
+
+                // ---- MOTOR DE CÁLCULO Y ESTADÍSTICAS GLOBALES ----
+                const scoring = {
+                    "GRUPOS": { at: 10, parcial: 7, trend: 5, oneteam: 2, mu: 10 },
+                    "16VOS":  { at: 12, parcial: 7, trend: 5, oneteam: 2, mu: 12 },
+                    "8VOS":   { at: 12, parcial: 7, trend: 5, oneteam: 2, mu: 12 },
+                    "4TOS":   { at: 15, parcial: 7, trend: 5, oneteam: 0, mu: 0 },
+                    "SEMI":   { at: 20, parcial: 10, trend: 7, oneteam: 0, mu: 0 },
+                    "3RO":    { at: 20, parcial: 10, trend: 7, oneteam: 0, mu: 0 },
+                    "FINAL":  { at: 50, parcial: 20, trend: 15, oneteam: 0, mu: 0 }
+                };
+
+                let playerStats = {};
+                players.forEach(p => {
+                    playerStats[p.name] = { nombre: p.name, puntos: 0, mu: 0, at: 0, ag: 0, llaves: 0, posPrev: 99, empatesApostados: 0, historialPuntos: [0] };
+                });
+
+                let rompeQuinielas = null; let matchLowestPts = 9999;
+
+                finishedMatches.forEach((match, idx) => {
+                    let numMatchStr = String(match.matchNum).match(/\d+/); 
+                    let mNum = numMatchStr ? parseInt(numMatchStr[0]) : (match.rowIndex - headerRowIdx);
+
+                    let phase = "GRUPOS";
+                    if (mNum > 72 && mNum <= 88) phase = "16VOS";
+                    else if (mNum > 88 && mNum <= 96) phase = "8VOS";
+                    else if (mNum > 96 && mNum <= 100) phase = "4TOS";
+                    else if (mNum > 100 && mNum <= 102) phase = "SEMI";
+                    else if (mNum === 103) phase = "3RO";
+                    else if (mNum === 104) phase = "FINAL";
+
+                    let sc = scoring[phase];
+                    let rl = match.gl; 
+                    let rv = match.gv; 
+                    let realTrend = rl > rv ? 1 : (rl < rv ? -1 : 0);
+
+                    let correctExacts = []; let totalMatchPoints = 0;
+                    
+                    players.forEach(p => {
+                        let pL = match.cols[p.idxL] !== undefined ? String(match.cols[p.idxL]).trim() : "";
+                        let pV = match.cols[p.idxV] !== undefined ? String(match.cols[p.idxV]).trim() : "";
+                        if(pL !== "" && pV !== "") {
+                            let numL = parseInt(pL.replace(/o/gi, '0'));
+                            let numV = parseInt(pV.replace(/o/gi, '0'));
+                            if(!isNaN(numL) && !isNaN(numV)) {
+                                if (numL === numV) playerStats[p.name].empatesApostados++; // Contar apuestas al empate
+                                if (numL === rl && numV === rv) correctExacts.push(p.name);
+                            }
+                        }
+                    });
+                    
+                    let isMU = correctExacts.length === 1;
+
+                    players.forEach(p => {
+                        let pL = match.cols[p.idxL] !== undefined ? String(match.cols[p.idxL]).trim() : "";
+                        let pV = match.cols[p.idxV] !== undefined ? String(match.cols[p.idxV]).trim() : "";
+                        
+                        if(pL !== "" && pV !== "") {
+                            let pl = parseInt(pL.replace(/o/gi, '0'));
+                            let pv = parseInt(pV.replace(/o/gi, '0'));
+                            
+                            if(!isNaN(pl) && !isNaN(pv)) {
+                                let playerTrend = pl > pv ? 1 : (pl < pv ? -1 : 0);
+                                let trendMatch = (realTrend === playerTrend);
+                                let partialMatch = (pl === rl || pv === rv);
+                                let isAT = (pl === rl && pv === rv);
+
+                                let earned = 0;
+                                if (isAT) {
+                                    playerStats[p.name].at += 1; earned += sc.at; 
+                                    if (isMU) { playerStats[p.name].mu += 1; earned += sc.mu; }
+                                } else if (trendMatch && partialMatch) {
+                                    playerStats[p.name].ag += 1; earned += sc.parcial; 
+                                } else if (trendMatch && !partialMatch) {
+                                    playerStats[p.name].ag += 1; earned += sc.trend; 
+                                } else if (!trendMatch && partialMatch && sc.oneteam > 0) {
+                                    playerStats[p.name].ag += 1; earned += sc.oneteam; 
                                 }
                                 
-                                let avatar = getAvatarUrl(p.name);
-                                predsHtml += `<li class="pred-row">
-                                    <div style="display: flex; align-items: center; gap: 10px;">
-                                        <img src="${avatar}" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                                        <span class="player-name">${p.name}</span>
-                                    </div> 
-                                    <span class="pred-score">${score}</span>
-                                </li>`;
-                            });
+                                playerStats[p.name].puntos += earned;
+                                totalMatchPoints += earned;
+                            }
                         }
-
-                        let pctL = totalBets ? Math.round((localBets/totalBets)*100) : 0;
-                        let pctE = totalBets ? Math.round((tieBets/totalBets)*100) : 0;
-                        let pctV = totalBets ? Math.round((visitBets/totalBets)*100) : 0;
-
-                        let statusCenterHtml = ""; let liveBadgeHtml = ""; let cardClass = "match-card";
-
-                        if(match.status === "LIVE") {
-                            cardClass = "match-card live-card";
-                            liveBadgeHtml = `<span class="time live">🔴 EN VIVO</span>`;
-                            statusCenterHtml = `<div class="live-score-badge">${match.gl}<span class="live-dot">🔴</span>${match.gv}</div>`;
-                        } else {
-                            statusCenterHtml = `<div class="match-sched"><span class="date-val">${match.fecha || 'Partido # '+match.matchNum}</span><span class="time-val">${match.hora || '--:--'}</span></div>`;
-                        }
-
-                        let distContainerHtml = "";
-                        let actionBtnHtml = "";
-                        let predsUlHtml = "";
-
-                        if (match.status === "PRÓXIMO") {
-                            distContainerHtml = `
-                                <div class="dist-container" style="text-align:center; padding-bottom: 15px; border-bottom: 1px solid var(--border-color);">
-                                    <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">🕵️‍♂️ TENDENCIAS Y PRONÓSTICOS OCULTOS</span>
-                                </div>`;
-                            actionBtnHtml = `<button class="toggle-btn" style="color: #999; cursor: default; opacity: 0.8;" disabled>🔒 PRONÓSTICOS CERRADOS</button>`;
-                            predsUlHtml = `<ul class="predictions" id="pred_${index}"></ul>`;
-                        } else {
-                            distContainerHtml = `
-                                <div class="dist-container">
-                                    <div class="dist-bar-wrapper">
-                                        <div class="dist-bar local" style="width:${pctL}%"></div>
-                                        <div class="dist-bar empate" style="width:${pctE}%"></div>
-                                        <div class="dist-bar visit" style="width:${pctV}%"></div>
-                                    </div>
-                                    <div class="dist-labels"><span>${localBets} L</span><span>${tieBets} E</span><span>${visitBets} V</span></div>
-                                </div>`;
-                            actionBtnHtml = `<button class="toggle-btn" id="btn_${index}" onclick="togglePred('pred_${index}', 'btn_${index}')">VER PRONÓSTICOS ▼</button>`;
-                            predsUlHtml = `<ul class="predictions" id="pred_${index}">${predsHtml}</ul>`;
-                        }
-
-                        containerM.innerHTML += `
-                            <div class="${cardClass}">
-                                <div class="match-info">
-                                    <div class="team"><span class="team-icon">⚽</span><span class="team-name">${match.teamL}</span></div>
-                                    <div class="match-status"><span class="vs">VS</span>${statusCenterHtml}${liveBadgeHtml}</div>
-                                    <div class="team"><span class="team-icon">⚽</span><span class="team-name">${match.teamV}</span></div>
-                                </div>
-                                ${distContainerHtml}
-                                ${actionBtnHtml}
-                                ${predsUlHtml}
-                            </div>`;
+                        // Registrar historial para la gráfica
+                        playerStats[p.name].historialPuntos.push(playerStats[p.name].puntos);
                     });
-                }
+
+                    // Calcular el Rompe-Quinielas (el partido finalizado que dio menos puntos en general)
+                    if (totalMatchPoints < matchLowestPts && totalMatchPoints >= 0) {
+                        matchLowestPts = totalMatchPoints;
+                        rompeQuinielas = `${getFlag(match.teamL)} ${match.teamL} ${rl}-${rv} ${match.teamV} ${getFlag(match.teamV)}`;
+                    }
+                });
 
                 // ---- RENDERIZAR HISTORIAL DE PARTIDOS ----
                 const containerH = document.getElementById("history-container");
@@ -510,7 +652,6 @@
                             let pL = match.cols[p.idxL] !== undefined ? String(match.cols[p.idxL]).trim() : "";
                             let pV = match.cols[p.idxV] !== undefined ? String(match.cols[p.idxV]).trim() : "";
                             let score = "-";
-                            
                             if(pL !== "" && pV !== "") {
                                 score = String(`${pL} - ${pV}`).replace(/\.0/g, '').replace(/o/gi, '0');
                                 let numL = parseInt(String(pL).replace(/o/gi, '0')); 
@@ -520,7 +661,6 @@
                                     if(numL > numV) localBets++; else if(numL < numV) visitBets++; else tieBets++;
                                 }
                             }
-                            
                             let avatar = getAvatarUrl(p.name);
                             predsHtml += `<li class="pred-row">
                                 <div style="display: flex; align-items: center; gap: 10px;">
@@ -540,13 +680,13 @@
                         histHtml += `
                             <div class="match-card history-card">
                                 <div class="match-info">
-                                    <div class="team"><span class="team-icon">⚽</span><span class="team-name">${match.teamL}</span></div>
+                                    <div class="team"><span class="team-icon">${getFlag(match.teamL)}</span><span class="team-name">${match.teamL}</span></div>
                                     <div class="match-status">
                                         <span class="vs">FINAL</span>
                                         <div class="live-score-badge" style="color:var(--primary); font-size:1.8rem;">${match.gl} - ${match.gv}</div>
                                         <span class="time" style="background:#e0e0e0; color:#555; font-size:0.65rem;">${displayDate}</span>
                                     </div>
-                                    <div class="team"><span class="team-icon">⚽</span><span class="team-name">${match.teamV}</span></div>
+                                    <div class="team"><span class="team-icon">${getFlag(match.teamV)}</span><span class="team-name">${match.teamV}</span></div>
                                 </div>
                                 <div class="dist-container">
                                     <div class="dist-bar-wrapper">
@@ -563,28 +703,24 @@
                     containerH.innerHTML = histHtml;
                 }
 
-                // ---- RENDERIZAR PESTAÑA DE LLAVES DE OCTAVOS DE FINAL (AUTOMÁTICO) ----
+                // ---- RENDERIZAR PESTAÑA DE LLAVES (AUTOMÁTICO) ----
                 let bracketHtml = `
                     <div style="text-align: center; margin-bottom: 20px;">
-                        <h2 style="color: var(--primary); margin: 0 0 5px 0; font-weight: 900;">🏆 Octavos de Final</h2>
-                        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">Los 16 mejores clasificados del mundo</p>
+                        <h2 style="color: var(--primary); margin: 0 0 5px 0; font-weight: 900;">🏆 Fases Finales</h2>
+                        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">Clasificados a partir de Octavos</p>
                     </div>`;
 
                 try {
-                    const resLlaves = await fetch(urlLlaves, { cache: "no-store" });
+                    const resLlaves = await fetch(urlLlaves + "&t=" + new Date().getTime(), { cache: "no-store" });
                     const csvLlaves = await resLlaves.text();
                     const rowsLL = parseCSV(csvLlaves);
 
                     if (rowsLL.length > 1) {
                         const hLL = rowsLL[0].map(h => String(h || "").trim().toUpperCase());
-                        const iF = hLL.indexOf("FECHA");
-                        const iE = hLL.indexOf("ESTADIO");
-                        const iL = hLL.indexOf("LOCAL");
-                        const iBL = hLL.indexOf("BANDERA L");
-                        const iV = hLL.indexOf("VISITANTE");
-                        const iBV = hLL.indexOf("BANDERA V");
-                        const iEst = hLL.indexOf("ESTADO");
-                        const iA = hLL.indexOf("ACERTARON");
+                        const iF = hLL.indexOf("FECHA"); const iE = hLL.indexOf("ESTADIO");
+                        const iL = hLL.indexOf("LOCAL"); const iBL = hLL.indexOf("BANDERA L");
+                        const iV = hLL.indexOf("VISITANTE"); const iBV = hLL.indexOf("BANDERA V");
+                        const iEst = hLL.indexOf("ESTADO"); const iA = hLL.indexOf("ACERTARON");
 
                         for (let i = 1; i < rowsLL.length; i++) {
                             let cols = rowsLL[i];
@@ -607,13 +743,10 @@
                             let statusText = isConfirmado ? "CONFIRMADO" : "POR DEFINIR";
                             let statusColor = isConfirmado ? "background: #fffde7; color: #f57f17;" : "background: #eee; color: #555;";
 
-                            let acertaronHtml = a;
-                            let cb = "#f5f5f5"; let ct = "#555";
+                            let acertaronHtml = a; let cb = "#f5f5f5"; let ct = "#555";
                             if (isConfirmado) {
-                                 acertaronHtml = `🎯 <strong>Acertaron:</strong> ${a}`;
-                                 cb = "#e8f5e9"; ct = "#2e7d32";
+                                 acertaronHtml = `🎯 <strong>Acertaron:</strong> ${a}`; cb = "#e8f5e9"; ct = "#2e7d32";
                             }
-
                             if(eL === "Por definir" || eL === "") eL = "Por definir";
                             if(eV === "Por definir" || eV === "") eV = "Por definir";
 
@@ -639,106 +772,19 @@
                     }
                 } catch(error) {
                     console.error(error);
-                    bracketHtml += `<div class='loader'>Error al cargar las llaves desde Google Sheets 🔴</div>`;
+                    bracketHtml += `<div class='loader'>Error al cargar las llaves 🔴</div>`;
                 }
 
                 document.getElementById("bracket-container").innerHTML = bracketHtml;
 
-                // ---- MOTOR DE CÁLCULO AUTOMÁTICO DE PUNTOS ----
-                
-                const scoring = {
-                    "GRUPOS": { at: 10, parcial: 7, trend: 5, oneteam: 2, mu: 10 },
-                    "16VOS":  { at: 12, parcial: 7, trend: 5, oneteam: 2, mu: 12 },
-                    "8VOS":   { at: 12, parcial: 7, trend: 5, oneteam: 2, mu: 12 },
-                    "4TOS":   { at: 15, parcial: 7, trend: 5, oneteam: 0, mu: 0 },
-                    "SEMI":   { at: 20, parcial: 10, trend: 7, oneteam: 0, mu: 0 },
-                    "3RO":    { at: 20, parcial: 10, trend: 7, oneteam: 0, mu: 0 },
-                    "FINAL":  { at: 50, parcial: 20, trend: 15, oneteam: 0, mu: 0 }
-                };
-
-                let playerStats = {};
-                players.forEach(p => {
-                    playerStats[p.name] = { nombre: p.name, puntos: 0, mu: 0, at: 0, ag: 0, llaves: 0, posPrev: 99 };
-                });
-
-                finishedMatches.forEach(match => {
-                    let numMatchStr = String(match.matchNum).match(/\d+/); 
-                    let mNum = numMatchStr ? parseInt(numMatchStr[0]) : (match.rowIndex - headerRowIdx);
-
-                    let phase = "GRUPOS";
-                    if (mNum > 72 && mNum <= 88) phase = "16VOS";
-                    else if (mNum > 88 && mNum <= 96) phase = "8VOS";
-                    else if (mNum > 96 && mNum <= 100) phase = "4TOS";
-                    else if (mNum > 100 && mNum <= 102) phase = "SEMI";
-                    else if (mNum === 103) phase = "3RO";
-                    else if (mNum === 104) phase = "FINAL";
-
-                    let sc = scoring[phase];
-                    let rl = match.gl; 
-                    let rv = match.gv; 
-                    let realTrend = rl > rv ? 1 : (rl < rv ? -1 : 0);
-
-                    let correctExacts = [];
-                    players.forEach(p => {
-                        let pL = match.cols[p.idxL] !== undefined ? String(match.cols[p.idxL]).trim() : "";
-                        let pV = match.cols[p.idxV] !== undefined ? String(match.cols[p.idxV]).trim() : "";
-                        if(pL !== "" && pV !== "") {
-                            let numL = parseInt(pL.replace(/o/gi, '0'));
-                            let numV = parseInt(pV.replace(/o/gi, '0'));
-                            if (numL === rl && numV === rv) correctExacts.push(p.name);
-                        }
-                    });
-                    let isMU = correctExacts.length === 1;
-
-                    players.forEach(p => {
-                        let pL = match.cols[p.idxL] !== undefined ? String(match.cols[p.idxL]).trim() : "";
-                        let pV = match.cols[p.idxV] !== undefined ? String(match.cols[p.idxV]).trim() : "";
-                        
-                        if(pL !== "" && pV !== "") {
-                            let pl = parseInt(pL.replace(/o/gi, '0'));
-                            let pv = parseInt(pV.replace(/o/gi, '0'));
-                            
-                            if(!isNaN(pl) && !isNaN(pv)) {
-                                let playerTrend = pl > pv ? 1 : (pl < pv ? -1 : 0);
-                                let trendMatch = (realTrend === playerTrend);
-                                let partialMatch = (pl === rl || pv === rv);
-                                let isAT = (pl === rl && pv === rv);
-
-                                if (isAT) {
-                                    playerStats[p.name].at += 1;
-                                    playerStats[p.name].puntos += sc.at; 
-                                    if (isMU) { 
-                                        playerStats[p.name].mu += 1;
-                                        playerStats[p.name].puntos += sc.mu; 
-                                    }
-                                } else if (trendMatch && partialMatch) {
-                                    playerStats[p.name].ag += 1;
-                                    playerStats[p.name].puntos += sc.parcial; 
-                                } else if (trendMatch && !partialMatch) {
-                                    playerStats[p.name].ag += 1;
-                                    playerStats[p.name].puntos += sc.trend; 
-                                } else if (!trendMatch && partialMatch) {
-                                    if (sc.oneteam > 0) {
-                                        playerStats[p.name].ag += 1;
-                                        playerStats[p.name].puntos += sc.oneteam; 
-                                    }
-                                }
-                            }
-                        }
-                    });
-                });
-
-                // ---- LECTURA FLEXIBLE DE TABLA DE POSICIONES Y CANTIDAD DE LLAVES ----
-                const resBoard = await fetch(urlTabla, { cache: "no-store" });
+                // ---- LEER TABLA E INTEGRAR POSICIONES ----
+                const resBoard = await fetch(urlTabla + "&t=" + new Date().getTime(), { cache: "no-store" });
                 const csvBoard = await resBoard.text();
                 const rowsB = parseCSV(csvBoard);
                 const hB = rowsB[0].map(h => String(h || "").trim().toUpperCase());
                 
-                let idxName = hB.findIndex(h => h.includes("JUGADOR") || h.includes("NOMBRE")); 
-                if(idxName === -1) idxName = 1;
+                let idxName = hB.findIndex(h => h.includes("JUGADOR") || h.includes("NOMBRE")); if(idxName === -1) idxName = 1;
                 let idxPosPrev = hB.findIndex(h => h.includes("POSICI"));
-                
-                // NUEVA LÓGICA: Buscar explícitamente "CANTIDAD LLAVES" o "# LLAVES"
                 let idxPtosLlaves = hB.findIndex(h => h === "PTOS LLAVES" || h === "PUNTOS LLAVES" || h.includes("PTOS"));
                 let idxCantLlaves = hB.findIndex(h => h === "CANTIDAD LLAVES" || h === "# LLAVES" || h.includes("CANTIDAD"));
 
@@ -749,24 +795,19 @@
                     
                     if (statKey) {
                         playerStats[statKey].posPrev = parseInt(cols[idxPosPrev]) || 99;
-                        
                         let ptosLlavesRaw = idxPtosLlaves !== -1 ? (parseInt(cols[idxPtosLlaves]) || 0) : 0;
-                        
-                        // Si existe la nueva columna de cantidad, la lee. Si no, usa la división clásica como respaldo.
-                        let cantidadLlaves = 0;
-                        if (idxCantLlaves !== -1) {
-                            cantidadLlaves = parseInt(cols[idxCantLlaves]) || 0;
-                        } else {
-                            cantidadLlaves = Math.round(ptosLlavesRaw / 5); 
-                        }
-
+                        let cantidadLlaves = idxCantLlaves !== -1 ? (parseInt(cols[idxCantLlaves]) || 0) : Math.round(ptosLlavesRaw / 5); 
                         playerStats[statKey].puntos += ptosLlavesRaw;
-                        playerStats[statKey].llaves = cantidadLlaves; 
+                        playerStats[statKey].llaves = cantidadLlaves;
+                        
+                        // Añadir los puntos de llaves al historial final de la gráfica
+                        let lastIdx = playerStats[statKey].historialPuntos.length - 1;
+                        playerStats[statKey].historialPuntos[lastIdx] += ptosLlavesRaw;
                     }
                 }
 
-                globalPlayersList = Object.values(playerStats);
-                globalPlayersList.sort((a, b) => b.puntos - a.puntos);
+                globalPlayersList = playerStats; // Guardar en variable global para el chart
+                let sortedList = Object.values(playerStats).sort((a, b) => b.puntos - a.puntos);
 
                 let maxMU = -1, maxAT = -1, maxAG = -1, maxLlaves = -1; 
                 let nMU = "-", nAT = "-", nAG = "-", nLlaves = "-";
@@ -776,29 +817,23 @@
                 
                 let currentRank = 1; let previousPts = -1;
 
-                globalPlayersList.forEach((p, index) => {
+                sortedList.forEach((p, index) => {
                     if (p.puntos !== previousPts) { currentRank = index + 1; previousPts = p.puntos; }
-                    
                     if(p.mu > maxMU){ maxMU = p.mu; nMU = String(p.nombre || "-").split(" ")[0]; }
                     if(p.at > maxAT){ maxAT = p.at; nAT = String(p.nombre || "-").split(" ")[0]; }
                     if(p.ag > maxAG){ maxAG = p.ag; nAG = String(p.nombre || "-").split(" ")[0]; }
                     if(p.llaves > maxLlaves){ maxLlaves = p.llaves; nLlaves = String(p.nombre || "-").split(" ")[0]; }
 
-                    let podiumClass = "";
-                    let medalHtml = "";
+                    let podiumClass = ""; let medalHtml = "";
                     if (currentRank === 1) { medalHtml = `👑`; podiumClass = "podium-1"; } 
                     else if (currentRank === 2) { medalHtml = `🥈`; podiumClass = "podium-2"; } 
                     else if (currentRank === 3) { medalHtml = `🥉`; podiumClass = "podium-3"; } 
 
                     let trendHtml = `<span class="trend" style="color:var(--text-muted); font-size:0.75rem;">●</span>`;
-                    if (currentRank < p.posPrev) {
-                        trendHtml = `<span class="trend" style="color:var(--accent); font-size:0.85rem;">▲</span>`;
-                    } else if (currentRank > p.posPrev) {
-                        trendHtml = `<span class="trend" style="color:#e53935; font-size:0.85rem;">▼</span>`;
-                    }
+                    if (currentRank < p.posPrev) trendHtml = `<span class="trend" style="color:var(--accent); font-size:0.85rem;">▲</span>`;
+                    else if (currentRank > p.posPrev) trendHtml = `<span class="trend" style="color:#e53935; font-size:0.85rem;">▼</span>`;
 
                     let avatar = getAvatarUrl(p.nombre);
-
                     boardHtml += `<tr class="strat-row ${podiumClass}" data-name="${p.nombre}" onclick="openModal('${p.nombre}', ${p.puntos}, ${p.mu}, ${p.at}, ${p.ag}, ${p.llaves})">
                                     <td>${currentRank} ${trendHtml}</td>
                                     <td style="display: flex; align-items: center; gap: 8px; padding-left: 10px;">
@@ -810,54 +845,58 @@
                                   </tr>`;
                 });
                 boardHtml += `</table></div>`;
-                
-                let imgAT = getAvatarUrl(nAT);
-                let imgMU = getAvatarUrl(nMU);
-                let imgAG = getAvatarUrl(nAG);
-                let imgLlaves = getAvatarUrl(nLlaves);
 
+                // Determinar Insights (Curiosidades)
+                let reyEmpate = sortedList.sort((a,b) => b.empatesApostados - a.empatesApostados)[0];
+                let valReyEmpate = reyEmpate ? reyEmpate.empatesApostados : 0;
+                let rompeTexto = rompeQuinielas ? rompeQuinielas : "Aún no hay";
+
+                let insightsHtml = `
+                    <div class="insights-card">
+                        <div class="insight-box">
+                            <h4>💔 Rompe-Quinielas</h4>
+                            <span>💣</span>
+                            <p style="font-size:0.75rem;">${rompeTexto}</p>
+                        </div>
+                        <div class="insight-box">
+                            <h4>⚖️ Rey del Empate</h4>
+                            <img src="${getAvatarUrl(reyEmpate.nombre)}" style="width:30px; height:30px; border-radius:50%; border:2px solid white; display:block; margin: 4px auto;">
+                            <p style="font-size:0.75rem;">${String(reyEmpate.nombre).split(" ")[0]} (${valReyEmpate})</p>
+                        </div>
+                    </div>`;
+                
                 let fameHtml = `
                     <div style="text-align: center; margin-bottom: 15px;">
                         <h2 style="color: var(--primary); margin: 0 0 5px 0; font-weight: 900;">🏆 Cuadro de Honor</h2>
                     </div>
                     <div class="wall-of-fame">
                         <div class="fame-item" style="border-top-color: #2196F3;">
-                            <img src="${imgAT}" class="fame-img">
+                            <img src="${getAvatarUrl(nAT)}" class="fame-img">
                             <span>🎯 ${nAT}</span>
                             <small>Precisión (AT)</small>
                         </div>
                         <div class="fame-item" style="border-top-color: #FF9800;">
-                            <img src="${imgMU}" class="fame-img">
+                            <img src="${getAvatarUrl(nMU)}" class="fame-img">
                             <span>🔥 ${nMU}</span>
                             <small>Chepazos (MU)</small>
                         </div>
                         <div class="fame-item" style="border-top-color: #4CAF50;">
-                            <img src="${imgAG}" class="fame-img">
+                            <img src="${getAvatarUrl(nAG)}" class="fame-img">
                             <span>🩹 ${nAG}</span>
                             <small>Consolación (AG)</small>
                         </div>
                         <div class="fame-item" style="border-top-color: #9C27B0;">
-                            <img src="${imgLlaves}" class="fame-img">
+                            <img src="${getAvatarUrl(nLlaves)}" class="fame-img">
                             <span>🗝️ ${nLlaves}</span>
                             <small>Cerrajería (Lla)</small>
                         </div>
                     </div>`;
 
-                document.getElementById('leaderboard-container').innerHTML = fameHtml + boardHtml;
+                document.getElementById('leaderboard-container').innerHTML = insightsHtml + fameHtml + boardHtml;
 
             } catch (error) {
                 document.getElementById("status").innerText = "Sin conexión al VAR 🔴";
                 console.error(error);
-            }
-        }
-
-        function togglePred(listId, btnId) {
-            let list = document.getElementById(listId);
-            if(list) list.classList.toggle('active');
-            let btn = document.getElementById(btnId);
-            if(btn) {
-                btn.classList.toggle('active');
-                btn.innerText = btn.classList.contains('active') ? "OCULTAR PRONÓSTICOS ▲" : "VER PRONÓSTICOS ▼";
             }
         }
 
