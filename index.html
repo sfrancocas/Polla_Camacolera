@@ -159,7 +159,6 @@
         .toggle-btn { width: 100%; background: var(--card-bg); border: none; padding: 15px; color: var(--primary); font-weight: 700; cursor: pointer; border-top: 1px solid var(--border-color); transition: background 0.2s;}
         .toggle-btn:hover { filter: brightness(0.95); }
 
-        /* Botón flotante para refrescar */
         .fab-refresh { position: fixed; bottom: 20px; right: 20px; width: 55px; height: 55px; border-radius: 50%; background: var(--primary); color: white; border: none; font-size: 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; z-index: 100; transition: transform 0.2s; display: flex; align-items: center; justify-content: center;}
         .fab-refresh:active { transform: scale(0.9); }
         .spin { animation: spin 0.8s linear infinite; }
@@ -243,9 +242,9 @@
             "PORTUGAL": "🇵🇹", "JAPÓN": "🇯🇵", "SENEGAL": "🇸🇳", "BÉLGICA": "🇧🇪",
             "PAÍSES BAJOS": "🇳🇱", "HOLANDA": "🇳🇱", "CROACIA": "🇭🇷", "PERÚ": "🇵🇪",
             "CHILE": "🇨🇱", "VENEZUELA": "🇻🇪", "BOLIVIA": "🇧🇴", "COSTA RICA": "🇨🇷",
-            "SUIZA": "🇨🇭", "COREA DEL SUR": "🇰🇷", "DINAMARCA": "🇩🇰", "SUECIA": "🇩🇰", "POLONIA": "🇵🇱",
+            "SUIZA": "🇨🇭", "COREA DEL SUR": "🇰🇷", "DINAMARCA": "🇩🇰", "SUECIA": "🇸🇪", "POLONIA": "🇵🇱",
             "AUSTRALIA": "🇦🇺", "IRÁN": "🇮🇷", "ARABIA SAUDITA": "🇸🇦", "QATAR": "🇶🇦", "EGIPTO": "🇪🇬",
-            "NIGERIA": "🇸🇳", "GHANA": "🇬🇭", "CAMERÚN": "🇨🇲", "TÚNEZ": "🇹🇳"
+            "NIGERIA": "🇳🇬", "GHANA": "🇬🇭", "CAMERÚN": "🇨🇲", "TÚNEZ": "🇹🇳", "AUSTRIA": "🇦🇹"
         };
 
         function getAvatarUrl(name) {
@@ -261,7 +260,7 @@
             return countryFlags[cleanName] || "⚽";
         }
         
-        let globalPlayersList = {}; // Para guardar la historia gráfica de cada uno
+        let globalPlayersList = {};
 
         const frasesGalpon = [
             "El que no arriesga, se queda en el fondo de la tabla mirando. 👀",
@@ -296,6 +295,16 @@
             if(currentBtn) currentBtn.classList.add('active');
             document.querySelectorAll('.container').forEach(cont => cont.classList.remove('active'));
             document.getElementById(tab + '-container').classList.add('active');
+        }
+
+        // LÓGICA DE BOTÓN DIRECTA Y A PRUEBA DE FALLOS
+        function togglePred(btn) {
+            let list = btn.nextElementSibling;
+            if(list && list.classList.contains('predictions')) {
+                list.classList.toggle('active');
+                btn.classList.toggle('active');
+                btn.innerText = btn.classList.contains('active') ? "OCULTAR PRONÓSTICOS ▲" : "VER PRONÓSTICOS ▼";
+            }
         }
 
         // DIBUJAR SPARKLINE SVG
@@ -517,7 +526,7 @@
                     if (match.status === "PRÓXIMO") {
                         distContainerHtml = `<div class="dist-container" style="text-align:center; padding-bottom: 15px; border-bottom: 1px solid var(--border-color);"><span style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">🕵️‍♂️ TENDENCIAS Y PRONÓSTICOS OCULTOS</span></div>`;
                         actionBtnHtml = `<button class="toggle-btn" style="color: #999; cursor: default; opacity: 0.8;" disabled>🔒 PRONÓSTICOS CERRADOS</button>`;
-                        predsUlHtml = `<ul class="predictions" id="pred_${index}"></ul>`;
+                        predsUlHtml = `<ul class="predictions"></ul>`;
                     } else {
                         distContainerHtml = `
                             <div class="dist-container">
@@ -528,8 +537,9 @@
                                 </div>
                                 <div class="dist-labels"><span>${localBets} L</span><span>${tieBets} E</span><span>${visitBets} V</span></div>
                             </div>`;
-                        actionBtnHtml = `<button class="toggle-btn" id="btn_${index}" onclick="togglePred('pred_${index}', 'btn_${index}')">VER PRONÓSTICOS ▼</button>`;
-                        predsUlHtml = `<ul class="predictions" id="pred_${index}">${predsHtml}</ul>`;
+                        // NUEVO BOTÓN A PRUEBA DE FALLOS:
+                        actionBtnHtml = `<button class="toggle-btn" onclick="togglePred(this)">VER PRONÓSTICOS ▼</button>`;
+                        predsUlHtml = `<ul class="predictions">${predsHtml}</ul>`;
                     }
 
                     containerM.innerHTML += `
@@ -696,8 +706,8 @@
                                     </div>
                                     <div class="dist-labels"><span>${localBets} L</span><span>${tieBets} E</span><span>${visitBets} V</span></div>
                                 </div>
-                                <button class="toggle-btn" id="btn_hist_${index}" onclick="togglePred('pred_hist_${index}', 'btn_hist_${index}')">VER PRONÓSTICOS ▼</button>
-                                <ul class="predictions" id="pred_hist_${index}">${predsHtml}</ul>
+                                <button class="toggle-btn" onclick="togglePred(this)">VER PRONÓSTICOS ▼</button>
+                                <ul class="predictions">${predsHtml}</ul>
                             </div>`;
                     });
                     containerH.innerHTML = histHtml;
@@ -904,4 +914,3 @@
     </script>
 </body>
 </html>
-
