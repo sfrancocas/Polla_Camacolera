@@ -95,9 +95,6 @@
         .player-name { font-weight: 600; color: var(--text-main);}
         .pred-score { font-weight: 800; color: var(--primary); background: #e3f2fd; padding: 4px 12px; border-radius: 8px; }
         body.dark-mode .pred-score { background: #0d47a1; color: white; }
-        
-        .toggle-btn { width: 100%; background: var(--card-bg); border: none; padding: 15px; color: var(--primary); font-weight: 700; cursor: pointer; border-top: 1px solid var(--border-color); transition: background 0.2s;}
-        .toggle-btn:hover { filter: brightness(0.95); }
 
         .wall-of-fame { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 25px; }
         .fame-item { background: var(--card-bg); padding: 15px 10px; border-radius: 16px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.06); display: flex; flex-direction: column; align-items: center; border-top: 3px solid var(--primary); }
@@ -188,6 +185,7 @@
     <script>
         const urlPartidos = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5-A3wQAPUD3raKLrhfkiKWU62m6V7xFLsXY-vO_UdxCSADMwQSmkEecyGTqfpCJr2yYL6IghQ_B3i/pub?gid=658946236&single=true&output=csv";
         const urlTabla = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5-A3wQAPUD3raKLrhfkiKWU62m6V7xFLsXY-vO_UdxCSADMwQSmkEecyGTqfpCJr2yYL6IghQ_B3i/pub?gid=187955950&single=true&output=csv";
+        const urlLlaves = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5-A3wQAPUD3raKLrhfkiKWU62m6V7xFLsXY-vO_UdxCSADMwQSmkEecyGTqfpCJr2yYL6IghQ_B3i/pub?gid=1452253607&single=true&output=csv";
 
         // ==========================================
         // 📸 DICCIONARIO DE FOTOS DE LOS JUGADORES
@@ -562,50 +560,84 @@
                     containerH.innerHTML = histHtml;
                 }
 
-                // ---- RENDERIZAR PESTAÑA DE LLAVES DE OCTAVOS DE FINAL ----
-                const bracketData = [
-                    { f: "Sáb 4 de julio • 12:00 COT", e: "Por confirmar", eL: "Canadá", fL: "🇨🇦", eV: "Marruecos", fV: "🇲🇦", a: "🎯 <strong>Acertaron:</strong> Sebastián, Viviana, Diana", cb: "#e8f5e9", ct: "#2e7d32" },
-                    { f: "Dom 5 de julio • 15:00 COT", e: "Por confirmar", eL: "Brasil", fL: "BR", eV: "Noruega", fV: "NOR", a: "🎯 <strong>Acertaron:</strong> Sergio, Paula, Sebastián, Mónica, JuanP, Valeria, Angélica, Diana, Luisa, Manuela", cb: "#e8f5e9", ct: "#2e7d32" },
-                    { f: "Sáb 4 de julio • 16:00 COT", e: "Estadio Filadelfia", eL: "Paraguay", fL: "PAR", eV: "Francia", fV: "FR", a: "⏳ Ningún 🐤 acertó esta llave", cb: "#e8f5e9", ct: "#2e7d32" },
-                    { f: "Dom 5 de julio • 15:00 COT", e: "Estadio Ciudad de México", eL: "México", fL: "MEX", eV: "Inglaterra", fV: "ENG", a: "🎯 <strong>Acertaron:</strong> Paula, Sebastián, Valeria, Diana, Luisa,", cb: "#e8f5e9", ct: "#2e7d32" },
-                    { f: "Fecha por confirmar", e: "Por confirmar", eL: "Por definir", fL: "❓", eV: "Por definir", fV: "❓", a: "⏳ Pendiente de verificación por el VAR", cb: "#f5f5f5", ct: "#555" },
-                    { f: "Fecha por confirmar", e: "Por confirmar", eL: "Por definir", fL: "❓", eV: "Por definir", fV: "❓", a: "⏳ Pendiente de verificación por el VAR", cb: "#f5f5f5", ct: "#555" },
-                    { f: "Fecha por confirmar", e: "Por confirmar", eL: "Por definir", fL: "❓", eV: "Por definir", fV: "❓", a: "⏳ Pendiente de verificación por el VAR", cb: "#f5f5f5", ct: "#555" },
-                    { f: "Fecha por confirmar", e: "Por confirmar", eL: "Por definir", fL: "❓", eV: "Por definir", fV: "❓", a: "⏳ Pendiente de verificación por el VAR", cb: "#f5f5f5", ct: "#555" }
-                ];
-
+                // ---- RENDERIZAR PESTAÑA DE LLAVES DE OCTAVOS DE FINAL (AUTOMÁTICO) ----
                 let bracketHtml = `
                     <div style="text-align: center; margin-bottom: 20px;">
                         <h2 style="color: var(--primary); margin: 0 0 5px 0; font-weight: 900;">🏆 Octavos de Final</h2>
                         <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">Los 16 mejores clasificados del mundo</p>
                     </div>`;
 
-                bracketData.forEach(llave => {
-                    let opacidad = llave.eL === "Por definir" ? "opacity: 0.7;" : "";
-                    let banderaL = llave.fL === "❓" ? `<span class="team-icon" style="filter:grayscale(1)">❓</span>` : `<span class="team-icon">${llave.fL}</span>`;
-                    let banderaV = llave.fV === "❓" ? `<span class="team-icon" style="filter:grayscale(1)">❓</span>` : `<span class="team-icon">${llave.fV}</span>`;
-                    let status = llave.eL === "Por definir" ? "7 LLAVES RESTANTES" : "CONFIRMADO";
-                    let statusColor = llave.eL === "Por definir" ? "background: #eee; color: #555;" : "background: #fffde7; color: #f57f17;";
+                try {
+                    const resLlaves = await fetch(urlLlaves, { cache: "no-store" });
+                    const csvLlaves = await resLlaves.text();
+                    const rowsLL = parseCSV(csvLlaves);
 
-                    bracketHtml += `
-                    <div class="match-card" style="border-top: 4px solid #fbc02d; ${opacidad}">
-                        <div style="text-align:center; padding: 10px; border-bottom: 1px solid var(--border-color); background-color: rgba(11, 83, 148, 0.05);">
-                            <span style="display:block; font-size: 0.8rem; font-weight: 800; color: var(--primary);">📅 ${llave.f}</span>
-                            <span style="display:block; font-size: 0.7rem; font-weight: 600; color: var(--text-muted); margin-top: 3px;">🏟️ ${llave.e}</span>
-                        </div>
-                        <div class="match-info" style="padding: 15px;">
-                            <div class="team">${banderaL}<span class="team-name" style="font-size: 0.95rem;">${llave.eL}</span></div>
-                            <div class="match-status">
-                                <span class="vs" style="font-size: 0.7rem; ${statusColor} padding: 3px 8px; border-radius: 10px; font-weight:800; letter-spacing:0.5px">${status}</span>
-                                <span style="font-size:1.2rem; font-weight:900; color:var(--text-muted); margin-top:5px;">VS</span>
-                            </div>
-                            <div class="team">${banderaV}<span class="team-name" style="font-size: 0.95rem;">${llave.eV}</span></div>
-                        </div>
-                        <div style="background: ${llave.cb}; padding: 10px; border-top: 1px solid var(--border-color); font-size: 0.8rem; color: ${llave.ct}; text-align: center;">
-                            ${llave.a}
-                        </div>
-                    </div>`;
-                });
+                    if (rowsLL.length > 1) {
+                        const hLL = rowsLL[0].map(h => String(h || "").trim().toUpperCase());
+                        const iF = hLL.indexOf("FECHA");
+                        const iE = hLL.indexOf("ESTADIO");
+                        const iL = hLL.indexOf("LOCAL");
+                        const iBL = hLL.indexOf("BANDERA L");
+                        const iV = hLL.indexOf("VISITANTE");
+                        const iBV = hLL.indexOf("BANDERA V");
+                        const iEst = hLL.indexOf("ESTADO");
+                        const iA = hLL.indexOf("ACERTARON");
+
+                        for (let i = 1; i < rowsLL.length; i++) {
+                            let cols = rowsLL[i];
+                            if (!cols || cols.length < 3) continue;
+
+                            let f = iF !== -1 && cols[iF] ? cols[iF] : "Fecha por confirmar";
+                            let e = iE !== -1 && cols[iE] ? cols[iE] : "Por confirmar";
+                            let eL = iL !== -1 && cols[iL] ? cols[iL] : "Por definir";
+                            let fL = iBL !== -1 && cols[iBL] ? cols[iBL] : "❓";
+                            let eV = iV !== -1 && cols[iV] ? cols[iV] : "Por definir";
+                            let fV = iBV !== -1 && cols[iBV] ? cols[iBV] : "❓";
+                            let est = iEst !== -1 && cols[iEst] ? cols[iEst].toUpperCase() : "PENDIENTE";
+                            let a = iA !== -1 && cols[iA] ? cols[iA] : "⏳ Pendiente";
+
+                            let opacidad = (eL === "Por definir" || eL === "") ? "opacity: 0.7;" : "";
+                            let banderaL = fL === "❓" ? `<span class="team-icon" style="filter:grayscale(1)">❓</span>` : `<span class="team-icon">${fL}</span>`;
+                            let banderaV = fV === "❓" ? `<span class="team-icon" style="filter:grayscale(1)">❓</span>` : `<span class="team-icon">${fV}</span>`;
+                            
+                            let isConfirmado = est.includes("CONFIRMADO");
+                            let statusText = isConfirmado ? "CONFIRMADO" : "POR DEFINIR";
+                            let statusColor = isConfirmado ? "background: #fffde7; color: #f57f17;" : "background: #eee; color: #555;";
+
+                            let acertaronHtml = a;
+                            let cb = "#f5f5f5"; let ct = "#555";
+                            if (isConfirmado) {
+                                 acertaronHtml = `🎯 <strong>Acertaron:</strong> ${a}`;
+                                 cb = "#e8f5e9"; ct = "#2e7d32";
+                            }
+
+                            if(eL === "Por definir" || eL === "") eL = "Por definir";
+                            if(eV === "Por definir" || eV === "") eV = "Por definir";
+
+                            bracketHtml += `
+                            <div class="match-card" style="border-top: 4px solid #fbc02d; ${opacidad}">
+                                <div style="text-align:center; padding: 10px; border-bottom: 1px solid var(--border-color); background-color: rgba(11, 83, 148, 0.05);">
+                                    <span style="display:block; font-size: 0.8rem; font-weight: 800; color: var(--primary);">📅 ${f}</span>
+                                    <span style="display:block; font-size: 0.7rem; font-weight: 600; color: var(--text-muted); margin-top: 3px;">🏟️ ${e}</span>
+                                </div>
+                                <div class="match-info" style="padding: 15px;">
+                                    <div class="team">${banderaL}<span class="team-name" style="font-size: 0.95rem;">${eL}</span></div>
+                                    <div class="match-status">
+                                        <span class="vs" style="font-size: 0.7rem; ${statusColor} padding: 3px 8px; border-radius: 10px; font-weight:800; letter-spacing:0.5px">${statusText}</span>
+                                        <span style="font-size:1.2rem; font-weight:900; color:var(--text-muted); margin-top:5px;">VS</span>
+                                    </div>
+                                    <div class="team">${banderaV}<span class="team-name" style="font-size: 0.95rem;">${eV}</span></div>
+                                </div>
+                                <div style="background: ${cb}; padding: 10px; border-top: 1px solid var(--border-color); font-size: 0.8rem; color: ${ct}; text-align: center;">
+                                    ${acertaronHtml}
+                                </div>
+                            </div>`;
+                        }
+                    }
+                } catch(error) {
+                    console.error(error);
+                    bracketHtml += `<div class='loader'>Error al cargar las llaves desde Google Sheets 🔴</div>`;
+                }
 
                 document.getElementById("bracket-container").innerHTML = bracketHtml;
 
@@ -630,7 +662,6 @@
 
                 // 3. Evaluar cada partido FINALIZADO
                 finishedMatches.forEach(match => {
-                    // CÓDIGO CORREGIDO: Buscamos cualquier número dentro del texto del partido
                     let numMatchStr = String(match.matchNum).match(/\d+/); 
                     // Si no tiene número, usamos la fila de excel restándole el header como salvavidas
                     let mNum = numMatchStr ? parseInt(numMatchStr[0]) : (match.rowIndex - headerRowIdx);
@@ -647,10 +678,9 @@
                     let sc = scoring[phase];
                     let rl = match.gl; // Goles reales Local
                     let rv = match.gv; // Goles reales Visitante
-                    // Determinar ganador oficial (1 Local, -1 Visitante, 0 Empate)
                     let realTrend = rl > rv ? 1 : (rl < rv ? -1 : 0);
 
-                    // Buscar si alguien logró Marcador Único (Solo 1 persona acertó EXACTO)
+                    // Buscar si hay Marcador Único (MU)
                     let correctExacts = [];
                     players.forEach(p => {
                         let pL = match.cols[p.idxL] !== undefined ? String(match.cols[p.idxL]).trim() : "";
@@ -675,26 +705,26 @@
                             if(!isNaN(pl) && !isNaN(pv)) {
                                 let playerTrend = pl > pv ? 1 : (pl < pv ? -1 : 0);
                                 let trendMatch = (realTrend === playerTrend);
-                                let partialMatch = (pl === rl || pv === rv); // Acertó los goles de al menos 1 equipo
-                                let isAT = (pl === rl && pv === rv); // Acertó exacto
+                                let partialMatch = (pl === rl || pv === rv);
+                                let isAT = (pl === rl && pv === rv);
 
                                 if (isAT) {
                                     playerStats[p.name].at += 1;
-                                    playerStats[p.name].puntos += sc.at; // Suma puntos de AT
-                                    if (isMU) { 
+                                    playerStats[p.name].puntos += sc.at;
+                                    if (isMU) { // Bono de Marcador Único
                                         playerStats[p.name].mu += 1;
-                                        playerStats[p.name].puntos += sc.mu; // Suma bono de MU
+                                        playerStats[p.name].puntos += sc.mu;
                                     }
                                 } else if (trendMatch && partialMatch) {
                                     playerStats[p.name].ag += 1;
-                                    playerStats[p.name].puntos += sc.parcial; // 7 pts (Grupos)
+                                    playerStats[p.name].puntos += sc.parcial;
                                 } else if (trendMatch && !partialMatch) {
                                     playerStats[p.name].ag += 1;
-                                    playerStats[p.name].puntos += sc.trend; // 5 pts (Grupos)
+                                    playerStats[p.name].puntos += sc.trend;
                                 } else if (!trendMatch && partialMatch) {
                                     if (sc.oneteam > 0) {
                                         playerStats[p.name].ag += 1;
-                                        playerStats[p.name].puntos += sc.oneteam; // 2 pts (Grupos)
+                                        playerStats[p.name].puntos += sc.oneteam;
                                     }
                                 }
                             }
@@ -702,13 +732,12 @@
                     });
                 });
 
-                // 4. Leer posiciones anteriores y Puntos de LLAVES desde el Google Sheet 
+                // 4. Leer posiciones anteriores y Puntos de LLAVES desde el Google Sheet (Tabla)
                 const resBoard = await fetch(urlTabla, { cache: "no-store" });
                 const csvBoard = await resBoard.text();
                 const rowsB = parseCSV(csvBoard);
                 const hB = rowsB[0].map(h => String(h || "").trim().toUpperCase());
                 
-                // CÓDIGO CORREGIDO: Búsqueda más flexible de columnas para evitar fallos por tildes o espacios
                 let idxName = hB.findIndex(h => h.includes("JUGADOR") || h.includes("NOMBRE")); 
                 if(idxName === -1) idxName = 1;
                 let idxPosPrev = hB.findIndex(h => h.includes("POSICI"));
@@ -722,9 +751,9 @@
                     if (statKey) {
                         playerStats[statKey].posPrev = parseInt(cols[idxPosPrev]) || 99;
                         
-                        // Rescatamos los puntos de las llaves calculados manualmente en la tabla
+                        // Sumar los puntos de llaves manuales (si los tienes en la tabla)
                         let ptosLlavesRaw = idxPtosLlaves !== -1 ? (parseInt(cols[idxPtosLlaves]) || 0) : 0;
-                        let cantidadLlaves = Math.round(ptosLlavesRaw / 5); 
+                        let cantidadLlaves = Math.round(ptosLlavesRaw / 5); // Lógica para calcular # de llaves
 
                         playerStats[statKey].puntos += ptosLlavesRaw;
                         playerStats[statKey].llaves = cantidadLlaves; 
