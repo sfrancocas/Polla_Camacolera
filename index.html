@@ -105,7 +105,6 @@
         .next-match-banner { background: var(--accent); color: white; border-radius: 12px; padding: 15px; text-align: center; font-weight: 800; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; position: relative; overflow: hidden;}
         .next-match-banner h3 { margin: 0 0 5px 0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.8);}
         .next-match-banner .teams { font-size: 1.3rem; margin-bottom: 8px;}
-        .next-match-banner .timer { font-size: 2rem; font-family: monospace; letter-spacing: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.2);}
 
         .leaderboard-card { background: var(--card-bg); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden; }
         .pos-table { width: 100%; border-collapse: collapse; text-align: center; }
@@ -164,7 +163,7 @@
             <h1>⚽ Polla Camacolera</h1>
             <span class="theme-toggle" onclick="toggleTheme()">🌓</span>
         </div>
-        <p id="status">Calculando estrategias... 🔄</p>
+        <p id="status">Obteniendo datos... 🔄</p>
         
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('matches')"><span class="icon">📅</span>Partidos<br>del Día</button>
@@ -213,11 +212,11 @@
             "Paula": "https://i.postimg.cc/h4MnmMTV/Paula.png",
             "Viviana": "https://i.postimg.cc/nrh6TbBD/Viviana.png",
             "JuanP": "https://i.postimg.cc/Kj8dQSB3/Juan-Pablo.png",
-            "Mónica": "https://i.postimg.cc/vZjGk7sb/Gemini-Generated-Image-ybofdkybofdkybof.png",
+            "Mónica": "https://i.postimg.cc/v8vYzGFb/Monica.png",
             "Sebastián": "",
             "Luisa": "https://i.postimg.cc/gc4ph48r/Luisa.png",
             "Valeria": "https://i.postimg.cc/zXc1tBd8/Valeria.png",
-            "Angélica": "https://i.postimg.cc/1520zT0L/Gemini-Generated-Image-44r80o44r80o44r8.png"
+            "Angélica": "https://i.postimg.cc/wxWKMMYW/Angelica.png"
         };
 
         const countryFlags = {
@@ -345,7 +344,6 @@
 
         async function loadData() {
             try {
-                // ROMPE-CACHÉ SEGURO
                 const resMatches = await fetch(urlPartidos + "&t=" + new Date().getTime(), { cache: "no-store" });
                 const csvMatches = await resMatches.text();
                 const rowsM = parseCSV(csvMatches);
@@ -648,88 +646,7 @@
 
                 document.getElementById("bracket-container").innerHTML = bracketHtml;
 
-                // ---- MOTOR DE CÁLCULO GLOBALES ----
-                const scoring = {
-                    "GRUPOS": { at: 10, parcial: 7, trend: 5, oneteam: 2, mu: 10 },
-                    "16VOS":  { at: 12, parcial: 7, trend: 5, oneteam: 2, mu: 12 },
-                    "8VOS":   { at: 12, parcial: 7, trend: 5, oneteam: 2, mu: 12 },
-                    "4TOS":   { at: 15, parcial: 7, trend: 5, oneteam: 0, mu: 0 },
-                    "SEMI":   { at: 20, parcial: 10, trend: 7, oneteam: 0, mu: 0 },
-                    "3RO":    { at: 20, parcial: 10, trend: 7, oneteam: 0, mu: 0 },
-                    "FINAL":  { at: 50, parcial: 20, trend: 15, oneteam: 0, mu: 0 }
-                };
-
-                let playerStats = {};
-                players.forEach(p => {
-                    playerStats[p.name] = { nombre: p.name, puntos: 0, mu: 0, at: 0, ag: 0, llaves: 0, posPrev: 99 };
-                });
-
-                finishedMatches.forEach((match, idx) => {
-                    let numMatchStr = String(match.matchNum).match(/\d+/); 
-                    let mNum = numMatchStr ? parseInt(numMatchStr[0]) : (match.rowIndex - headerRowIdx);
-
-                    let phase = "GRUPOS";
-                    if (mNum > 72 && mNum <= 88) phase = "16VOS";
-                    else if (mNum > 88 && mNum <= 96) phase = "8VOS";
-                    else if (mNum > 96 && mNum <= 100) phase = "4TOS";
-                    else if (mNum > 100 && mNum <= 102) phase = "SEMI";
-                    else if (mNum === 103) phase = "3RO";
-                    else if (mNum === 104) phase = "FINAL";
-
-                    let sc = scoring[phase];
-                    let rl = match.gl; 
-                    let rv = match.gv; 
-                    let realTrend = rl > rv ? 1 : (rl < rv ? -1 : 0);
-
-                    let correctExacts = [];
-                    
-                    players.forEach(p => {
-                        let pL = match.cols[p.idxL] !== undefined ? String(match.cols[p.idxL]).trim() : "";
-                        let pV = match.cols[p.idxV] !== undefined ? String(match.cols[p.idxV]).trim() : "";
-                        if(pL !== "" && pV !== "") {
-                            let numL = parseInt(pL.replace(/o/gi, '0'));
-                            let numV = parseInt(pV.replace(/o/gi, '0'));
-                            if(!isNaN(numL) && !isNaN(numV)) {
-                                if (numL === rl && numV === rv) correctExacts.push(p.name);
-                            }
-                        }
-                    });
-                    
-                    let isMU = correctExacts.length === 1;
-
-                    players.forEach(p => {
-                        let pL = match.cols[p.idxL] !== undefined ? String(match.cols[p.idxL]).trim() : "";
-                        let pV = match.cols[p.idxV] !== undefined ? String(match.cols[p.idxV]).trim() : "";
-                        
-                        if(pL !== "" && pV !== "") {
-                            let pl = parseInt(pL.replace(/o/gi, '0'));
-                            let pv = parseInt(pV.replace(/o/gi, '0'));
-                            
-                            if(!isNaN(pl) && !isNaN(pv)) {
-                                let playerTrend = pl > pv ? 1 : (pl < pv ? -1 : 0);
-                                let trendMatch = (realTrend === playerTrend);
-                                let partialMatch = (pl === rl || pv === rv);
-                                let isAT = (pl === rl && pv === rv);
-
-                                let earned = 0;
-                                if (isAT) {
-                                    playerStats[p.name].at += 1; earned += sc.at; 
-                                    if (isMU) { playerStats[p.name].mu += 1; earned += sc.mu; }
-                                } else if (trendMatch && partialMatch) {
-                                    playerStats[p.name].ag += 1; earned += sc.parcial; 
-                                } else if (trendMatch && !partialMatch) {
-                                    playerStats[p.name].ag += 1; earned += sc.trend; 
-                                } else if (!trendMatch && partialMatch && sc.oneteam > 0) {
-                                    playerStats[p.name].ag += 1; earned += sc.oneteam; 
-                                }
-                                
-                                playerStats[p.name].puntos += earned;
-                            }
-                        }
-                    });
-                });
-
-                // ---- LEER TABLA E INTEGRAR POSICIONES ----
+                // ---- LEER TABLA E INTEGRAR POSICIONES DESDE EXCEL DIRECTAMENTE (MODO MANUAL) ----
                 const resBoard = await fetch(urlTabla + "&t=" + new Date().getTime(), { cache: "no-store" });
                 const csvBoard = await resBoard.text();
                 const rowsB = parseCSV(csvBoard);
@@ -737,24 +654,31 @@
                 
                 let idxName = hB.findIndex(h => h.includes("JUGADOR") || h.includes("NOMBRE")); if(idxName === -1) idxName = 1;
                 let idxPosPrev = hB.findIndex(h => h.includes("POSICI"));
-                let idxPtosLlaves = hB.findIndex(h => h === "PTOS LLAVES" || h === "PUNTOS LLAVES" || h.includes("PTOS"));
+                let idxPts = hB.findIndex(h => h.includes("PUNTOS TOTALES") || h === "PUNTOS" || h.includes("TOTAL")); if(idxPts === -1) idxPts = 2;
+                let idxMU = hB.indexOf("MU");
+                let idxAT = hB.indexOf("AT");
+                let idxAG = hB.indexOf("AG");
                 let idxCantLlaves = hB.findIndex(h => h === "CANTIDAD LLAVES" || h === "# LLAVES" || h.includes("CANTIDAD"));
+
+                let sortedList = [];
 
                 for(let i=1; i<rowsB.length; i++) {
                     let cols = rowsB[i] || [];
                     let name = String(cols[idxName] || "").trim();
-                    let statKey = Object.keys(playerStats).find(k => k.toLowerCase() === name.toLowerCase());
-                    
-                    if (statKey) {
-                        playerStats[statKey].posPrev = parseInt(cols[idxPosPrev]) || 99;
-                        let ptosLlavesRaw = idxPtosLlaves !== -1 ? (parseInt(cols[idxPtosLlaves]) || 0) : 0;
-                        let cantidadLlaves = idxCantLlaves !== -1 ? (parseInt(cols[idxCantLlaves]) || 0) : Math.round(ptosLlavesRaw / 5); 
-                        playerStats[statKey].puntos += ptosLlavesRaw;
-                        playerStats[statKey].llaves = cantidadLlaves;
-                    }
+                    if (!name) continue; 
+
+                    let puntos = parseInt(cols[idxPts]) || 0;
+                    let posPrev = parseInt(cols[idxPosPrev]) || 99;
+                    let mu = idxMU !== -1 ? (parseInt(cols[idxMU]) || 0) : 0;
+                    let at = idxAT !== -1 ? (parseInt(cols[idxAT]) || 0) : 0;
+                    let ag = idxAG !== -1 ? (parseInt(cols[idxAG]) || 0) : 0;
+                    let llaves = idxCantLlaves !== -1 ? (parseInt(cols[idxCantLlaves]) || 0) : 0;
+
+                    sortedList.push({ nombre: name, puntos: puntos, mu: mu, at: at, ag: ag, llaves: llaves, posPrev: posPrev });
                 }
 
-                let sortedList = Object.values(playerStats).sort((a, b) => b.puntos - a.puntos);
+                // Se ordena estrictamente por los puntos ingresados en el Excel
+                sortedList.sort((a, b) => b.puntos - a.puntos);
 
                 let maxMU = -1, maxAT = -1, maxAG = -1, maxLlaves = -1; 
                 let nMU = "-", nAT = "-", nAG = "-", nLlaves = "-";
