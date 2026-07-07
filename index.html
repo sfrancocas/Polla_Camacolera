@@ -344,6 +344,7 @@
 
         async function loadData() {
             try {
+                // ROMPE-CACHÉ SEGURO
                 const resMatches = await fetch(urlPartidos + "&t=" + new Date().getTime(), { cache: "no-store" });
                 const csvMatches = await resMatches.text();
                 const rowsM = parseCSV(csvMatches);
@@ -575,8 +576,8 @@
                 // ---- RENDERIZAR PESTAÑA DE LLAVES (AUTOMÁTICO) ----
                 let bracketHtml = `
                     <div style="text-align: center; margin-bottom: 20px;">
-                        <h2 style="color: var(--primary); margin: 0 0 5px 0; font-weight: 900;">🏆 Fases Finales</h2>
-                        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">Clasificados a partir de Octavos</p>
+                        <h2 style="color: var(--primary); margin: 0 0 5px 0; font-weight: 900;">🏆 Cuartos de Final</h2>
+                        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">Los 8 mejores equipos del mundo</p>
                     </div>`;
 
                 try {
@@ -646,7 +647,7 @@
 
                 document.getElementById("bracket-container").innerHTML = bracketHtml;
 
-                // ---- LEER TABLA E INTEGRAR POSICIONES DESDE EXCEL DIRECTAMENTE (MODO MANUAL) ----
+                // ---- LEER TABLA E INTEGRAR POSICIONES DIRECTAMENTE (MODO MANUAL) ----
                 const resBoard = await fetch(urlTabla + "&t=" + new Date().getTime(), { cache: "no-store" });
                 const csvBoard = await resBoard.text();
                 const rowsB = parseCSV(csvBoard);
