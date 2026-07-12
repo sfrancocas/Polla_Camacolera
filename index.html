@@ -105,7 +105,6 @@
         .next-match-banner { background: var(--accent); color: white; border-radius: 12px; padding: 15px; text-align: center; font-weight: 800; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; position: relative; overflow: hidden;}
         .next-match-banner h3 { margin: 0 0 5px 0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.8);}
         .next-match-banner .teams { font-size: 1.3rem; margin-bottom: 8px;}
-        .next-match-banner .timer { font-size: 2rem; font-family: monospace; letter-spacing: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.2);}
 
         .leaderboard-card { background: var(--card-bg); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden; }
         .pos-table { width: 100%; border-collapse: collapse; text-align: center; }
@@ -124,7 +123,6 @@
         .pos-table tr:hover td { background-color: rgba(11, 83, 148, 0.06); cursor: pointer; }
         body.dark-mode .pos-table tr:hover td { background-color: rgba(255, 255, 255, 0.05); }
 
-        .pos-table td:nth-child(2) { text-align: left; font-weight: 700; color: var(--primary);}
         .pts-badge { background: var(--accent); color: white; padding: 4px 10px; border-radius: 12px; font-weight: bold; }
         .trend { font-size: 0.85rem; display: inline-block; width: 14px; text-align: center; margin-left: 3px;}
 
@@ -135,7 +133,7 @@
         .close-btn { position: absolute; top: 10px; right: 15px; font-size: 1.8rem; font-weight: bold; cursor: pointer; color: var(--text-muted); transition: color 0.2s;}
         .close-btn:hover { color: #e53935; }
         
-        .modal-name { font-size: 1.3rem; font-weight: 900; color: var(--primary); margin: 5px 0 15px 0;}
+        .modal-name { font-size: 1.3rem; font-weight: 900; color: var(--primary); margin: 5px 0 15px 0; line-height: 1.2;}
         .modal-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: left;}
         .stat-box { background: rgba(0,0,0,0.03); padding: 10px; border-radius: 10px; border: 1px solid var(--border-color); text-align: center;}
         .stat-box span { display: block; font-size: 1.4rem; font-weight: 900; color: var(--text-main); margin-bottom: 2px;}
@@ -182,7 +180,7 @@
     <div id="player-modal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal()">&times;</span>
-            <img id="m-avatar" src="" style="width: 90px; height: 90px; border-radius: 50%; margin: -50px auto 10px auto; display: block; border: 4px solid var(--card-bg); box-shadow: 0 6px 12px rgba(0,0,0,0.15); object-fit: cover; background: white;">
+            <img id="m-avatar" src="" style="width: 90px; height: 90px; border-radius: 50%; margin: -50px auto 10px auto; display: block; border: 4px solid var(--card-bg); box-shadow: 0 6px 12px rgba(0,0,0,0.15); object-fit: cover; background: white; transition: filter 0.3s;">
             <h2 class="modal-name" id="m-name">Nombre</h2>
             
             <div class="modal-stats-grid">
@@ -290,14 +288,24 @@
             }
         }
 
-        function openModal(name, pts, mu, at, ag, llaves) {
-            document.getElementById('m-name').innerText = name;
+        function openModal(name, pts, mu, at, ag, llaves, isEliminated) {
             document.getElementById('m-avatar').src = getAvatarUrl(name);
             document.getElementById('m-pts').innerText = pts;
             document.getElementById('m-mu').innerText = mu;
             document.getElementById('m-at').innerText = at;
             document.getElementById('m-ag').innerText = ag;
             document.getElementById('m-llaves').innerText = llaves;
+            
+            let nameEl = document.getElementById('m-name');
+            let avatarEl = document.getElementById('m-avatar');
+            
+            if (isEliminated) {
+                avatarEl.style.filter = "grayscale(100%) opacity(0.8)";
+                nameEl.innerHTML = `<span style="text-decoration: line-through; color: var(--text-muted);">${name}</span><br><span style="background:#e53935; color:white; font-size:0.6rem; padding:3px 8px; border-radius:6px; display:inline-block; margin-top:5px; font-weight:800; letter-spacing:0.5px;">ELIMINADO 💀</span>`;
+            } else {
+                avatarEl.style.filter = "none";
+                nameEl.innerText = name;
+            }
             
             document.getElementById('player-modal').classList.add('active');
         }
@@ -345,7 +353,6 @@
 
         async function loadData() {
             try {
-                // ROMPE-CACHÉ SEGURO
                 const resMatches = await fetch(urlPartidos + "&t=" + new Date().getTime(), { cache: "no-store" });
                 const csvMatches = await resMatches.text();
                 const rowsM = parseCSV(csvMatches);
@@ -661,6 +668,9 @@
                 let idxAT = hB.indexOf("AT");
                 let idxAG = hB.indexOf("AG");
                 let idxCantLlaves = hB.findIndex(h => h === "CANTIDAD LLAVES" || h === "# LLAVES" || h.includes("CANTIDAD"));
+                
+                // NUEVA COLUMNA PARA ELIMINADOS
+                let idxEliminado = hB.findIndex(h => h === "ELIMINADO" || h === "ESTADO");
 
                 let sortedList = [];
 
@@ -675,8 +685,11 @@
                     let at = idxAT !== -1 ? (parseInt(cols[idxAT]) || 0) : 0;
                     let ag = idxAG !== -1 ? (parseInt(cols[idxAG]) || 0) : 0;
                     let llaves = idxCantLlaves !== -1 ? (parseInt(cols[idxCantLlaves]) || 0) : 0;
+                    
+                    let eliminadoVal = idxEliminado !== -1 ? String(cols[idxEliminado] || "").trim().toUpperCase() : "";
+                    let isEliminated = (eliminadoVal === "SI" || eliminadoVal === "TRUE" || eliminadoVal === "X" || eliminadoVal === "ELIMINADO");
 
-                    sortedList.push({ nombre: name, puntos: puntos, mu: mu, at: at, ag: ag, llaves: llaves, posPrev: posPrev });
+                    sortedList.push({ nombre: name, puntos: puntos, mu: mu, at: at, ag: ag, llaves: llaves, posPrev: posPrev, isEliminated: isEliminated });
                 }
 
                 // Se ordena estrictamente por los puntos ingresados en el Excel
@@ -707,14 +720,23 @@
                     else if (currentRank > p.posPrev) trendHtml = `<span class="trend" style="color:#e53935; font-size:0.85rem;">▼</span>`;
 
                     let avatar = getAvatarUrl(p.nombre);
-                    boardHtml += `<tr class="strat-row ${podiumClass}" data-name="${p.nombre}" onclick="openModal('${p.nombre}', ${p.puntos}, ${p.mu}, ${p.at}, ${p.ag}, ${p.llaves})">
+                    
+                    let rowStyle = p.isEliminated ? "opacity: 0.6; background-color: rgba(0,0,0,0.03);" : "";
+                    let avatarFilter = p.isEliminated ? "filter: grayscale(100%); opacity: 0.8;" : "";
+                    let nameDecoration = p.isEliminated ? "text-decoration: line-through; color: var(--text-muted);" : "";
+                    let elimBadge = p.isEliminated ? `<span style="background:#e53935; color:white; font-size:0.5rem; padding:2px 5px; border-radius:4px; font-weight:800; margin-top:3px; letter-spacing:0.5px; width:fit-content;">ELIMINADO 💀</span>` : "";
+
+                    boardHtml += `<tr class="strat-row ${podiumClass}" style="${rowStyle}" data-name="${p.nombre}" onclick="openModal('${p.nombre}', ${p.puntos}, ${p.mu}, ${p.at}, ${p.ag}, ${p.llaves}, ${p.isEliminated})">
                                     <td>${currentRank} ${trendHtml}</td>
-                                    <td style="display: flex; align-items: center; gap: 8px; padding-left: 10px;">
-                                        <span style="display:inline-block; width:18px;">${medalHtml}</span> 
-                                        <img src="${avatar}" alt="${p.nombre}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--bg-color); box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                                        ${p.nombre}
+                                    <td style="display: flex; align-items: center; gap: 8px; padding-left: 10px; text-align: left;">
+                                        <span style="display:inline-block; width:18px; text-align:center;">${medalHtml}</span> 
+                                        <img src="${avatar}" alt="${p.nombre}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--bg-color); box-shadow: 0 2px 4px rgba(0,0,0,0.1); ${avatarFilter}">
+                                        <div style="display: flex; flex-direction: column; justify-content: center; line-height: 1.2;">
+                                            <span style="${nameDecoration}">${p.nombre}</span>
+                                            ${elimBadge}
+                                        </div>
                                     </td>
-                                    <td><span class="pts-badge">${p.puntos}</span></td>
+                                    <td><span class="pts-badge" style="${p.isEliminated ? 'background:#999;' : ''}">${p.puntos}</span></td>
                                   </tr>`;
                 });
                 boardHtml += `</table></div>`;
