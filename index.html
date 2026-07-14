@@ -2,781 +2,480 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Polla Camacolera App PRO</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfilación de Afiliados | Camacol Caldas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --primary: #0b5394;
-            --bg-color: #f0f2f5;
-            --card-bg: #ffffff;
-            --text-main: #333333;
-            --text-muted: #777777;
-            --accent: #2ca02c;
-            --border-color: #eeeeee;
+        /* Ajuste para transiciones suaves al ocultar secciones */
+        .hidden { display: none !important; }
+        
+        /* Ajuste del placeholder para que sea más legible en pantallas pequeñas */
+        input::placeholder {
+            color: #9ca3af;
+            font-size: 0.85rem;
         }
-        
-        body.dark-mode {
-            --primary: #64b5f6;
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --text-main: #f5f5f5;
-            --text-muted: #aaaaaa;
-            --border-color: #333333;
-        }
-
-        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        body { margin: 0; padding: 0; background-color: var(--bg-color); color: var(--text-main); padding-bottom: 80px; transition: background 0.3s;}
-        
-        .app-header {
-            background-color: #0b5394;
-            color: white;
-            padding: 16px 20px 0 20px;
-            text-align: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        body.dark-mode .app-header { background-color: #111111; border-bottom: 1px solid #333; }
-        
-        .header-top { display: flex; justify-content: space-between; align-items: center; }
-        .app-header h1 { margin: 0; font-size: 1.3rem; font-weight: 800; letter-spacing: 0.5px;}
-        .theme-toggle { font-size: 1.5rem; cursor: pointer; background: rgba(255,255,255,0.2); border-radius: 50%; padding: 4px; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;}
-        
-        .app-header p { margin: 6px 0 10px 0; font-size: 0.85rem; font-weight: 500; opacity: 0.9; font-style: italic; transition: opacity 0.5s ease;}
-
-        .tabs { display: flex; margin-top: 10px; background: rgba(0,0,0,0.15); border-radius: 12px 12px 0 0; padding: 5px 5px 0 5px;}
-        body.dark-mode .tabs { background: rgba(0,0,0,0.4); }
-        
-        .tab-btn { flex: 1; background: transparent; color: rgba(255, 255, 255, 0.6); border: none; padding: 8px 2px; font-size: 0.65rem; font-weight: 700; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s; display: flex; flex-direction: column; align-items: center; gap: 4px; text-transform: uppercase; letter-spacing: 0.2px; text-align: center; line-height: 1.1;}
-        .tab-btn span.icon { font-size: 1.2rem; margin-bottom: 2px;}
-        .tab-btn.active { color: white; border-bottom: 3px solid var(--accent); background: rgba(255, 255, 255, 0.1); border-radius: 8px 8px 0 0;}
-
-        .container { padding: 15px; max-width: 600px; margin: 0 auto; display: none; animation: fadeIn 0.3s; }
-        .container.active { display: block; }
-        @keyframes fadeIn { from {opacity: 0; transform: translateY(5px);} to {opacity: 1; transform: translateY(0);} }
-
-        .match-card { background: var(--card-bg); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; overflow: hidden; border-top: 4px solid var(--accent); transition: background 0.3s;}
-        .match-card.live-card { border-top: 4px solid #e53935; }
-        .match-card.history-card { border-top: 4px solid #777777; opacity: 0.95; }
-        
-        .match-info { display: flex; justify-content: space-between; align-items: center; padding: 20px 15px 10px 15px; }
-        .team { display: flex; flex-direction: column; align-items: center; width: 38%; text-align:center; }
-        .team-icon { font-size: 2.2rem; margin-bottom: 4px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));}
-        .team-name { font-weight: 700; font-size: 0.95rem; text-align: center; color: var(--primary); line-height: 1.1;}
-        .match-status { display: flex; flex-direction: column; align-items: center; width: 24%; }
-        .vs { font-size: 1.1rem; font-weight: 900; color: var(--text-muted); margin-bottom: 3px; }
-        
-        .live-score-badge { display: flex; align-items: center; justify-content: center; font-size: 1.6rem; font-weight: 900; color: #e53935; gap: 6px; margin-top: 2px; }
-        .live-dot { font-size: 0.8rem; animation: pulse 1.5s infinite; }
-        
-        .match-sched { display: flex; flex-direction: column; align-items: center; text-align: center; font-size: 0.75rem; color: var(--text-muted); font-weight: 700; gap: 4px; }
-        .match-sched .date-val { background: rgba(0,0,0,0.05); padding: 3px 8px; border-radius: 6px; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.3px;}
-        body.dark-mode .match-sched .date-val { background: rgba(255,255,255,0.08); color: #fff;}
-        .match-sched .time-val { color: var(--primary); font-weight: 800; font-size: 0.85rem; }
-
-        .time { font-size: 0.75rem; color: #e53935; font-weight: 700; margin-top: 5px; background: #ffebee; padding: 4px 8px; border-radius: 12px; text-transform: uppercase;}
-        body.dark-mode .time { background: #3e1010; color: #ff5252; }
-        .time.live { background: #e53935; color: white; padding: 3px 8px; border-radius: 10px; font-size: 0.65rem; font-weight: 800; animation: pulse 1.5s infinite; margin-top: 3px; letter-spacing: 0.5px;}
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-
-        .dist-container { padding: 0 15px 15px 15px; border-bottom: 1px solid var(--border-color); }
-        .dist-bar-wrapper { display: flex; height: 6px; border-radius: 4px; overflow: hidden; background: #eee; margin-bottom: 5px;}
-        body.dark-mode .dist-bar-wrapper { background: #333; }
-        .dist-bar { height: 100%; transition: width 0.4s ease; }
-        .dist-bar.local { background: var(--accent); }
-        .dist-bar.empate { background: #ffb300; }
-        .dist-bar.visit { background: #e53935; }
-        .dist-labels { display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: 700; color: var(--text-muted);}
-
-        .predictions { padding: 0; margin: 0; list-style: none; display: none; background-color: rgba(0,0,0,0.02);}
-        .predictions.active { display: block; }
-        .pred-row { display: flex; justify-content: space-between; padding: 12px 20px; border-bottom: 1px solid var(--border-color); font-size: 0.95rem; align-items: center; }
-        .player-name { font-weight: 600; color: var(--text-main);}
-        .pred-score { font-weight: 800; color: var(--primary); background: #e3f2fd; padding: 4px 12px; border-radius: 8px; }
-        body.dark-mode .pred-score { background: #0d47a1; color: white; }
-
-        .wall-of-fame { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 25px; }
-        .fame-item { background: var(--card-bg); padding: 15px 10px; border-radius: 16px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.06); display: flex; flex-direction: column; align-items: center; border-top: 3px solid var(--primary); position: relative; overflow: hidden;}
-        .fame-img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; margin-bottom: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); background: white; border: 3px solid var(--bg-color); z-index: 2;}
-        .fame-item span { font-weight: 900; font-size: 0.95rem; color: var(--primary); display: inline-block; margin-bottom: 2px; z-index: 2;}
-        .fame-item small { display: block; font-size: 0.65rem; color: var(--text-muted); margin-top: 4px; font-weight: 800; line-height: 1.2; text-transform: uppercase; z-index: 2;}
-
-        .next-match-banner { background: var(--accent); color: white; border-radius: 12px; padding: 15px; text-align: center; font-weight: 800; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; position: relative; overflow: hidden;}
-        .next-match-banner h3 { margin: 0 0 5px 0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.8);}
-        .next-match-banner .teams { font-size: 1.3rem; margin-bottom: 8px;}
-
-        .leaderboard-card { background: var(--card-bg); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden; }
-        .pos-table { width: 100%; border-collapse: collapse; text-align: center; }
-        .pos-table th { background-color: #0b5394; color: white; padding: 12px 5px; font-size: 0.85rem; }
-        body.dark-mode .pos-table th { background-color: #111; }
-        .pos-table td { padding: 12px 5px; border-bottom: 1px solid var(--border-color); font-size: 0.95rem; transition: background 0.2s;}
-        
-        .pos-table tr:nth-child(even) { background-color: rgba(0,0,0,0.01); }
-        .pos-table tr.podium-1 td { background-color: #fffde7 !important; font-weight: 700; }
-        body.dark-mode .pos-table tr.podium-1 td { background-color: #2a2712 !important; }
-        .pos-table tr.podium-1 td:nth-child(2) { color: #b78103; font-weight: 800; }
-        .pos-table tr.podium-2 td { background-color: #f9f9f9 !important; }
-        body.dark-mode .pos-table tr.podium-2 td { background-color: #212121 !important; }
-        .pos-table tr.podium-3 td { background-color: #fffaf4 !important; }
-        body.dark-mode .pos-table tr.podium-3 td { background-color: #261f18 !important; }
-        .pos-table tr:hover td { background-color: rgba(11, 83, 148, 0.06); cursor: pointer; }
-        body.dark-mode .pos-table tr:hover td { background-color: rgba(255, 255, 255, 0.05); }
-
-        .pts-badge { background: var(--accent); color: white; padding: 4px 10px; border-radius: 12px; font-weight: bold; }
-        .trend { font-size: 0.85rem; display: inline-block; width: 14px; text-align: center; margin-left: 3px;}
-
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 200; align-items: center; justify-content: center; padding: 20px;}
-        .modal.active { display: flex; animation: fadeIn 0.3s; }
-        
-        .modal-content { background: var(--card-bg); padding: 25px 20px; border-radius: 16px; width: 100%; max-width: 340px; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border-top: 6px solid var(--primary); text-align: center;}
-        .close-btn { position: absolute; top: 10px; right: 15px; font-size: 1.8rem; font-weight: bold; cursor: pointer; color: var(--text-muted); transition: color 0.2s;}
-        .close-btn:hover { color: #e53935; }
-        
-        .modal-name { font-size: 1.3rem; font-weight: 900; color: var(--primary); margin: 5px 0 15px 0; line-height: 1.2;}
-        .modal-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: left;}
-        .stat-box { background: rgba(0,0,0,0.03); padding: 10px; border-radius: 10px; border: 1px solid var(--border-color); text-align: center;}
-        .stat-box span { display: block; font-size: 1.4rem; font-weight: 900; color: var(--text-main); margin-bottom: 2px;}
-        .stat-box small { font-size: 0.6rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; line-height: 1.2; display: block;}
-        
-        .stat-total { grid-column: span 2; background: #e8f5e9; border-color: var(--accent); color: var(--accent); margin-top: 5px; padding: 12px;}
-        body.dark-mode .stat-total { background: #1b3a1b; }
-        .stat-total span { color: var(--accent); font-size: 1.8rem;}
-
-        .loader { text-align: center; padding: 40px; color: var(--text-muted); font-weight: 600;}
-        
-        .toggle-btn { width: 100%; background: var(--card-bg); border: none; padding: 15px; color: var(--primary); font-weight: 700; cursor: pointer; border-top: 1px solid var(--border-color); transition: background 0.2s;}
-        .toggle-btn:hover { filter: brightness(0.95); }
-
-        .fab-refresh { position: fixed; bottom: 20px; right: 20px; width: 55px; height: 55px; border-radius: 50%; background: var(--primary); color: white; border: none; font-size: 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; z-index: 100; transition: transform 0.2s; display: flex; align-items: center; justify-content: center;}
-        .fab-refresh:active { transform: scale(0.9); }
-        .spin { animation: spin 0.8s linear infinite; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4 font-sans text-gray-800">
 
-    <div class="app-header">
-        <div class="header-top">
-            <div style="width:35px"></div>
-            <h1>⚽ Polla Camacolera</h1>
-            <span class="theme-toggle" onclick="toggleTheme()">🌓</span>
-        </div>
-        <p id="status">Obteniendo datos... 🔄</p>
+    <main class="bg-white p-8 rounded-xl shadow-xl max-w-3xl w-full my-8">
         
-        <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('matches')"><span class="icon">📅</span>Partidos<br>del Día</button>
-            <button class="tab-btn" onclick="switchTab('history')"><span class="icon">✅</span>Historial</button>
-            <button class="tab-btn" onclick="switchTab('bracket')"><span class="icon">🏆</span>Llaves</button>
-            <button class="tab-btn" onclick="switchTab('leaderboard')"><span class="icon">📊</span>Posiciones</button>
-        </div>
-    </div>
-
-    <div class="container active" id="matches-container"><div class="loader">Buscando los partidos del día...</div></div>
-    <div class="container" id="history-container"><div class="loader">Cargando historial de partidos...</div></div>
-    <div class="container" id="bracket-container"><div class="loader">Analizando clasificados...</div></div>
-    <div class="container" id="leaderboard-container"><div class="loader">Calculando posiciones...</div></div>
-
-    <div id="player-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeModal()">&times;</span>
-            <img id="m-avatar" src="" style="width: 90px; height: 90px; border-radius: 50%; margin: -50px auto 10px auto; display: block; border: 4px solid var(--card-bg); box-shadow: 0 6px 12px rgba(0,0,0,0.15); object-fit: cover; background: white; transition: filter 0.3s;">
-            <h2 class="modal-name" id="m-name">Nombre</h2>
+        <header class="mb-8 text-center flex flex-col items-center">
+            <!-- AQUÍ VA EL LOGO: Reemplaza el src con la URL real de la imagen -->
+            <img src="https://camacolcaldas.org/assets/logo-camacol-blanco-BYq1CuoC.png" class="h-24 mb-4 object-contain">
             
-            <div class="modal-stats-grid">
-                <div class="stat-box"><span id="m-at">0</span><small>Marcadores Exactos</small></div>
-                <div class="stat-box"><span id="m-mu">0</span><small>Marcadores Únicos</small></div>
-                <div class="stat-box"><span id="m-ag">0</span><small>Diferencia / Goles</small></div>
-                <div class="stat-box" style="background: #fff8e1; border-color: #ffe082;"><span id="m-llaves" style="color: #f57f17;">0</span><small style="color: #b78103;">Llaves Acertadas</small></div>
-                <div class="stat-box stat-total"><span id="m-pts">0</span><small>Puntos Totales</small></div>
-            </div>
-        </div>
-    </div>
+            <h1 class="text-3xl font-bold text-blue-900 mb-2">Actualización de Afiliados</h1>
+            <p class="text-gray-600 text-sm">Ayúdanos a enfocar nuestra gestión gremial y estrategia con la información correcta.</p>
+        </header>
 
-    <button onclick="refreshData(this)" class="fab-refresh" id="fab-btn">🔄</button>
+        <form id="encuestaCamacol">
+            
+            <!-- BLOQUE 0: DATOS GENERALES -->
+            <section id="bloque-0" class="block transition-all duration-300">
+                <h2 class="text-2xl font-semibold mb-6 border-b pb-2 text-blue-800">Datos Generales de la Empresa</h2>
+                
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold mb-1">Nombre o Razón Social:</label>
+                            <input type="text" id="nombreEmpresa" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold mb-1">NIT:</label>
+                            <input type="text" id="nitEmpresa" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                    </div>
+
+                    <!-- Contacto Alta Dirección -->
+                    <div class="contacto-grupo bg-blue-50 p-4 rounded-lg border border-blue-100" data-rol="Alta Dirección">
+                        <label class="block text-sm font-bold text-blue-900 mb-3">1. Contacto de Alta Dirección (Gerente / Presidente)</label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <input type="text" placeholder="Nombre completo" class="input-nombre w-full border rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400" required>
+                            <input type="text" placeholder="Cargo" class="input-cargo w-full border rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400" required>
+                            <input type="email" placeholder="Correo electrónico" class="input-correo w-full border rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400" required>
+                            <input type="tel" placeholder="Celular" class="input-celular w-full border rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400" required>
+                        </div>
+                    </div>
+
+                    <!-- Contacto RRHH -->
+                    <div class="contacto-grupo bg-blue-50 p-4 rounded-lg border border-blue-100" data-rol="Gestión Humana">
+                        <label class="block text-sm font-bold text-blue-900 mb-3">2. Contacto de Gestión Humana o Capacitación</label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <input type="text" placeholder="Nombre completo" class="input-nombre w-full border rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400" required>
+                            <input type="text" placeholder="Cargo" class="input-cargo w-full border rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400" required>
+                            <input type="email" placeholder="Correo electrónico" class="input-correo w-full border rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400" required>
+                            <input type="tel" placeholder="Celular" class="input-celular w-full border rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400" required>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t">
+                        <label class="block text-sm font-bold mb-2 text-gray-800">Tipo de Empresa (Seleccione para continuar):</label>
+                        <select id="tipoEmpresa" class="w-full border-2 border-blue-200 rounded px-3 py-3 font-semibold focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white" required>
+                            <option value="">Seleccione su sector...</option>
+                            <option value="bloque-1">Constructor / Promotor</option>
+                            <option value="bloque-2">Industrial o Comerciante</option>
+                            <option value="bloque-3">Entidad Financiera o Fiduciaria</option>
+                            <option value="bloque-4">Empresa de Servicios Públicos</option>
+                            <option value="bloque-5">Avaluador / Firma de Avalúos</option>
+                            <option value="bloque-6">Caja de Compensación Familiar</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="button" id="btnSiguiente" class="mt-8 w-full bg-blue-700 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-800 transition shadow-md">
+                    Siguiente Paso
+                </button>
+            </section>
+
+            <!-- BLOQUE 1: CONSTRUCTOR -->
+            <section id="bloque-1" class="hidden transition-all duration-300">
+                <h2 class="text-2xl font-semibold mb-6 border-b pb-2 text-blue-800">Área: Constructor / Promotor</h2>
+                
+                <div class="space-y-4 mb-8">
+                    <p class="text-sm font-bold text-gray-700 mb-2">1. Contactos Estratégicos Adicionales (Llene los que apliquen)</p>
+                    
+                    <div class="contacto-grupo border rounded p-3 bg-gray-50" data-rol="Comercial y Ventas">
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-2">Comercial y Ventas</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <input type="text" placeholder="Nombre" class="input-nombre w-full border rounded px-2 py-1 text-sm"><input type="text" placeholder="Cargo" class="input-cargo w-full border rounded px-2 py-1 text-sm"><input type="email" placeholder="Correo" class="input-correo w-full border rounded px-2 py-1 text-sm"><input type="tel" placeholder="Celular" class="input-celular w-full border rounded px-2 py-1 text-sm">
+                        </div>
+                    </div>
+                    
+                    <div class="contacto-grupo border rounded p-3 bg-gray-50" data-rol="Técnico / Proyectos">
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-2">Técnico o Proyectos (Ing/Arq)</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <input type="text" placeholder="Nombre" class="input-nombre w-full border rounded px-2 py-1 text-sm"><input type="text" placeholder="Cargo" class="input-cargo w-full border rounded px-2 py-1 text-sm"><input type="email" placeholder="Correo" class="input-correo w-full border rounded px-2 py-1 text-sm"><input type="tel" placeholder="Celular" class="input-celular w-full border rounded px-2 py-1 text-sm">
+                        </div>
+                    </div>
+
+                    <div class="contacto-grupo border rounded p-3 bg-gray-50" data-rol="Jurídico / Urbanismo">
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-2">Jurídico o Urbanismo</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <input type="text" placeholder="Nombre" class="input-nombre w-full border rounded px-2 py-1 text-sm"><input type="text" placeholder="Cargo" class="input-cargo w-full border rounded px-2 py-1 text-sm"><input type="email" placeholder="Correo" class="input-correo w-full border rounded px-2 py-1 text-sm"><input type="tel" placeholder="Celular" class="input-celular w-full border rounded px-2 py-1 text-sm">
+                        </div>
+                    </div>
+
+                    <div class="contacto-grupo border rounded p-3 bg-gray-50" data-rol="Sostenibilidad">
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-2">Sostenibilidad / Gestión Ambiental</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <input type="text" placeholder="Nombre" class="input-nombre w-full border rounded px-2 py-1 text-sm"><input type="text" placeholder="Cargo" class="input-cargo w-full border rounded px-2 py-1 text-sm"><input type="email" placeholder="Correo" class="input-correo w-full border rounded px-2 py-1 text-sm"><input type="tel" placeholder="Celular" class="input-celular w-full border rounded px-2 py-1 text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <p class="text-sm font-bold text-gray-700 mb-3">2. Interés de Capacitación (Selección múltiple)</p>
+                    <div class="space-y-2 bg-blue-50 p-4 rounded border border-blue-100">
+                        <label class="flex items-start"><input type="checkbox" value="Gerencia, Lean Construction y Estructuración" class="mt-1 mr-3 w-4 h-4 text-blue-600"> Gerencia, Lean Construction y Estructuración de Proyectos</label>
+                        <label class="flex items-start"><input type="checkbox" value="Derecho Urbano, POT y Licencias" class="mt-1 mr-3 w-4 h-4 text-blue-600"> Derecho Urbano, POT y Licencias</label>
+                        <label class="flex items-start"><input type="checkbox" value="Modelado y Gestión BIM" class="mt-1 mr-3 w-4 h-4 text-blue-600"> Modelado y Gestión BIM / Transformación Digital</label>
+                        <label class="flex items-start"><input type="checkbox" value="Construcción Sostenible EDGE" class="mt-1 mr-3 w-4 h-4 text-blue-600"> Construcción Sostenible y Certificación EDGE</label>
+                    </div>
+                </div>
+
+                <button type="button" class="btn-continuar-legal w-full bg-blue-700 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-800 transition shadow-md">Continuar a Términos Legales</button>
+            </section>
+
+            <!-- BLOQUE 2: INDUSTRIAL / COMERCIANTE -->
+            <section id="bloque-2" class="hidden transition-all duration-300">
+                <h2 class="text-2xl font-semibold mb-6 border-b pb-2 text-blue-800">Área: Industrial o Comerciante</h2>
+                
+                <div class="space-y-4 mb-8">
+                    <p class="text-sm font-bold text-gray-700 mb-2">1. Contactos Estratégicos Adicionales (Llene los que apliquen)</p>
+                    
+                    <div class="contacto-grupo border rounded p-3 bg-gray-50" data-rol="Comercial B2B">
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-2">Comercial B2B o Ventas</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <input type="text" placeholder="Nombre" class="input-nombre w-full border rounded px-2 py-1 text-sm"><input type="text" placeholder="Cargo" class="input-cargo w-full border rounded px-2 py-1 text-sm"><input type="email" placeholder="Correo" class="input-correo w-full border rounded px-2 py-1 text-sm"><input type="tel" placeholder="Celular" class="input-celular w-full border rounded px-2 py-1 text-sm">
+                        </div>
+                    </div>
+                    
+                    <div class="contacto-grupo border rounded p-3 bg-gray-50" data-rol="Innovación / Técnico">
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-2">Innovación, Desarrollo o Técnico</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <input type="text" placeholder="Nombre" class="input-nombre w-full border rounded px-2 py-1 text-sm"><input type="text" placeholder="Cargo" class="input-cargo w-full border rounded px-2 py-1 text-sm"><input type="email" placeholder="Correo" class="input-correo w-full border rounded px-2 py-1 text-sm"><input type="tel" placeholder="Celular" class="input-celular w-full border rounded px-2 py-1 text-sm">
+                        </div>
+                    </div>
+
+                    <div class="contacto-grupo border rounded p-3 bg-gray-50" data-rol="Compras / Abastecimiento">
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-2">Compras o Abastecimiento</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <input type="text" placeholder="Nombre" class="input-nombre w-full border rounded px-2 py-1 text-sm"><input type="text" placeholder="Cargo" class="input-cargo w-full border rounded px-2 py-1 text-sm"><input type="email" placeholder="Correo" class="input-correo w-full border rounded px-2 py-1 text-sm"><input type="tel" placeholder="Celular" class="input-celular w-full border rounded px-2 py-1 text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <p class="text-sm font-bold text-gray-700 mb-3">2. Interés de Capacitación (Selección múltiple)</p>
+                    <div class="space-y-2 bg-blue-50 p-4 rounded border border-blue-100">
+                        <label class="flex items-start"><input type="checkbox" value="Ventas Técnicas B2B y Mercadeo" class="mt-1 mr-3 w-4 h-4 text-blue-600"> Ventas Técnicas B2B y Mercadeo Sectorial</label>
+                        <label class="flex items-start"><input type="checkbox" value="Actualización de Normas Técnicas" class="mt-1 mr-3 w-4 h-4 text-blue-600"> Actualización de Normas Técnicas y de Materiales</label>
+                        <label class="flex items-start"><input type="checkbox" value="Sostenibilidad y Economía Circular" class="mt-1 mr-3 w-4 h-4 text-blue-600"> Sostenibilidad y Economía Circular en Insumos</label>
+                    </div>
+                </div>
+
+                <button type="button" class="btn-continuar-legal w-full bg-blue-700 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-800 transition shadow-md">Continuar a Términos Legales</button>
+            </section>
+
+            <!-- BLOQUE 3: ENTIDAD FINANCIERA -->
+            <section id="bloque-3" class="hidden transition-all duration-300">
+                <h2 class="text-2xl font-semibold mb-6 border-b pb-2 text-blue-800">Área: Entidad Financiera o Fiduciaria</h2>
+                
+                <div class="space-y-4 mb-8">
+                    <p class="text-sm font-bold text-gray-700 mb-2">1. Contactos Estratégicos Adicionales (Llene los que apliquen)</p>
+                    
+                    <div class="contacto-grupo border rounded p-3 bg-gray-50" data-rol="Riesgos / Estudios Económicos">
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-2">Riesgos o Estudios Económicos</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <input type="text" placeholder="Nombre" class="input-nombre w-full border rounded px-2 py-1 text-sm"><input type="text" placeholder="Cargo" class="input-cargo w-full border rounded px-2 py-1 text-sm"><input type="email" placeholder="Correo" class="input-correo w-full border rounded px-2 py-1 text-sm"><input type="tel" placeholder="Celular" class="input-celular w-full border rounded px-2 py-1 text-sm">
+                        </div>
+                    </div>
+                    
+                    <div class="contacto-grupo border rounded p-3 bg-gray-50" data-rol="Crédito Constructor">
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-2">Crédito Constructor o Comercial</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <input type="text" placeholder="Nombre" class="input-nombre w-full border rounded px-2 py-1 text-sm"><input type="text" placeholder="Cargo" class="input-cargo w-full border rounded px-2 py-1 text-sm"><input type="email" placeholder="Correo" class="input-correo w-full border rounded px-2 py-1 text-sm"><input type="tel" placeholder="Celular" class="input-celular w-full border rounded px-2 py-1 text-sm">
+                        </div>
+                    </div>
+
+                    <div class="contacto-grupo border rounded p-3 bg-gray-50" data-rol="Negocios Fiduciarios">
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-2">Negocios Fiduciarios / Legal</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <input type="text" placeholder="Nombre" class="input-nombre w-full border rounded px-2 py-1 text-sm"><input type="text" placeholder="Cargo" class="input-cargo w-full border rounded px-2 py-1 text-sm"><input type="email" placeholder="Correo" class="input-correo w-full border rounded px-2 py-1 text-sm"><input type="tel" placeholder="Celular" class="input-celular w-full border rounded px-2 py-1 text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <p class="text-sm font-bold text-gray-700 mb-3">2. Interés de Capacitación (Selección múltiple)</p>
+                    <div class="space-y-2 bg-blue-50 p-4 rounded border border-blue-100">
+                        <label class="flex items-start"><input type="checkbox" value="Estructuración Inmobiliaria" class="mt-1 mr-3 w-4 h-4 text-blue-600"> Estructuración y Valoración de Proyectos Inmobiliarios</label>
+                        <label class="flex items-start"><input type="checkbox" value="Análisis de Riesgo y Macroeconomía" class="mt-1 mr-3 w-4 h-4 text-blue-600"> Análisis de Riesgo Sectorial y Macroeconomía</label>
+                        <label class="flex items-start"><input type="checkbox" value="Derecho Financiero y Fiducias" class="mt-1 mr-3 w-4 h-4 text-blue-600"> Derecho Financiero, Fiducias y Régimen Urbano</label>
+                    </div>
+                </div>
+
+                <button type="button" class="btn-continuar-legal w-full bg-blue-700 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-800 transition shadow-md">Continuar a Términos Legales</button>
+            </section>
+
+            <!-- BLOQUE 4: SERVICIOS PÚBLICOS -->
+            <section id="bloque-4" class="hidden transition-all duration-300">
+                <h2 class="text-2xl font-semibold mb-6 border-b pb-2 text-blue-800">Área: Empresa de Servicios Públicos</h2>
+                
+                <div class="space-y-4 mb-8">
+                    <p class="text-sm font-bold text-gray-700 mb-2">1. Contactos Estratégicos Adicionales (Llene los que apliquen)</p>
+                    
+                    <div class="contacto-grupo border rounded p-3 bg-gray-50" data-rol="Planeación e Infraestructura">
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-2">Planeación, Expansión e Infraestructura</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <input type="text" placeholder="Nombre" class="input-nombre w-full border rounded px-2 py-1 text-sm"><input type="text" placeholder="Cargo" class="input-cargo w-full border rounded px-2 py-1 text-sm"><input type="email" placeholder="Correo" class="input-correo w-full border rounded px-2 py-1 text-sm"><input type="tel" placeholder="Celular" class="input-celular w-full border rounded px-2 py-1 text-sm">
+                        </div>
+                    </div>
+                    
+                    <div class="contacto-grupo border rounded p-3 bg-gray-50" data-rol="Atención a Constructores">
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-2">Comercial o Atención a Constructores</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <input type="text" placeholder="Nombre" class="input-nombre w-full border rounded px-2 py-1 text-sm"><input type="text" placeholder="Cargo" class="input-cargo w-full border rounded px-2 py-1 text-sm"><input type="email" placeholder="Correo" class="input-correo w-full border rounded px-2 py-1 text-sm"><input type="tel" placeholder="Celular" class="input-celular w-full border rounded px-2 py-1 text-sm">
+                        </div>
+                    </div>
+
+                    <div class="contacto-grupo border rounded p-3 bg-gray-50" data-rol="Técnico / Ingeniería">
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-2">Técnico o Ingeniería</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <input type="text" placeholder="Nombre" class="input-nombre w-full border rounded px-2 py-1 text-sm"><input type="text" placeholder="Cargo" class="input-cargo w-full border rounded px-2 py-1 text-sm"><input type="email" placeholder="Correo" class="input-correo w-full border rounded px-2 py-1 text-sm"><input type="tel" placeholder="Celular" class="input-celular w-full border rounded px-2 py-1 text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <p class="text-sm font-bold text-gray-700 mb-3">2. Interés de Capacitación (Selección múltiple)</p>
+                    <div class="space-y-2 bg-blue-50 p-4 rounded border border-blue-100">
+                        <label class="flex items-start"><input type="checkbox" value="Planificación Territorial y POT" class="mt-1 mr-3 w-4 h-4 text-blue-600"> Planificación Territorial, Ciudad y POT</label>
+                        <label class="flex items-start"><input type="checkbox" value="Regulación Servicios Públicos" class="mt-1 mr-3 w-4 h-4 text-blue-600"> Regulación y Normativa (RETIE, Hidrosanitarios)</label>
+                        <label class="flex items-start"><input type="checkbox" value="Gerencia Proyectos Infraestructura" class="mt-1 mr-3 w-4 h-4 text-blue-600"> Gerencia de Proyectos de Infraestructura y Obra Civil</label>
+                    </div>
+                </div>
+
+                <button type="button" class="btn-continuar-legal w-full bg-blue-700 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-800 transition shadow-md">Continuar a Términos Legales</button>
+            </section>
+
+            <!-- BLOQUE 5: AVALUADOR -->
+            <section id="bloque-5" class="hidden transition-all duration-300">
+                <h2 class="text-2xl font-semibold mb-6 border-b pb-2 text-blue-800">Área: Avaluador / Firma de Avalúos</h2>
+                
+                <div class="space-y-4 mb-8">
+                    <p class="text-sm font-bold text-gray-700 mb-2">1. Contactos Estratégicos Adicionales (Llene los que apliquen)</p>
+                    
+                    <div class="contacto-grupo border rounded p-3 bg-gray-50" data-rol="Técnico Avalúos">
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-2">Técnico de Avalúos / Perito Principal</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <input type="text" placeholder="Nombre" class="input-nombre w-full border rounded px-2 py-1 text-sm"><input type="text" placeholder="Cargo" class="input-cargo w-full border rounded px-2 py-1 text-sm"><input type="email" placeholder="Correo" class="input-correo w-full border rounded px-2 py-1 text-sm"><input type="tel" placeholder="Celular" class="input-celular w-full border rounded px-2 py-1 text-sm">
+                        </div>
+                    </div>
+                    
+                    <div class="contacto-grupo border rounded p-3 bg-gray-50" data-rol="Estudios de Mercado">
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-2">Estudios de Mercado o Análisis de Datos</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <input type="text" placeholder="Nombre" class="input-nombre w-full border rounded px-2 py-1 text-sm"><input type="text" placeholder="Cargo" class="input-cargo w-full border rounded px-2 py-1 text-sm"><input type="email" placeholder="Correo" class="input-correo w-full border rounded px-2 py-1 text-sm"><input type="tel" placeholder="Celular" class="input-celular w-full border rounded px-2 py-1 text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <p class="text-sm font-bold text-gray-700 mb-3">2. Interés de Capacitación (Selección múltiple)</p>
+                    <div class="space-y-2 bg-blue-50 p-4 rounded border border-blue-100">
+                        <label class="flex items-start"><input type="checkbox" value="Avalúos Complejos y NIIF" class="mt-1 mr-3 w-4 h-4 text-blue-600"> Avalúos Complejos, Especiales y NIIF</label>
+                        <label class="flex items-start"><input type="checkbox" value="Catastro y Propiedad Horizontal" class="mt-1 mr-3 w-4 h-4 text-blue-600"> Derecho Urbano, Catastro Multipropósito y Propiedad Horizontal</label>
+                        <label class="flex items-start"><input type="checkbox" value="Analítica de Datos Inmobiliarios" class="mt-1 mr-3 w-4 h-4 text-blue-600"> Analítica de Datos e Inteligencia de Mercados</label>
+                    </div>
+                </div>
+
+                <button type="button" class="btn-continuar-legal w-full bg-blue-700 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-800 transition shadow-md">Continuar a Términos Legales</button>
+            </section>
+
+            <!-- BLOQUE 6: CAJA DE COMPENSACIÓN -->
+            <section id="bloque-6" class="hidden transition-all duration-300">
+                <h2 class="text-2xl font-semibold mb-6 border-b pb-2 text-blue-800">Área: Caja de Compensación Familiar</h2>
+                
+                <div class="space-y-4 mb-8">
+                    <p class="text-sm font-bold text-gray-700 mb-2">1. Contactos Estratégicos Adicionales (Llene los que apliquen)</p>
+                    
+                    <div class="contacto-grupo border rounded p-3 bg-gray-50" data-rol="Vivienda y Subsidios">
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-2">Vivienda y Subsidios</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <input type="text" placeholder="Nombre" class="input-nombre w-full border rounded px-2 py-1 text-sm"><input type="text" placeholder="Cargo" class="input-cargo w-full border rounded px-2 py-1 text-sm"><input type="email" placeholder="Correo" class="input-correo w-full border rounded px-2 py-1 text-sm"><input type="tel" placeholder="Celular" class="input-celular w-full border rounded px-2 py-1 text-sm">
+                        </div>
+                    </div>
+                    
+                    <div class="contacto-grupo border rounded p-3 bg-gray-50" data-rol="Infraestructura / Obras">
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-2">Infraestructura / Obras y Proyectos</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <input type="text" placeholder="Nombre" class="input-nombre w-full border rounded px-2 py-1 text-sm"><input type="text" placeholder="Cargo" class="input-cargo w-full border rounded px-2 py-1 text-sm"><input type="email" placeholder="Correo" class="input-correo w-full border rounded px-2 py-1 text-sm"><input type="tel" placeholder="Celular" class="input-celular w-full border rounded px-2 py-1 text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <p class="text-sm font-bold text-gray-700 mb-3">2. Interés de Capacitación (Selección múltiple)</p>
+                    <div class="space-y-2 bg-blue-50 p-4 rounded border border-blue-100">
+                        <label class="flex items-start"><input type="checkbox" value="Estructuración VIS/VIP" class="mt-1 mr-3 w-4 h-4 text-blue-600"> Estructuración de Proyectos de Vivienda (VIS/VIP)</label>
+                        <label class="flex items-start"><input type="checkbox" value="Gerencia Infraestructura Social" class="mt-1 mr-3 w-4 h-4 text-blue-600"> Gerencia de Proyectos de Infraestructura Social</label>
+                        <label class="flex items-start"><input type="checkbox" value="Subsidios Concurrentes y Gestión Suelo" class="mt-1 mr-3 w-4 h-4 text-blue-600"> Derecho Urbano, Gestión del Suelo y Subsidios Concurrentes</label>
+                    </div>
+                </div>
+
+                <button type="button" class="btn-continuar-legal w-full bg-blue-700 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-800 transition shadow-md">Continuar a Términos Legales</button>
+            </section>
+
+            <!-- BLOQUE FINAL: LEGAL -->
+            <section id="bloque-final" class="hidden transition-all duration-300">
+                <h2 class="text-2xl font-semibold mb-6 border-b pb-2 text-blue-800">Autorización Legal</h2>
+                
+                <div class="mb-8 p-5 bg-blue-50 border border-blue-200 rounded-lg text-sm text-gray-700">
+                    <p class="font-bold text-base mb-2 text-blue-900">Tratamiento de Datos Personales:</p>
+                    <p>¿Autoriza a Camacol Caldas el tratamiento de los datos personales de los contactos aquí registrados, según la ley de Habeas Data, para el envío de información gremial, comercial y educativa?</p>
+                    <div class="mt-4 flex gap-8">
+                        <label class="flex items-center cursor-pointer font-semibold">
+                            <input type="radio" name="habeasData" value="Sí" class="mr-2 w-5 h-5 text-blue-600" required> Sí, autorizo.
+                        </label>
+                        <label class="flex items-center cursor-pointer font-semibold">
+                            <input type="radio" name="habeasData" value="No" class="mr-2 w-5 h-5 text-blue-600"> No autorizo.
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <button type="button" onclick="location.reload()" class="w-1/3 bg-gray-200 text-gray-700 font-bold py-3 px-4 rounded-lg hover:bg-gray-300 transition">
+                        Volver al inicio
+                    </button>
+                    <button type="submit" id="btnEnviar" class="w-2/3 bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition shadow-md">
+                        Enviar Datos a Camacol
+                    </button>
+                </div>
+            </section>
+
+        </form>
+    </main>
 
     <script>
-        const urlPartidos = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5-A3wQAPUD3raKLrhfkiKWU62m6V7xFLsXY-vO_UdxCSADMwQSmkEecyGTqfpCJr2yYL6IghQ_B3i/pub?gid=658946236&single=true&output=csv";
-        const urlTabla = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5-A3wQAPUD3raKLrhfkiKWU62m6V7xFLsXY-vO_UdxCSADMwQSmkEecyGTqfpCJr2yYL6IghQ_B3i/pub?gid=187955950&single=true&output=csv";
-        const urlLlaves = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5-A3wQAPUD3raKLrhfkiKWU62m6V7xFLsXY-vO_UdxCSADMwQSmkEecyGTqfpCJr2yYL6IghQ_B3i/pub?gid=1452253607&single=true&output=csv";
+        // ¡REEMPLAZA ESTA URL POR LA NUEVA QUE TE DÉ GOOGLE APPS SCRIPT AL IMPLEMENTAR!
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyOxNsk8-mxqXezn_Z3b7dCdZnAqdtHEQU2RfAxuQf9dJEsipkxhh_9tNonxcu6Fj-y7g/exec
 
-        // ==========================================
-        // 📸 FOTOS Y BANDERAS
-        // ==========================================
-        const playerPhotos = {
-            "Sergio": "https://i.postimg.cc/L4vSPvLx/Sergio.png", 
-            "Diana": "https://i.postimg.cc/hvtHMWT9/Diana.png",
-            "Manuela": "https://i.postimg.cc/bY6Xrrfm/Manuela.png",
-            "Manuel": "https://i.postimg.cc/ZnsXM7xP/Manuel.png",
-            "Paula": "https://i.postimg.cc/h4MnmMTV/Paula.png",
-            "Viviana": "https://i.postimg.cc/nrh6TbBD/Viviana.png",
-            "JuanP": "https://i.postimg.cc/Kj8dQSB3/Juan-Pablo.png",
-            "Mónica": "https://i.postimg.cc/vZjGk7sb/Gemini-Generated-Image-ybofdkybofdkybof.png",
-            "Sebastián": "",
-            "Luisa": "https://i.postimg.cc/gc4ph48r/Luisa.png",
-            "Valeria": "https://i.postimg.cc/zXc1tBd8/Valeria.png",
-            "Angélica": "https://i.postimg.cc/1520zT0L/Gemini-Generated-Image-44r80o44r80o44r8.png"
-        };
+AKfycbyOxNsk8-mxqXezn_Z3b7dCdZnAqdtHEQU2RfAxuQf9dJEsipkxhh_9tNonxcu6Fj-y7g';
 
-        const countryFlags = {
-            "ARGENTINA": "🇦🇷", "BRASIL": "🇧🇷", "COLOMBIA": "🇨🇴", "MÉXICO": "🇲🇽",
-            "CANADÁ": "🇨🇦", "ESTADOS UNIDOS": "🇺🇸", "USA": "🇺🇸", "ESPAÑA": "🇪🇸", "FRANCIA": "🇫🇷",
-            "INGLATERRA": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "ALEMANIA": "🇩🇪", "ITALIA": "🇮🇹", "MARRUECOS": "🇲🇦",
-            "PARAGUAY": "🇵🇾", "URUGUAY": "🇺🇾", "ECUADOR": "🇪🇨", "NORUEGA": "🇳🇴",
-            "PORTUGAL": "🇵🇹", "JAPÓN": "🇯🇵", "SENEGAL": "🇸🇳", "BÉLGICA": "🇧🇪",
-            "PAÍSES BAJOS": "🇳🇱", "HOLANDA": "🇳🇱", "CROACIA": "🇭🇷", "PERÚ": "🇵🇪",
-            "CHILE": "🇨🇱", "VENEZUELA": "🇻🇪", "BOLIVIA": "🇧🇴", "COSTA RICA": "🇨🇷",
-            "SUIZA": "🇨🇭", "COREA DEL SUR": "🇰🇷", "DINAMARCA": "🇩🇰", "SUECIA": "🇸🇪", "POLONIA": "🇵🇱",
-            "AUSTRALIA": "🇦🇺", "IRÁN": "🇮🇷", "ARABIA SAUDITA": "🇸🇦", "QATAR": "🇶🇦", "EGIPTO": "🇪🇬",
-            "NIGERIA": "🇳🇬", "GHANA": "🇬🇭", "CAMERÚN": "🇨🇲", "TÚNEZ": "🇹🇳", "AUSTRIA": "🇦🇹", "ARGELIA": "🇩🇿"
-        };
+        const form = document.getElementById('encuestaCamacol');
+        const bloque0 = document.getElementById('bloque-0');
+        const bloqueFinal = document.getElementById('bloque-final');
+        const tipoEmpresaSelect = document.getElementById('tipoEmpresa');
+        let bloqueActivoId = '';
 
-        function getAvatarUrl(name) {
-            let rawUrl = playerPhotos[name] || playerPhotos[name.trim()] || "";
-            if (rawUrl !== "") return rawUrl;
-            let colors = ["1976D2", "388E3C", "F57C00", "D32F2F", "7B1FA2", "00796B", "C2185B", "455A64"];
-            let randomColor = colors[name.length % colors.length];
-            return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${randomColor}&color=fff&bold=true&rounded=true`;
-        }
-
-        function getFlag(teamName) {
-            let cleanName = String(teamName).trim().toUpperCase();
-            return countryFlags[cleanName] || "⚽";
-        }
-        
-        const frasesGalpon = [
-            "El que no arriesga, se queda en el fondo de la tabla mirando. 👀",
-            "Hay pronósticos que duelen más que un gol en contra al minuto 90. 💔",
-            "El VAR está revisando la fe ciega que le tenían a ese empate. 🖥️🔍",
-            "Mucho análisis táctico para terminar ganando por un autogol. 🤦‍♂️",
-            "¿Alguien le puede revisar la bola de cristal a los líderes? 🔮",
-            "Demostrando que un buen chepazo vale más que mil horas de análisis. 🍀",
-            "Rascando puntos de consolación como si fueran el último tinto de la oficina. ☕",
-            "Usando algoritmos de la NASA solo para terminar poniendo un 1-0. 💻",
-            "Apostando con mentalidad de campeones, pero sufriendo como novatos. 🏆",
-            "Pidiendo la hora desde el primer tiempo para no perder esos punticos. ⏱️🥵"
-        ];
-
-        setInterval(() => {
-            let statusP = document.getElementById("status");
-            if (statusP) {
-                statusP.style.opacity = 0;
-                setTimeout(() => {
-                    let fraseElegida = frasesGalpon[Math.floor(Math.random() * frasesGalpon.length)];
-                    statusP.innerHTML = `${fraseElegida} 🟢`;
-                    statusP.style.opacity = 1;
-                }, 500); 
-            }
-        }, 6000);
-
-        function toggleTheme() { document.body.classList.toggle('dark-mode'); }
-
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            let currentBtn = window.event.currentTarget;
-            if(currentBtn) currentBtn.classList.add('active');
-            document.querySelectorAll('.container').forEach(cont => cont.classList.remove('active'));
-            document.getElementById(tab + '-container').classList.add('active');
-        }
-
-        function togglePred(btn) {
-            let list = btn.nextElementSibling;
-            if(list && list.classList.contains('predictions')) {
-                list.classList.toggle('active');
-                btn.classList.toggle('active');
-                btn.innerText = btn.classList.contains('active') ? "OCULTAR PRONÓSTICOS ▲" : "VER PRONÓSTICOS ▼";
-            }
-        }
-
-        function openModal(name, pts, mu, at, ag, llaves, isEliminated) {
-            document.getElementById('m-avatar').src = getAvatarUrl(name);
-            document.getElementById('m-pts').innerText = pts;
-            document.getElementById('m-mu').innerText = mu;
-            document.getElementById('m-at').innerText = at;
-            document.getElementById('m-ag').innerText = ag;
-            document.getElementById('m-llaves').innerText = llaves;
-            
-            let nameEl = document.getElementById('m-name');
-            let avatarEl = document.getElementById('m-avatar');
-            
-            if (isEliminated) {
-                avatarEl.style.filter = "grayscale(100%) opacity(0.8)";
-                nameEl.innerHTML = `<span style="text-decoration: line-through; color: var(--text-muted);">${name}</span><br><span style="background:#e53935; color:white; font-size:0.6rem; padding:3px 8px; border-radius:6px; display:inline-block; margin-top:5px; font-weight:800; letter-spacing:0.5px;">ELIMINADO 💀</span>`;
-            } else {
-                avatarEl.style.filter = "none";
-                nameEl.innerText = name;
-            }
-            
-            document.getElementById('player-modal').classList.add('active');
-        }
-
-        function closeModal() { document.getElementById('player-modal').classList.remove('active'); }
-
-        window.onclick = function(event) {
-            let modal = document.getElementById('player-modal');
-            if (event.target == modal) { closeModal(); }
-        }
-
-        function parseCSV(text) {
-            let result = [], row = [], cur = '', inQuote = false;
-            for (let i = 0; i < text.length; i++) {
-                let c = text[i];
-                if (inQuote) {
-                    if (c === '"' && text[i+1] === '"') { cur += '"'; i++; }
-                    else if (c === '"') { inQuote = false; }
-                    else { cur += c; }
-                } else {
-                    if (c === '"') { inQuote = true; }
-                    else if (c === ',') { row.push(cur.trim()); cur = ''; }
-                    else if (c === '\n' || c === '\r') {
-                        row.push(cur.trim()); result.push(row); row = []; cur = '';
-                        if (c === '\r' && text[i+1] === '\n') i++;
-                    }
-                    else { cur += c; }
+        // Función para validar campos obligatorios dentro de un contenedor
+        function validarCamposObligatorios(contenedor) {
+            const requeridos = contenedor.querySelectorAll('[required]');
+            for (let req of requeridos) {
+                if (!req.value.trim()) {
+                    req.focus();
+                    return false;
                 }
             }
-            if (cur || row.length) { row.push(cur.trim()); result.push(row); }
-            return result;
+            return true;
         }
 
-        async function refreshData(btn) {
-            if(btn) btn.classList.add('spin');
-            document.querySelectorAll('.container').forEach(c => {
-                let text = c.id === 'matches-container' ? "Buscando partidos..." : "Actualizando...";
-                c.innerHTML = `<div class='loader'>${text} 🔄</div>`;
+        // Avanzar del Bloque 0 al Específico
+        document.getElementById('btnSiguiente').addEventListener('click', () => {
+            if (!validarCamposObligatorios(bloque0)) {
+                alert('Por favor, completa todos los campos obligatorios y selecciona un tipo de empresa.');
+                return;
+            }
+            bloque0.classList.add('hidden');
+            bloqueActivoId = tipoEmpresaSelect.value; 
+            document.getElementById(bloqueActivoId).classList.remove('hidden');
+            window.scrollTo(0, 0);
+        });
+
+        // Avanzar al Bloque Legal
+        document.querySelectorAll('.btn-continuar-legal').forEach(boton => {
+            boton.addEventListener('click', (evento) => {
+                evento.target.closest('section').classList.add('hidden');
+                bloqueFinal.classList.remove('hidden');
+                window.scrollTo(0, 0);
             });
-            await loadData();
-            if(btn) {
-                setTimeout(() => btn.classList.remove('spin'), 500);
-            }
+        });
+
+        // Función central para extraer contactos de los bloques HTML
+        function extraerContactos(contenedor, arrayDestino) {
+            contenedor.querySelectorAll('.contacto-grupo').forEach(grupo => {
+                const rol = grupo.getAttribute('data-rol');
+                const nombre = grupo.querySelector('.input-nombre').value.trim();
+                const cargo = grupo.querySelector('.input-cargo').value.trim();
+                const correo = grupo.querySelector('.input-correo').value.trim();
+                const celular = grupo.querySelector('.input-celular').value.trim();
+                
+                // Solo guardamos si al menos escribieron el nombre
+                if (nombre) {
+                    arrayDestino.push({ rol, nombre, cargo, correo, celular });
+                }
+            });
         }
 
-        async function loadData() {
-            try {
-                const resMatches = await fetch(urlPartidos + "&t=" + new Date().getTime(), { cache: "no-store" });
-                const csvMatches = await resMatches.text();
-                const rowsM = parseCSV(csvMatches);
-                
-                let headerM = [];
-                let headerRowIdx = 0;
-                for(let r=0; r<Math.min(10, rowsM.length); r++) {
-                    let rowText = (rowsM[r] || []).join(" ").toUpperCase();
-                    if(rowText.includes("(L)") && rowText.includes("(V)")) {
-                        headerM = rowsM[r];
-                        headerRowIdx = r;
-                        break;
-                    }
-                }
-                if(headerM.length === 0) { headerM = rowsM[0] || []; headerRowIdx = 0; }
-                
-                const hM_upper = headerM.map(h => String(h || "").trim().toUpperCase());
-                
-                let idxMatchNum = hM_upper.findIndex(h => h.includes("PARTIDO")); if(idxMatchNum === -1) idxMatchNum = 0;
-                let idxFecha = hM_upper.findIndex(h => h.includes("FECHA")); if(idxFecha === -1) idxFecha = 1;
-                let idxHora = hM_upper.findIndex(h => h.includes("HORA")); if(idxHora === -1) idxHora = 2;
-                let idxTeamL = hM_upper.findIndex(h => h.includes("LOCAL") && !h.includes("REAL") && !h.includes("(")); if(idxTeamL === -1) idxTeamL = 3;
-                let idxTeamV = hM_upper.findIndex(h => h.includes("VISITANTE") && !h.includes("REAL") && !h.includes("(")); if(idxTeamV === -1) idxTeamV = 4;
-                let idxRealL = hM_upper.findIndex(h => h.includes("REAL") && h.includes("LOCAL")); if(idxRealL === -1) idxRealL = 5;
-                let idxRealV = hM_upper.findIndex(h => h.includes("REAL") && h.includes("VISITANTE")); if(idxRealV === -1) idxRealV = 6;
+        // Enviar Formulario
+        form.addEventListener('submit', (evento) => {
+            evento.preventDefault(); 
+            
+            const btnEnviar = document.getElementById('btnEnviar');
+            const textoOriginalBtn = btnEnviar.innerText;
+            btnEnviar.innerText = 'Guardando en la base de datos...';
+            btnEnviar.disabled = true;
+            btnEnviar.classList.replace('bg-green-600', 'bg-gray-400');
 
-                const players = [];
-                headerM.forEach((colName, idx) => {
-                    let upper = String(colName || "").trim().toUpperCase();
-                    if (upper.includes("(L)")) {
-                        let cleanName = colName.replace(/\(\s*[Ll]\s*\)/i, "").trim();
-                        let safeNameL = cleanName.toUpperCase().replace(/[^A-Z0-9]/g, "");
-                        let idxV = headerM.findIndex((h, i) => i > idx && String(h||"").toUpperCase().includes("(V)") && String(h||"").replace(/\(\s*[Vv]\s*\)/i, "").replace(/[^A-Z0-9]/g, "") === safeNameL);
-                        if (idxV === -1 && idx + 1 < headerM.length) {
-                            let nextCol = String(headerM[idx+1] || "").toUpperCase();
-                            if (!nextCol.includes("(L)") && !nextCol.includes("REAL")) idxV = idx + 1;
-                        }
-                        if (idxV !== -1) players.push({ name: cleanName, idxL: idx, idxV: idxV });
-                    }
-                });
+            // 1. Recopilar todos los contactos en un solo array estructurado
+            let arrayContactos = [];
+            // Extraer obligatorios del bloque 0
+            extraerContactos(bloque0, arrayContactos);
+            // Extraer opcionales del bloque específico seleccionado
+            const bloqueActivo = document.getElementById(bloqueActivoId);
+            extraerContactos(bloqueActivo, arrayContactos);
 
-                let upcomingMatches = [];
-                let finishedMatches = [];
+            // 2. Recopilar intereses
+            let arrayIntereses = [];
+            bloqueActivo.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
+                arrayIntereses.push(cb.value);
+            });
 
-                for(let i = headerRowIdx + 1; i < rowsM.length; i++){
-                    const cols = rowsM[i] || [];
-                    if(cols.length < 3) continue;
-                    
-                    let colA = cols[0] ? String(cols[0]).trim().toUpperCase() : "";
-                    let isLive = (colA.includes("VIVO") || colA.includes("JUEGO"));
+            // 3. Construir el objeto estructurado
+            const requestData = {
+                nombreEmpresa: document.getElementById('nombreEmpresa').value.trim(),
+                nit: document.getElementById('nitEmpresa').value.trim(),
+                tipoEmpresa: tipoEmpresaSelect.options[tipoEmpresaSelect.selectedIndex].text,
+                autorizacionLegal: document.querySelector('input[name="habeasData"]:checked').value,
+                contactos: arrayContactos,
+                intereses: arrayIntereses
+            };
 
-                    let matchNumStr = cols[idxMatchNum] ? String(cols[idxMatchNum]).trim() : String(i);
-                    let fechaPartido = (idxFecha !== -1 && cols[idxFecha]) ? String(cols[idxFecha]).trim().replace(/ 00:00:00/g, '') : "";
-                    let horaPartido = (idxHora !== -1 && cols[idxHora]) ? String(cols[idxHora]).trim() : "";
-                    let teamL = (idxTeamL !== -1 && cols[idxTeamL]) ? String(cols[idxTeamL]).trim() : "";
-                    let teamV = (idxTeamV !== -1 && cols[idxTeamV]) ? String(cols[idxTeamV]).trim() : "";
-                    
-                    if(!teamL || !teamV || teamL.toUpperCase().includes("LOCAL") || teamL.toUpperCase().includes("EQUIPO")) continue;
-                    
-                    let glRaw = (idxRealL !== -1 && cols[idxRealL] !== undefined) ? String(cols[idxRealL]).trim() : "";
-                    let gvRaw = (idxRealV !== -1 && cols[idxRealV] !== undefined) ? String(cols[idxRealV]).trim() : "";
-                    let hasScores = /\d/.test(glRaw) && /\d/.test(gvRaw);
-                    
-                    if(isLive) {
-                        upcomingMatches.push({teamL, teamV, cols, status: "LIVE", gl: parseInt(glRaw)||0, gv: parseInt(gvRaw)||0, matchNum: matchNumStr, fecha: fechaPartido, hora: horaPartido, rowIndex: i});
-                    } else if(!hasScores) {
-                        upcomingMatches.push({teamL, teamV, cols, status: "PRÓXIMO", gl: "", gv: "", matchNum: matchNumStr, fecha: fechaPartido, hora: horaPartido, rowIndex: i});
-                    } else {
-                        finishedMatches.push({teamL, teamV, cols, status: "FINALIZADO", gl: parseInt(glRaw), gv: parseInt(gvRaw), matchNum: matchNumStr, fecha: fechaPartido, hora: horaPartido, rowIndex: i});
-                    }
-                }
-
-                // ---- RENDERIZAR PARTIDOS DEL DÍA ----
-                const matchesToShow = upcomingMatches.slice(0, 6);
-                const containerM = document.getElementById("matches-container");
-                containerM.innerHTML = "";
-                
-                if (matchesToShow.length > 0 && matchesToShow[0].status === "PRÓXIMO") {
-                    let pm = matchesToShow[0];
-                    containerM.innerHTML += `
-                        <div class="next-match-banner">
-                            <h3>⏳ Próximo Partido</h3>
-                            <div class="teams">${getFlag(pm.teamL)} ${pm.teamL} vs ${pm.teamV} ${getFlag(pm.teamV)}</div>
-                            <div style="font-size:0.9rem; background:rgba(0,0,0,0.15); display:inline-block; padding: 4px 12px; border-radius:12px; margin-top:5px;">📅 ${pm.fecha} • ⏰ ${pm.hora}</div>
-                        </div>`;
-                } else if(matchesToShow.length === 0) {
-                    containerM.innerHTML = "<div class='loader'>⚽ No hay pronósticos pendientes en este momento. ¡Todo está jugado!</div>";
-                }
-
-                matchesToShow.forEach((match, index) => {
-                    let predsHtml = "";
-                    let localBets = 0, tieBets = 0, visitBets = 0, totalBets = 0;
-
-                    if (match.status !== "PRÓXIMO") {
-                        players.forEach(p => {
-                            let pL = match.cols[p.idxL] !== undefined ? String(match.cols[p.idxL]).trim() : "";
-                            let pV = match.cols[p.idxV] !== undefined ? String(match.cols[p.idxV]).trim() : "";
-                            let score = "-";
-                            if(pL !== "" && pV !== "") {
-                                score = String(`${pL} - ${pV}`).replace(/\.0/g, '').replace(/o/gi, '0');
-                                let numL = parseInt(String(pL).replace(/o/gi, '0')); 
-                                let numV = parseInt(String(pV).replace(/o/gi, '0'));
-                                if(!isNaN(numL) && !isNaN(numV)) {
-                                    totalBets++;
-                                    if(numL > numV) localBets++; else if(numL < numV) visitBets++; else tieBets++;
-                                }
-                            }
-                            let avatar = getAvatarUrl(p.name);
-                            predsHtml += `<li class="pred-row">
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                    <img src="${avatar}" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                                    <span class="player-name">${p.name}</span>
-                                </div> 
-                                <span class="pred-score">${score}</span>
-                            </li>`;
-                        });
-                    }
-
-                    let pctL = totalBets ? Math.round((localBets/totalBets)*100) : 0;
-                    let pctE = totalBets ? Math.round((tieBets/totalBets)*100) : 0;
-                    let pctV = totalBets ? Math.round((visitBets/totalBets)*100) : 0;
-
-                    let statusCenterHtml = ""; let liveBadgeHtml = ""; let cardClass = "match-card";
-                    if(match.status === "LIVE") {
-                        cardClass = "match-card live-card";
-                        liveBadgeHtml = `<span class="time live">🔴 EN VIVO</span>`;
-                        statusCenterHtml = `<div class="live-score-badge">${match.gl}<span class="live-dot">🔴</span>${match.gv}</div>`;
-                    } else {
-                        statusCenterHtml = `<div class="match-sched"><span class="date-val">${match.fecha || 'Partido # '+match.matchNum}</span><span class="time-val">${match.hora || '--:--'}</span></div>`;
-                    }
-
-                    let distContainerHtml = ""; let actionBtnHtml = ""; let predsUlHtml = "";
-                    if (match.status === "PRÓXIMO") {
-                        distContainerHtml = `<div class="dist-container" style="text-align:center; padding-bottom: 15px; border-bottom: 1px solid var(--border-color);"><span style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">🕵️‍♂️ TENDENCIAS Y PRONÓSTICOS OCULTOS</span></div>`;
-                        actionBtnHtml = `<button class="toggle-btn" style="color: #999; cursor: default; opacity: 0.8;" disabled>🔒 PRONÓSTICOS CERRADOS</button>`;
-                        predsUlHtml = `<ul class="predictions"></ul>`;
-                    } else {
-                        distContainerHtml = `
-                            <div class="dist-container">
-                                <div class="dist-bar-wrapper">
-                                    <div class="dist-bar local" style="width:${pctL}%"></div>
-                                    <div class="dist-bar empate" style="width:${pctE}%"></div>
-                                    <div class="dist-bar visit" style="width:${pctV}%"></div>
-                                </div>
-                                <div class="dist-labels"><span>${localBets} L</span><span>${tieBets} E</span><span>${visitBets} V</span></div>
-                            </div>`;
-                        actionBtnHtml = `<button class="toggle-btn" onclick="togglePred(this)">VER PRONÓSTICOS ▼</button>`;
-                        predsUlHtml = `<ul class="predictions">${predsHtml}</ul>`;
-                    }
-
-                    containerM.innerHTML += `
-                        <div class="${cardClass}">
-                            <div class="match-info">
-                                <div class="team"><span class="team-icon">${getFlag(match.teamL)}</span><span class="team-name">${match.teamL}</span></div>
-                                <div class="match-status"><span class="vs">VS</span>${statusCenterHtml}${liveBadgeHtml}</div>
-                                <div class="team"><span class="team-icon">${getFlag(match.teamV)}</span><span class="team-name">${match.teamV}</span></div>
-                            </div>
-                            ${distContainerHtml}
-                            ${actionBtnHtml}
-                            ${predsUlHtml}
-                        </div>`;
-                });
-
-                // ---- RENDERIZAR HISTORIAL DE PARTIDOS ----
-                const containerH = document.getElementById("history-container");
-                if(finishedMatches.length === 0) {
-                    containerH.innerHTML = "<div class='loader'>Aún no hay partidos finalizados.</div>";
+            // Ejecutar POST a Google Apps Script
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify(requestData),
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+            })
+            .then(respuesta => respuesta.json())
+            .then(datos => {
+                if(datos.status === 'success') {
+                    alert('¡Excelente! La información se ha estructurado y guardado correctamente.');
+                    form.reset(); 
+                    location.reload(); 
                 } else {
-                    let histHtml = "";
-                    finishedMatches.slice().reverse().forEach((match, index) => {
-                        let predsHtml = "";
-                        let localBets = 0, tieBets = 0, visitBets = 0, totalBets = 0;
-
-                        players.forEach(p => {
-                            let pL = match.cols[p.idxL] !== undefined ? String(match.cols[p.idxL]).trim() : "";
-                            let pV = match.cols[p.idxV] !== undefined ? String(match.cols[p.idxV]).trim() : "";
-                            let score = "-";
-                            if(pL !== "" && pV !== "") {
-                                score = String(`${pL} - ${pV}`).replace(/\.0/g, '').replace(/o/gi, '0');
-                                let numL = parseInt(String(pL).replace(/o/gi, '0')); 
-                                let numV = parseInt(String(pV).replace(/o/gi, '0'));
-                                if(!isNaN(numL) && !isNaN(numV)) {
-                                    totalBets++;
-                                    if(numL > numV) localBets++; else if(numL < numV) visitBets++; else tieBets++;
-                                }
-                            }
-                            let avatar = getAvatarUrl(p.name);
-                            predsHtml += `<li class="pred-row">
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                    <img src="${avatar}" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                                    <span class="player-name">${p.name}</span>
-                                </div> 
-                                <span class="pred-score">${score}</span>
-                            </li>`;
-                        });
-
-                        let pctL = totalBets ? Math.round((localBets/totalBets)*100) : 0;
-                        let pctE = totalBets ? Math.round((tieBets/totalBets)*100) : 0;
-                        let pctV = totalBets ? Math.round((visitBets/totalBets)*100) : 0;
-
-                        let displayDate = match.fecha ? match.fecha + " " + match.hora : "Partido # " + match.matchNum;
-
-                        histHtml += `
-                            <div class="match-card history-card">
-                                <div class="match-info">
-                                    <div class="team"><span class="team-icon">${getFlag(match.teamL)}</span><span class="team-name">${match.teamL}</span></div>
-                                    <div class="match-status">
-                                        <span class="vs">FINAL</span>
-                                        <div class="live-score-badge" style="color:var(--primary); font-size:1.8rem;">${match.gl} - ${match.gv}</div>
-                                        <span class="time" style="background:#e0e0e0; color:#555; font-size:0.65rem;">${displayDate}</span>
-                                    </div>
-                                    <div class="team"><span class="team-icon">${getFlag(match.teamV)}</span><span class="team-name">${match.teamV}</span></div>
-                                </div>
-                                <div class="dist-container">
-                                    <div class="dist-bar-wrapper">
-                                        <div class="dist-bar local" style="width:${pctL}%"></div>
-                                        <div class="dist-bar empate" style="width:${pctE}%"></div>
-                                        <div class="dist-bar visit" style="width:${pctV}%"></div>
-                                    </div>
-                                    <div class="dist-labels"><span>${localBets} L</span><span>${tieBets} E</span><span>${visitBets} V</span></div>
-                                </div>
-                                <button class="toggle-btn" onclick="togglePred(this)">VER PRONÓSTICOS ▼</button>
-                                <ul class="predictions">${predsHtml}</ul>
-                            </div>`;
-                    });
-                    containerH.innerHTML = histHtml;
+                    throw new Error(datos.message || 'Error desconocido del servidor');
                 }
-
-                // ---- RENDERIZAR PESTAÑA DE LLAVES (AUTOMÁTICO) ----
-                let bracketHtml = `
-                    <div style="text-align: center; margin-bottom: 20px;">
-                        <h2 style="color: var(--primary); margin: 0 0 5px 0; font-weight: 900;">🏆 Semifinales</h2>
-                        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">Los 4 mejores equipos del mundo</p>
-                    </div>`;
-
-                try {
-                    const resLlaves = await fetch(urlLlaves + "&t=" + new Date().getTime(), { cache: "no-store" });
-                    const csvLlaves = await resLlaves.text();
-                    const rowsLL = parseCSV(csvLlaves);
-
-                    if (rowsLL.length > 1) {
-                        const hLL = rowsLL[0].map(h => String(h || "").trim().toUpperCase());
-                        const iF = hLL.indexOf("FECHA"); const iE = hLL.indexOf("ESTADIO");
-                        const iL = hLL.indexOf("LOCAL"); const iBL = hLL.indexOf("BANDERA L");
-                        const iV = hLL.indexOf("VISITANTE"); const iBV = hLL.indexOf("BANDERA V");
-                        const iEst = hLL.indexOf("ESTADO"); const iA = hLL.indexOf("ACERTARON");
-
-                        for (let i = 1; i < rowsLL.length; i++) {
-                            let cols = rowsLL[i];
-                            if (!cols || cols.length < 3) continue;
-
-                            let f = iF !== -1 && cols[iF] ? cols[iF] : "Fecha por confirmar";
-                            let e = iE !== -1 && cols[iE] ? cols[iE] : "Por confirmar";
-                            let eL = iL !== -1 && cols[iL] ? cols[iL] : "Por definir";
-                            let fL = iBL !== -1 && cols[iBL] ? cols[iBL] : "❓";
-                            let eV = iV !== -1 && cols[iV] ? cols[iV] : "Por definir";
-                            let fV = iBV !== -1 && cols[iBV] ? cols[iBV] : "❓";
-                            let est = iEst !== -1 && cols[iEst] ? cols[iEst].toUpperCase() : "PENDIENTE";
-                            let a = iA !== -1 && cols[iA] ? cols[iA] : "⏳ Pendiente";
-
-                            let opacidad = (eL === "Por definir" || eL === "") ? "opacity: 0.7;" : "";
-                            let banderaL = fL === "❓" ? `<span class="team-icon" style="filter:grayscale(1)">❓</span>` : `<span class="team-icon">${fL}</span>`;
-                            let banderaV = fV === "❓" ? `<span class="team-icon" style="filter:grayscale(1)">❓</span>` : `<span class="team-icon">${fV}</span>`;
-                            
-                            let isConfirmado = est.includes("CONFIRMADO");
-                            let statusText = isConfirmado ? "CONFIRMADO" : "POR DEFINIR";
-                            let statusColor = isConfirmado ? "background: #fffde7; color: #f57f17;" : "background: #eee; color: #555;";
-
-                            let acertaronHtml = a; let cb = "#f5f5f5"; let ct = "#555";
-                            if (isConfirmado) {
-                                 acertaronHtml = `🎯 <strong>Acertaron:</strong> ${a}`; cb = "#e8f5e9"; ct = "#2e7d32";
-                            }
-                            if(eL === "Por definir" || eL === "") eL = "Por definir";
-                            if(eV === "Por definir" || eV === "") eV = "Por definir";
-
-                            bracketHtml += `
-                            <div class="match-card" style="border-top: 4px solid #fbc02d; ${opacidad}">
-                                <div style="text-align:center; padding: 10px; border-bottom: 1px solid var(--border-color); background-color: rgba(11, 83, 148, 0.05);">
-                                    <span style="display:block; font-size: 0.8rem; font-weight: 800; color: var(--primary);">📅 ${f}</span>
-                                    <span style="display:block; font-size: 0.7rem; font-weight: 600; color: var(--text-muted); margin-top: 3px;">🏟️ ${e}</span>
-                                </div>
-                                <div class="match-info" style="padding: 15px;">
-                                    <div class="team">${banderaL}<span class="team-name" style="font-size: 0.95rem;">${eL}</span></div>
-                                    <div class="match-status">
-                                        <span class="vs" style="font-size: 0.7rem; ${statusColor} padding: 3px 8px; border-radius: 10px; font-weight:800; letter-spacing:0.5px">${statusText}</span>
-                                        <span style="font-size:1.2rem; font-weight:900; color:var(--text-muted); margin-top:5px;">VS</span>
-                                    </div>
-                                    <div class="team">${banderaV}<span class="team-name" style="font-size: 0.95rem;">${eV}</span></div>
-                                </div>
-                                <div style="background: ${cb}; padding: 10px; border-top: 1px solid var(--border-color); font-size: 0.8rem; color: ${ct}; text-align: center;">
-                                    ${acertaronHtml}
-                                </div>
-                            </div>`;
-                        }
-                    }
-                } catch(error) {
-                    console.error(error);
-                    bracketHtml += `<div class='loader'>Error al cargar las llaves 🔴</div>`;
-                }
-
-                document.getElementById("bracket-container").innerHTML = bracketHtml;
-
-                // ---- LEER TABLA E INTEGRAR POSICIONES DIRECTAMENTE (MODO MANUAL) ----
-                const resBoard = await fetch(urlTabla + "&t=" + new Date().getTime(), { cache: "no-store" });
-                const csvBoard = await resBoard.text();
-                const rowsB = parseCSV(csvBoard);
-                const hB = rowsB[0].map(h => String(h || "").trim().toUpperCase());
-                
-                let idxName = hB.findIndex(h => h.includes("JUGADOR") || h.includes("NOMBRE")); if(idxName === -1) idxName = 1;
-                let idxPosPrev = hB.findIndex(h => h.includes("POSICI"));
-                let idxPts = hB.findIndex(h => h.includes("PUNTOS TOTALES") || h === "PUNTOS" || h.includes("TOTAL")); if(idxPts === -1) idxPts = 2;
-                let idxMU = hB.indexOf("MU");
-                let idxAT = hB.indexOf("AT");
-                let idxAG = hB.indexOf("AG");
-                let idxCantLlaves = hB.findIndex(h => h === "CANTIDAD LLAVES" || h === "# LLAVES" || h.includes("CANTIDAD"));
-                
-                // NUEVA COLUMNA PARA ELIMINADOS
-                let idxEliminado = hB.findIndex(h => h === "ELIMINADO" || h === "ESTADO");
-
-                let sortedList = [];
-
-                for(let i=1; i<rowsB.length; i++) {
-                    let cols = rowsB[i] || [];
-                    let name = String(cols[idxName] || "").trim();
-                    if (!name) continue; 
-
-                    let puntos = parseInt(cols[idxPts]) || 0;
-                    let posPrev = parseInt(cols[idxPosPrev]) || 99;
-                    let mu = idxMU !== -1 ? (parseInt(cols[idxMU]) || 0) : 0;
-                    let at = idxAT !== -1 ? (parseInt(cols[idxAT]) || 0) : 0;
-                    let ag = idxAG !== -1 ? (parseInt(cols[idxAG]) || 0) : 0;
-                    let llaves = idxCantLlaves !== -1 ? (parseInt(cols[idxCantLlaves]) || 0) : 0;
-                    
-                    let eliminadoVal = idxEliminado !== -1 ? String(cols[idxEliminado] || "").trim().toUpperCase() : "";
-                    let isEliminated = (eliminadoVal === "SI" || eliminadoVal === "TRUE" || eliminadoVal === "X" || eliminadoVal === "ELIMINADO");
-
-                    sortedList.push({ nombre: name, puntos: puntos, mu: mu, at: at, ag: ag, llaves: llaves, posPrev: posPrev, isEliminated: isEliminated });
-                }
-
-                // Se ordena estrictamente por los puntos ingresados en el Excel
-                sortedList.sort((a, b) => b.puntos - a.puntos);
-
-                let maxMU = -1, maxAT = -1, maxAG = -1, maxLlaves = -1; 
-                let nMU = "-", nAT = "-", nAG = "-", nLlaves = "-";
-                
-                let boardHtml = `<div class="leaderboard-card"><table class="pos-table" id="table-board">
-                                 <tr><th>#</th><th>Estratega (Toca para ver stats)</th><th>Puntos</th></tr>`;
-                
-                let currentRank = 1; let previousPts = -1;
-
-                sortedList.forEach((p, index) => {
-                    if (p.puntos !== previousPts) { currentRank = index + 1; previousPts = p.puntos; }
-                    if(p.mu > maxMU){ maxMU = p.mu; nMU = String(p.nombre || "-").split(" ")[0]; }
-                    if(p.at > maxAT){ maxAT = p.at; nAT = String(p.nombre || "-").split(" ")[0]; }
-                    if(p.ag > maxAG){ maxAG = p.ag; nAG = String(p.nombre || "-").split(" ")[0]; }
-                    if(p.llaves > maxLlaves){ maxLlaves = p.llaves; nLlaves = String(p.nombre || "-").split(" ")[0]; }
-
-                    let podiumClass = ""; let medalHtml = "";
-                    if (currentRank === 1) { medalHtml = `👑`; podiumClass = "podium-1"; } 
-                    else if (currentRank === 2) { medalHtml = `🥈`; podiumClass = "podium-2"; } 
-                    else if (currentRank === 3) { medalHtml = `🥉`; podiumClass = "podium-3"; } 
-
-                    let trendHtml = `<span class="trend" style="color:var(--text-muted); font-size:0.75rem;">●</span>`;
-                    if (currentRank < p.posPrev) trendHtml = `<span class="trend" style="color:var(--accent); font-size:0.85rem;">▲</span>`;
-                    else if (currentRank > p.posPrev) trendHtml = `<span class="trend" style="color:#e53935; font-size:0.85rem;">▼</span>`;
-
-                    let avatar = getAvatarUrl(p.nombre);
-                    
-                    let rowStyle = p.isEliminated ? "opacity: 0.6; background-color: rgba(0,0,0,0.03);" : "";
-                    let avatarFilter = p.isEliminated ? "filter: grayscale(100%); opacity: 0.8;" : "";
-                    let nameDecoration = p.isEliminated ? "text-decoration: line-through; color: var(--text-muted);" : "";
-                    let elimBadge = p.isEliminated ? `<span style="background:#e53935; color:white; font-size:0.5rem; padding:2px 5px; border-radius:4px; font-weight:800; margin-top:3px; letter-spacing:0.5px; width:fit-content;">ELIMINADO 💀</span>` : "";
-
-                    boardHtml += `<tr class="strat-row ${podiumClass}" style="${rowStyle}" data-name="${p.nombre}" onclick="openModal('${p.nombre}', ${p.puntos}, ${p.mu}, ${p.at}, ${p.ag}, ${p.llaves}, ${p.isEliminated})">
-                                    <td>${currentRank} ${trendHtml}</td>
-                                    <td style="display: flex; align-items: center; gap: 8px; padding-left: 10px; text-align: left;">
-                                        <span style="display:inline-block; width:18px; text-align:center;">${medalHtml}</span> 
-                                        <img src="${avatar}" alt="${p.nombre}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--bg-color); box-shadow: 0 2px 4px rgba(0,0,0,0.1); ${avatarFilter}">
-                                        <div style="display: flex; flex-direction: column; justify-content: center; line-height: 1.2;">
-                                            <span style="${nameDecoration}">${p.nombre}</span>
-                                            ${elimBadge}
-                                        </div>
-                                    </td>
-                                    <td><span class="pts-badge" style="${p.isEliminated ? 'background:#999;' : ''}">${p.puntos}</span></td>
-                                  </tr>`;
-                });
-                boardHtml += `</table></div>`;
-
-                let fameHtml = `
-                    <div style="text-align: center; margin-bottom: 15px;">
-                        <h2 style="color: var(--primary); margin: 0 0 5px 0; font-weight: 900;">🏆 Cuadro de Honor</h2>
-                    </div>
-                    <div class="wall-of-fame">
-                        <div class="fame-item" style="border-top-color: #2196F3;">
-                            <img src="${getAvatarUrl(nAT)}" class="fame-img">
-                            <span>🎯 ${nAT}</span>
-                            <small>Precisión (AT)</small>
-                        </div>
-                        <div class="fame-item" style="border-top-color: #FF9800;">
-                            <img src="${getAvatarUrl(nMU)}" class="fame-img">
-                            <span>🔥 ${nMU}</span>
-                            <small>Chepazos (MU)</small>
-                        </div>
-                        <div class="fame-item" style="border-top-color: #4CAF50;">
-                            <img src="${getAvatarUrl(nAG)}" class="fame-img">
-                            <span>🩹 ${nAG}</span>
-                            <small>Consolación (AG)</small>
-                        </div>
-                        <div class="fame-item" style="border-top-color: #9C27B0;">
-                            <img src="${getAvatarUrl(nLlaves)}" class="fame-img">
-                            <span>🗝️ ${nLlaves}</span>
-                            <small>Cerrajería (Lla)</small>
-                        </div>
-                    </div>`;
-
-                document.getElementById('leaderboard-container').innerHTML = fameHtml + boardHtml;
-
-            } catch (error) {
-                document.getElementById("status").innerText = "Sin conexión al VAR 🔴";
+            })
+            .catch(error => {
+                alert('Hubo un inconveniente al enviar la información. Verifique su conexión o intente más tarde.');
                 console.error(error);
-            }
-        }
-
-        window.onload = loadData;
+                btnEnviar.innerText = textoOriginalBtn;
+                btnEnviar.disabled = false;
+                btnEnviar.classList.replace('bg-gray-400', 'bg-green-600');
+            });
+        });
     </script>
 </body>
 </html>
