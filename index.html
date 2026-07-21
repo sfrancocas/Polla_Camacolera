@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Polla Camacolera App PRO</title>
+    <title>Polla Camacolera App PRO - ¡PAULA CAMPEONA!</title>
+    <!-- Librería para el confeti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
             --primary: #0b5394;
@@ -51,6 +53,47 @@
         .tab-btn { flex: 1; background: transparent; color: rgba(255, 255, 255, 0.6); border: none; padding: 8px 2px; font-size: 0.65rem; font-weight: 700; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s; display: flex; flex-direction: column; align-items: center; gap: 4px; text-transform: uppercase; letter-spacing: 0.2px; text-align: center; line-height: 1.1;}
         .tab-btn span.icon { font-size: 1.2rem; margin-bottom: 2px;}
         .tab-btn.active { color: white; border-bottom: 3px solid var(--accent); background: rgba(255, 255, 255, 0.1); border-radius: 8px 8px 0 0;}
+
+        /* ESTILOS DE LA CAMPEONA */
+        .champion-banner {
+            background: linear-gradient(135deg, #FFD700 0%, #F57F17 100%);
+            color: #fff;
+            text-align: center;
+            padding: 20px 15px;
+            margin: 15px auto;
+            max-width: 600px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+            animation: pulse-gold 2s infinite;
+            position: relative;
+            overflow: hidden;
+        }
+        .champion-banner::after {
+            content: "👑";
+            position: absolute;
+            font-size: 4rem;
+            opacity: 0.2;
+            right: -10px;
+            bottom: -10px;
+            transform: rotate(-15deg);
+        }
+        .champion-banner h2 { margin: 0 0 5px 0; font-size: 1.5rem; font-weight: 900; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); letter-spacing: 1px;}
+        .champion-banner p { margin: 0; font-size: 0.95rem; font-weight: 700; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);}
+        
+        @keyframes pulse-gold {
+            0% { box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4); transform: scale(1); }
+            50% { box-shadow: 0 4px 25px rgba(255, 215, 0, 0.7); transform: scale(1.02); }
+            100% { box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4); transform: scale(1); }
+        }
+
+        .champion-row td {
+            background-color: #fffde7 !important;
+            border-top: 2px solid #FFD700;
+            border-bottom: 2px solid #FFD700;
+        }
+        body.dark-mode .champion-row td {
+            background-color: #3e3810 !important;
+        }
 
         .container { padding: 15px; max-width: 600px; margin: 0 auto; display: none; animation: fadeIn 0.3s; }
         .container.active { display: block; }
@@ -165,17 +208,23 @@
         <p id="status">Obteniendo datos... 🔄</p>
         
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('matches')"><span class="icon">📅</span>Partidos<br>del Día</button>
+            <button class="tab-btn" onclick="switchTab('matches')"><span class="icon">📅</span>Partidos</button>
             <button class="tab-btn" onclick="switchTab('history')"><span class="icon">✅</span>Historial</button>
             <button class="tab-btn" onclick="switchTab('bracket')"><span class="icon">🏆</span>Llaves</button>
-            <button class="tab-btn" onclick="switchTab('leaderboard')"><span class="icon">📊</span>Posiciones</button>
+            <button class="tab-btn active" onclick="switchTab('leaderboard')"><span class="icon">📊</span>Posiciones</button>
         </div>
     </div>
 
-    <div class="container active" id="matches-container"><div class="loader">Buscando los partidos del día...</div></div>
+    <!-- BANNER DE CAMPEONA GLOBAL -->
+    <div class="champion-banner">
+        <h2>🏆 ¡PAULA ES LA CAMPEONA! 🏆</h2>
+        <p>La reina absoluta de la Polla Camacolera 2026</p>
+    </div>
+
+    <div class="container" id="matches-container"><div class="loader">Buscando los partidos del día...</div></div>
     <div class="container" id="history-container"><div class="loader">Cargando historial de partidos...</div></div>
     <div class="container" id="bracket-container"><div class="loader">Analizando clasificados...</div></div>
-    <div class="container" id="leaderboard-container"><div class="loader">Calculando posiciones...</div></div>
+    <div class="container active" id="leaderboard-container"><div class="loader">Calculando posiciones...</div></div>
 
     <div id="player-modal" class="modal">
         <div class="modal-content">
@@ -199,6 +248,19 @@
         const urlPartidos = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5-A3wQAPUD3raKLrhfkiKWU62m6V7xFLsXY-vO_UdxCSADMwQSmkEecyGTqfpCJr2yYL6IghQ_B3i/pub?gid=658946236&single=true&output=csv";
         const urlTabla = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5-A3wQAPUD3raKLrhfkiKWU62m6V7xFLsXY-vO_UdxCSADMwQSmkEecyGTqfpCJr2yYL6IghQ_B3i/pub?gid=187955950&single=true&output=csv";
         const urlLlaves = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5-A3wQAPUD3raKLrhfkiKWU62m6V7xFLsXY-vO_UdxCSADMwQSmkEecyGTqfpCJr2yYL6IghQ_B3i/pub?gid=1452253607&single=true&output=csv";
+
+        // Lanzar confeti al cargar la página
+        window.onload = () => {
+            loadData();
+            setTimeout(() => {
+                confetti({
+                    particleCount: 150,
+                    spread: 80,
+                    origin: { y: 0.1 },
+                    colors: ['#FFD700', '#F57F17', '#ffffff']
+                });
+            }, 800);
+        };
 
         // ==========================================
         // 📸 FOTOS Y BANDERAS
@@ -245,16 +307,13 @@
         }
         
         const frasesGalpon = [
-            "El que no arriesga, se queda en el fondo de la tabla mirando. 👀",
-            "Hay pronósticos que duelen más que un gol en contra al minuto 90. 💔",
-            "El VAR está revisando la fe ciega que le tenían a ese empate. 🖥️🔍",
-            "Mucho análisis táctico para terminar ganando por un autogol. 🤦‍♂️",
-            "¿Alguien le puede revisar la bola de cristal a los líderes? 🔮",
-            "Demostrando que un buen chepazo vale más que mil horas de análisis. 🍀",
-            "Rascando puntos de consolación como si fueran el último tinto de la oficina. ☕",
-            "Usando algoritmos de la NASA solo para terminar poniendo un 1-0. 💻",
-            "Apostando con mentalidad de campeones, pero sufriendo como novatos. 🏆",
-            "Pidiendo la hora desde el primer tiempo para no perder esos punticos. ⏱️🥵"
+            "¡Se acabó lo que se daba! Tenemos campeona indiscutible. 👑",
+            "El VAR confirma que Paula los dejó a todos en el camino. 🖥️🔍",
+            "A pagar las apuestas, que Paula se llevó la gloria. 💰",
+            "Mucha estrategia y Excel para que Paula les diera cátedra. 📉",
+            "Nos vemos en el 2030, a ver si alguien puede destronarla. 🌍",
+            "Dejen de revisar los puntos, ¡ya no hay nada qué hacer! 😂",
+            "El trofeo ya tiene nombre grabado: P-A-U-L-A. 🏆"
         ];
 
         setInterval(() => {
@@ -263,7 +322,7 @@
                 statusP.style.opacity = 0;
                 setTimeout(() => {
                     let fraseElegida = frasesGalpon[Math.floor(Math.random() * frasesGalpon.length)];
-                    statusP.innerHTML = `${fraseElegida} 🟢`;
+                    statusP.innerHTML = `${fraseElegida}`;
                     statusP.style.opacity = 1;
                 }, 500); 
             }
@@ -299,7 +358,11 @@
             let nameEl = document.getElementById('m-name');
             let avatarEl = document.getElementById('m-avatar');
             
-            if (isEliminated) {
+            // Efecto campeona vs eliminados
+            if (name.toUpperCase() === "PAULA") {
+                avatarEl.style.filter = "drop-shadow(0 0 10px #FFD700)";
+                nameEl.innerHTML = `👑 ${name}`;
+            } else if (isEliminated) {
                 avatarEl.style.filter = "grayscale(100%) opacity(0.8)";
                 nameEl.innerHTML = `<span style="text-decoration: line-through; color: var(--text-muted);">${name}</span><br><span style="background:#e53935; color:white; font-size:0.6rem; padding:3px 8px; border-radius:6px; display:inline-block; margin-top:5px; font-weight:800; letter-spacing:0.5px;">ELIMINADO 💀</span>`;
             } else {
@@ -439,7 +502,7 @@
                             <div style="font-size:0.9rem; background:rgba(0,0,0,0.15); display:inline-block; padding: 4px 12px; border-radius:12px; margin-top:5px;">📅 ${pm.fecha} • ⏰ ${pm.hora}</div>
                         </div>`;
                 } else if(matchesToShow.length === 0) {
-                    containerM.innerHTML = "<div class='loader'>⚽ No hay pronósticos pendientes en este momento. ¡Todo está jugado!</div>";
+                    containerM.innerHTML = "<div class='loader'>⚽ El mundial ha finalizado. ¡Gracias por participar!</div>";
                 }
 
                 matchesToShow.forEach((match, index) => {
@@ -584,8 +647,8 @@
                 // ---- RENDERIZAR PESTAÑA DE LLAVES (AUTOMÁTICO) ----
                 let bracketHtml = `
                     <div style="text-align: center; margin-bottom: 20px;">
-                        <h2 style="color: var(--primary); margin: 0 0 5px 0; font-weight: 900;">🏆 Semifinales</h2>
-                        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">Los 4 mejores equipos del mundo</p>
+                        <h2 style="color: var(--primary); margin: 0 0 5px 0; font-weight: 900;">🏆 Torneo Finalizado</h2>
+                        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">Gracias por jugar la Polla Camacolera</p>
                     </div>`;
 
                 try {
@@ -669,7 +732,6 @@
                 let idxAG = hB.indexOf("AG");
                 let idxCantLlaves = hB.findIndex(h => h === "CANTIDAD LLAVES" || h === "# LLAVES" || h.includes("CANTIDAD"));
                 
-                // NUEVA COLUMNA PARA ELIMINADOS
                 let idxEliminado = hB.findIndex(h => h === "ELIMINADO" || h === "ESTADO");
 
                 let sortedList = [];
@@ -692,7 +754,6 @@
                     sortedList.push({ nombre: name, puntos: puntos, mu: mu, at: at, ag: ag, llaves: llaves, posPrev: posPrev, isEliminated: isEliminated });
                 }
 
-                // Se ordena estrictamente por los puntos ingresados en el Excel
                 sortedList.sort((a, b) => b.puntos - a.puntos);
 
                 let maxMU = -1, maxAT = -1, maxAG = -1, maxLlaves = -1; 
@@ -721,12 +782,20 @@
 
                     let avatar = getAvatarUrl(p.nombre);
                     
-                    let rowStyle = p.isEliminated ? "opacity: 0.6; background-color: rgba(0,0,0,0.03);" : "";
-                    let avatarFilter = p.isEliminated ? "filter: grayscale(100%); opacity: 0.8;" : "";
-                    let nameDecoration = p.isEliminated ? "text-decoration: line-through; color: var(--text-muted);" : "";
-                    let elimBadge = p.isEliminated ? `<span style="background:#e53935; color:white; font-size:0.5rem; padding:2px 5px; border-radius:4px; font-weight:800; margin-top:3px; letter-spacing:0.5px; width:fit-content;">ELIMINADO 💀</span>` : "";
+                    let isChampion = (p.nombre.toUpperCase() === "PAULA") ? "champion-row" : "";
+                    
+                    let rowStyle = p.isEliminated && !isChampion ? "opacity: 0.6; background-color: rgba(0,0,0,0.03);" : "";
+                    let avatarFilter = p.isEliminated && !isChampion ? "filter: grayscale(100%); opacity: 0.8;" : "";
+                    let nameDecoration = p.isEliminated && !isChampion ? "text-decoration: line-through; color: var(--text-muted);" : "";
+                    let elimBadge = p.isEliminated && !isChampion ? `<span style="background:#e53935; color:white; font-size:0.5rem; padding:2px 5px; border-radius:4px; font-weight:800; margin-top:3px; letter-spacing:0.5px; width:fit-content;">ELIMINADO 💀</span>` : "";
 
-                    boardHtml += `<tr class="strat-row ${podiumClass}" style="${rowStyle}" data-name="${p.nombre}" onclick="openModal('${p.nombre}', ${p.puntos}, ${p.mu}, ${p.at}, ${p.ag}, ${p.llaves}, ${p.isEliminated})">
+                    // Forzar corona extra si es Paula
+                    if (isChampion) {
+                        nameDecoration = "color: #b78103; font-weight: 900;";
+                        avatarFilter = "filter: drop-shadow(0 0 5px #FFD700); border: 2px solid #FFD700;";
+                    }
+
+                    boardHtml += `<tr class="strat-row ${podiumClass} ${isChampion}" style="${rowStyle}" data-name="${p.nombre}" onclick="openModal('${p.nombre}', ${p.puntos}, ${p.mu}, ${p.at}, ${p.ag}, ${p.llaves}, ${p.isEliminated})">
                                     <td>${currentRank} ${trendHtml}</td>
                                     <td style="display: flex; align-items: center; gap: 8px; padding-left: 10px; text-align: left;">
                                         <span style="display:inline-block; width:18px; text-align:center;">${medalHtml}</span> 
@@ -736,7 +805,7 @@
                                             ${elimBadge}
                                         </div>
                                     </td>
-                                    <td><span class="pts-badge" style="${p.isEliminated ? 'background:#999;' : ''}">${p.puntos}</span></td>
+                                    <td><span class="pts-badge" style="${p.isEliminated && !isChampion ? 'background:#999;' : ''}">${p.puntos}</span></td>
                                   </tr>`;
                 });
                 boardHtml += `</table></div>`;
@@ -769,6 +838,12 @@
                     </div>`;
 
                 document.getElementById('leaderboard-container').innerHTML = fameHtml + boardHtml;
+                
+                // Activar pestaña de posiciones por defecto para que vean a la ganadora
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-btn')[3].classList.add('active');
+                document.querySelectorAll('.container').forEach(cont => cont.classList.remove('active'));
+                document.getElementById('leaderboard-container').classList.add('active');
 
             } catch (error) {
                 document.getElementById("status").innerText = "Sin conexión al VAR 🔴";
@@ -776,7 +851,6 @@
             }
         }
 
-        window.onload = loadData;
     </script>
 </body>
 </html>
